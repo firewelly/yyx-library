@@ -1,0 +1,32 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - third_party/**
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
+  errors:
+    invalid_annotation_target: ignore
+
+linter:
+  rules:
+    prefer_const_constructors: true
+    prefer_const_literals_to_create_immutables: true
+    prefer_final_fields: true
+    prefer_final_locals: true
+    unnecessary_late: true
+    always_declare_return_types: true
+    annotate_overrides: true
+    avoid_empty_else: true
+    avoid_print: true
+    cancel_subscriptions: true
+    close_sinks: true
+    prefer_single_quotes: true
+    unawaited_futures: true

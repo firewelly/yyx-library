@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小说管理系统 · 配色风格方案</title>
+<style>
+  :root{
+    --page-bg:#f4f5f7;
+    --ink:#1d1b20;
+    --ink-soft:#44474f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",Segoe UI,Roboto,sans-serif;
+    background:var(--page-bg);
+    color:var(--ink);
+    padding:32px 24px 80px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .page-head{
+    max-width:1320px;margin:0 auto 32px;
+  }
+  .page-head h1{font-size:28px;letter-spacing:-.5px;}
+  .page-head p{margin-top:8px;color:var(--ink-soft);font-size:15px;line-height:1.7;max-width:780px;}
+  .page-head .meta{margin-top:10px;font-size:13px;color:#888;}
+
+  /* ===== 方案卡片容器 ===== */
+  .scheme{
+    max-width:1320px;margin:0 auto 48px;
+    border-radius:24px;overflow:hidden;
+    box-shadow:0 1px 2px rgba(0,0,0,.06),0 12px 32px rgba(0,0,0,.08);
+    background:#fff;
+  }
+  .scheme-head{
+    padding:28px 32px 24px;
+    display:flex;align-items:flex-start;justify-content:space-between;gap:24px;
+    border-bottom:1px solid rgba(0,0,0,.06);
+  }
+  .scheme-head .title{font-size:22px;font-weight:800;letter-spacing:-.3px;}
+  .scheme-head .desc{margin-top:6px;font-size:13.5px;color:var(--ink-soft);line-height:1.6;max-width:620px;}
+  .scheme-tags{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;}
+  .pill{font-size:11px;padding:3px 10px;border-radius:999px;background:#eef0f3;color:#555;}
+  .swatches{display:flex;gap:8px;}
+  .sw{width:34px;height:34px;border-radius:9px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);}
+  .scheme-body{padding:28px 32px 32px;}
+
+  /* ===== 模拟应用窗口 ===== */
+  .appwin{
+    border-radius:14px;overflow:hidden;
+    box-shadow:0 0 0 1px rgba(0,0,0,.08);
+    background:var(--s-bg);
+    color:var(--s-onbg);
+    display:grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap:20px;
+  }
+  .panel{
+    background:var(--s-surface);
+    border-radius:12px;
+    padding:18px;
+    box-shadow:0 0 0 1px var(--s-border);
+  }
+  .panel h4{font-size:13px;font-weight:700;color:var(--s-onsurf);margin-bottom:12px;}
+
+  /* 顶栏 */
+  .topbar{
+    grid-column:1/-1;
+    display:flex;align-items:center;gap:12px;
+    padding:14px 18px;
+    background:var(--s-surface);
+    box-shadow:0 0 0 1px var(--s-border);
+    border-radius:12px;
+  }
+  .topbar .logo{font-size:15px;font-weight:800;color:var(--s-primary);display:flex;align-items:center;gap:8px;}
+  .topbar .logo .dot{width:24px;height:24px;border-radius:7px;background:var(--s-primary);}
+  .search{
+    flex:1;max-width:340px;
+    display:flex;align-items:center;gap:8px;
+    padding:7px 14px;border-radius:999px;
+    background:var(--s-field);color:var(--s-onsurf-soft);
+    font-size:13px;
+  }
+  .top-actions{margin-left:auto;display:flex;gap:6px;}
+  .ico{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;background:transparent;color:var(--s-onsurf-soft);font-size:14px;}
+  .ico.on{background:var(--s-primary);color:#fff;}
+  .fab{width:40px;height:40px;border-radius:12px;background:var(--s-primary);color:#fff;display:grid;place-items:center;font-size:18px;box-shadow:0 6px 16px var(--s-primary-glow);}
+
+  /* 筛选条 */
+  .filterbar{
+    grid-column:1/-1;
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    padding:10px 16px;font-size:12px;
+    background:var(--s-surface);
+    border-radius:10px;
+    box-shadow:0 0 0 1px var(--s-border);
+    color:var(--s-onsurf-soft);
+  }
+  .chip{font-size:11.5px;padding:4px 11px;border-radius:999px;background:var(--s-chip);color:var(--s-onsurf);}
+  .chip.active{background:var(--s-primary);color:#fff;}
+  .sort{margin-left:auto;display:flex;align-items:center;gap:4px;color:var(--s-onsurf-soft);}
+
+  /* 书籍网格 */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  .book{
+    border-radius:12px;overflow:hidden;
+    background:var(--s-surface);
+    box-shadow:0 0 0 1px var(--s-border);
+    padding:14px;display:flex;flex-direction:column;gap:6px;min-height:150px;
+    position:relative;
+  }
+  .book .bt{font-size:13.5px;font-weight:700;color:var(--s-primary);line-height:1.3;}
+  .book .ba{font-size:11.5px;color:var(--s-onsurf-soft);}
+  .book .bmeta{margin-top:auto;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .badge{font-size:10px;padding:2px 8px;border-radius:999px;color:#fff;font-weight:600;}
+  .badge.done{background:var(--s-success);}
+  .badge.ongoing{background:var(--s-info);}
+  .wc{font-size:11px;color:var(--s-onsurf-soft);}
+  .tagline{display:flex;gap:4px;flex-wrap:wrap;margin-top:2px;}
+  .tag{font-size:10px;padding:1px 7px;border-radius:6px;}
+  .progress{height:3px;border-radius:3px;background:var(--s-border);margin-top:6px;overflow:hidden;}
+  .progress i{display:block;height:100%;background:var(--s-primary);}
+
+  /* 详情面板 */
+  .detail-hero{display:flex;gap:14px;}
+  .cover{width:64px;height:90px;border-radius:8px;background:linear-gradient(135deg,var(--s-primary),var(--s-accent));display:grid;place-items:center;color:#fff;font-size:22px;box-shadow:0 4px 12px var(--s-primary-glow);}
+  .detail-hero .info h5{font-size:15px;color:var(--s-onsurf);font-weight:800;}
+  .detail-hero .info .sub{margin-top:4px;font-size:11.5px;color:var(--s-onsurf-soft);display:flex;gap:10px;flex-wrap:wrap;}
+  .stars{margin-top:6px;font-size:12px;color:var(--s-rating);}
+  .detail-actions{margin-top:12px;display:flex;gap:6px;flex-wrap:wrap;}
+  .btn{font-size:11.5px;padding:7px 12px;border-radius:9px;font-weight:600;}
+  .btn.primary{background:var(--s-primary);color:#fff;}
+  .btn.ghost{background:transparent;color:var(--s-primary);box-shadow:inset 0 0 0 1px var(--s-primary);}
+  .summary{margin-top:12px;font-size:11.5px;color:var(--s-onsurf-soft);line-height:1.6;background:var(--s-softbg);padding:10px;border-radius:8px;}
+
+  /* 阅读器 */
+  .reader .chap{font-size:14px;font-weight:800;color:var(--s-onsurf);margin-bottom:8px;}
+  .reader .body{font-size:12.5px;line-height:1.9;color:var(--s-onsurf);}
+  .reader .nav{margin-top:12px;display:flex;gap:6px;justify-content:center;}
+  .reader .nav .btn{background:var(--s-chip);}
+
+  /* 统计 */
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+  .stat{background:var(--s-softbg);border-radius:10px;padding:10px;text-align:center;}
+  .stat .v{font-size:16px;font-weight:800;color:var(--s-primary);}
+  .stat .l{font-size:10px;color:var(--s-onsurf-soft);margin-top:2px;}
+  .bar-row{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:11px;color:var(--s-onsurf);}
+  .bar-row .lbl{width:46px;}
+  .bar{flex:1;height:7px;border-radius:4px;background:var(--s-border);overflow:hidden;}
+  .bar i{display:block;height:100%;background:var(--s-primary);}
+  .legend-dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:5px;}
+
+  /* 主题切换示意 */
+  .modeduo{display:flex;gap:8px;margin-top:14px;}
+  .mode{flex:1;border-radius:10px;padding:10px;font-size:11px;}
+  .mode.light{background:#fff;color:#222;box-shadow:inset 0 0 0 1px #eee;}
+  .mode.dark{background:#1a1a2e;color:#eee;box-shadow:inset 0 0 0 1px #333;}
+
+  .legend{margin-top:16px;display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
+  .legend .item{font-size:10.5px;}
+  .legend .item .sw{width:100%;height:26px;margin-bottom:4px;}
+  .legend .item .nm{color:var(--s-onsurf-soft);}
+
+  /* 候选标记 */
+  .rank{font-size:12px;font-weight:800;color:#bbb;background:#f0f1f3;padding:4px 10px;border-radius:999px;}
+
+  @media (max-width:900px){
+    .appwin{grid-template-columns:1fr;}
+    .grid{grid-template-columns:repeat(2,1fr);}
+  }
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <h1>📚 小说管理系统 · 配色风格方案</h1>
+  <p>下方提供 4 套差异化配色方案,每套都渲染了<strong>书库首页 / 书籍详情 / 阅读器 / 统计页</strong>四个核心场景的近似预览,以及完整色板。选定后,我将把对应配色落地到 Flutter 的 <code>app_colors.dart</code> 与 <code>app_theme.dart</code>,并重建全部 7 个页面的布局。</p>
+  <div class="meta">目标框架:Flutter (Material 3) · 数据层:sqflite + SQLite · 跨平台:macOS / Windows / Linux / Web</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 方案 A：墨韵书阁(墨绿+暖金,东方书卷气) -->
+<!-- ============================================================ -->
+<section class="scheme" id="A">
+  <div class="scheme-head">
+    <div>
+      <div class="title">A. 墨韵书阁 <span class="rank">方案 A</span></div>
+      <div class="desc">墨绿主色搭配暖金点缀,温润的米白底,营造古籍书卷、静心阅读的氛围。护眼、有文化质感,适合长时间阅读类应用。</div>
+      <div class="scheme-tags">
+        <span class="pill">墨绿 #2F5D50</span>
+        <span class="pill">暖金 #C9A227</span>
+        <span class="pill">米白底</span>
+        <span class="pill">护眼</span>
+        <span class="pill">东方书卷</span>
+      </div>
+    </div>
+    <div class="swatches">
+      <div class="sw" style="background:#2F5D50"></div>
+      <div class="sw" style="background:#C9A227"></div>
+      <div class="sw" style="background:#FAF7F0"></div>
+      <div class="sw" style="background:#8A9A5B"></div>
+    </div>
+  </div>
+  <div class="scheme-body">
+    <div class="appwin" style="
+      --s-bg:#F4EFE4; --s-onbg:#2A2520;
+      --s-surface:#FAF7F0; --s-onsurf:#2A2520; --s-onsurf-soft:#6B6256;
+      --s-primary:#2F5D50; --s-accent:#C9A227; --s-primary-glow:rgba(47,93,80,.3);
+      --s-border:rgba(47,93,80,.12); --s-field:#EFE9DC; --s-chip:#E8E1D0;
+      --s-softbg:#EFE9DC; --s-success:#5B8C5A; --s-info:#3E7CB1; --s-rating:#C9A227;
+    ">
+      <div class="topbar">
+        <div class="logo"><span class="dot"></span>书阁</div>
+        <div class="search">🔍 搜索小说、作者…</div>
+        <div class="top-actions">
+          <div class="ico">▦</div><div class="ico">≡</div><div class="ico on">+</div>
+        </div>
+      </div>
+      <div class="filterbar">
+        <span class="chip active">全部</span><span class="chip">连载中</span><span class="chip">已完结</span>
+        <span class="chip">#仙侠</span><span class="chip">#历史</span>
+        <span class="sort">排序:最近阅读 ↓</span>
+      </div>
+
+      <div class="panel">
+        <h4>书库 · 共 312 部</h4>
+        <div class="grid">
+          <div class="book">
+            <div class="bt">剑来</div><div class="ba">烽火戏诸侯</div>
+            <div class="bmeta"><span class="badge ongoing">连载</span><span class="wc">982万字</span></div>
+            <div class="tagline"><span class="tag" style="background:rgba(201,162,39,.18);color:#8a6f10">仙侠</span></div>
+            <div class="progress"><i style="width:62%"></i></div>
+          </div>
+          <div class="book">
+            <div class="bt">大奉打更人</div><div class="ba">卖报小郎君</div>
+            <div class="bmeta"><span class="badge done">完结</span><span class="wc">540万字</span></div>
+            <div class="tagline"><span class="tag" style="background:rgba(47,93,80,.16);color:#2F5D50">玄幻</span></div>
+            <div class="progress"><i style="width:100%"></i></div>
+          </div>
+          <div class="book">
+            <div class="bt">庆余年</div><div class="ba">猫腻</div>
+            <div class="bmeta"><span class="badge done">完结</span><span class="wc">372万字</span></div>
+            <div class="tagline"><span class="tag" style="background:rgba(62,124,177,.16);color:#3E7CB1">历史</span></div>
+            <div class="progress"><i style="width:38%"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h4>书籍详情 · 阅读器</h4>
+        <div class="detail-hero">
+          <div class="cover">📖</div>
+          <div class="info">
+            <h5>剑来</h5>
+            <div class="sub"><span>👤 烽火戏诸侯</span><span>📄 1340章</span><span>📝 982万字</span></div>
+            <div class="stars">★★★★★</div>
+          </div>
+        </div>
+        <div class="detail-actions">
+          <span class="btn primary">▶ 开始阅读</span>
+          <span class="btn ghost">⬇ 导出 TXT</span>
+        </div>
+        <div class="summary">少年陈平安,从一个贫寒少年成长为剑道巨擘的故事……(米白护眼底,长时间阅读不累。)</div>
+        <div class="reader" style="margin-top:14px;border-top:1px dashed var(--s-border);padding-top:12px;">
+          <div class="chap">第八百一十二章 · 问剑</div>
+          <div class="body">天地有大美而不言,四时有明法而不议,万物有成理而不说。陈平安提剑而立,山风鼓荡衣袖……</div>
+          <div class="nav"><span class="btn">‹ 上一章</span><span class="btn primary">下一章 ›</span></div>
+        </div>
+      </div>
+
+      <div class="panel" style="grid-column:1/-1;">
+        <h4>统计概览</h4>
+        <div class="stats-row">
+          <div class="stat"><div class="v">312</div><div class="l">小说</div></div>
+          <div class="stat"><div class="v">2.1亿</div><div class="l">字数</div></div>
+          <div class="stat"><div class="v">186</div><div class="l">作者</div></div>
+          <div class="stat"><div class="v">42</div><div class="l">标签</div></div>
+        </div>
+        <div class="bar-row"><span class="lbl"><span class="legend-dot" style="background:#5B8C5A"></span>已完结</span><div class="bar"><i style="width:40%"></i></div><span>124 本</span></div>
+        <div class="bar-row"><span class="lbl"><span class="legend-dot" style="background:#3E7CB1"></span>连载中</span><div class="bar"><i style="width:60%"></i></div><span>188 本</span></div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <div class="item"><div class="sw" style="background:#2F5D50"></div><div class="nm">主色 Primary</div></div>
+      <div class="item"><div class="sw" style="background:#C9A227"></div><div class="nm">强调 Accent</div></div>
+      <div class="item"><div class="sw" style="background:#FAF7F0"></div><div class="nm">表面 Surface</div></div>
+      <div class="item"><div class="sw" style="background:#EFE9DC"></div><div class="nm">弱底 SoftBg</div></div>
+      <div class="item"><div class="sw" style="background:#5B8C5A"></div><div class="nm">成功 Success</div></div>
+      <div class="item"><div class="sw" style="background:#B23A48"></div><div class="nm">错误 Error</div></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- 方案 B：靛蓝墨海(深靛蓝+珊瑚橙,现代专业) -->
+<!-- ============================================================ -->
+<section class="scheme" id="B">
+  <div class="scheme-head">
+    <div>
+      <div class="title">B. 靛蓝墨海 <span class="rank">方案 B</span></div>
+      <div class="desc">深靛蓝主色搭配珊瑚橙强调色,纯白净底,现代、专业、信息密度高。强调数据可视化与效率,类似 Notion / Linear 的高级感。</div>
+      <div class="scheme-tags">
+        <span class="pill">靛蓝 #3949AB</span>
+        <span class="pill">珊瑚橙 #FF6E40</span>
+        <span class="pill">纯白底</span>
+        <span class="pill">现代专业</span>
+        <span class="pill">数据可视化</span>
+      </div>
+    </div>
+    <div class="swatches">
+      <div class="sw" style="background:#3949AB"></div>
+      <div class="sw" style="background:#FF6E40"></div>
+      <div class="sw" style="background:#FFFFFF"></div>
+      <div class="sw" style="background:#26C6DA"></div>
+    </div>
+  </div>
+  <div class="scheme-body">
+    <div class="appwin" style="
+      --s-bg:#F5F6FA; --s-onbg:#1A1A2E;
+      --s-surface:#FFFFFF; --s-onsurf:#1A1A2E; --s-onsurf-soft:#64748B;
+      --s-primary:#3949AB; --s-accent:#FF6E40; --s-primary-glow:rgba(57,73,171,.28);
+      --s-border:rgba(57,73,171,.1); --s-field:#F1F3F9; --s-chip:#EEF0F7;
+      --s-softbg:#F1F3F9; --s-success:#16A34A; --s-info:#0EA5E9; --s-rating:#F59E0B;
+    ">
+      <div class="topbar">
+        <div class="logo"><span class="dot"></span>小说库</div>
+        <div class="search">🔍 搜索小说、作者…</div>
+        <div class="top-actions">
+          <div class="ico">▦</div><div class="ico">≡</div><div class="ico on">+</div>
+        </div>
+      </div>
+      <div class="filterbar">
+        <span class="chip active">全部</span><span class="chip">连载中</span><span class="chip">已完结</span>
+        <span class="chip">#玄幻</span><span class="chip">#科幻</span>
+        <span class="sort">排序:评分 ↓</span>
+      </div>
+
+      <div class="panel">
+        <h4>书库 · 共 312 部</h4>
+        <div class="grid">
+          <div class="book">
+            <div class="bt">三体</div><div class="ba">刘慈欣</div>
+            <div class="bmeta"><span class="badge done">完结</span><span class="wc">88万字</span></div>
+            <div class="tagline"><span class="tag" style="background:rgba(255,110,64,.16);color:#D84315">科幻</span></div>
+            <div class="progress"><i style="width:100%"></i></div>
+          </div>
+          <div class="book">
+            <div class="bt">诡秘之主</div><div class="ba">爱潜水的乌贼</div>
+            <div class="bmeta"><span class="badge done">完结</span><span class="wc">446万字</span></div>
+            <div class="tagline"><span class="tag" style="background:rgba(57,73,171,.14);color:#3949AB">奇幻</span></div>
+            <div class="progress"><i style="width:75%"></i></div>
+          </div>
+          <div class="book">
+            <div class="bt">夜的命名术</div><div class="ba">会说话的肘子</div>
+            <div class="bmeta"><span class="badge ongoing">连载</span><span class="wc">312万字</span></div>
+            <div class="tagline"><span class="tag" style="background:rgba(14,165,233,.16);color:#0288D1">都市</span></div>
+            <div class="progress"><i style="width:48%"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h4>书籍详情 · 阅读器</h4>
+        <div class="detail-hero">
+          <div class="cover">🚀</div>
+          <div class="info">
+            <h5>三体</h5>
+            <div class="sub"><span>👤 刘慈欣</span><span>📄 36章</span><span>📝 88万字</span></div>
+            <div class="stars">★★★★★</div>
+          </div>
+        </div>
+        <div class="detail-actions">
+          <span class="btn primary">▶ 开始阅读</span>
+          <span class="btn ghost">⬇ 导出 EPUB</span>
+        </div>
+        <div class="summary">文化大革命如火如荼地进行,叶文洁在绝望中向宇宙发出了人类的第一声啼鸣……(纯白净底,高对比,信息清晰。)</div>
+        <div class="reader" style="margin-top:14px;border-top:1px dashed var(--s-border);padding-top:12px;">
+          <div class="chap">第一章 · 科学边界</div>
+          <div class="body">物理学不存在了。杨冬看着实验数据,玻璃墙外的天空蓝得异常。她最后的念头是:世界其实是一直在欺骗她……</div>
+          <div class="nav"><span class="btn">‹ 上一章</span><span class="btn primary">下一章 ›</span></div>
+        </div>
+      </div>
+
+      <div class="panel" style="grid-column:1/-1;">
+        <h4>统计概览</h4>
+        <div class="stats-row">
+          <div class="stat"><div class="v">312</div><div class="l">小说</div></div>
+          <div class="stat"><div class="v">2.1亿</div><div class="l">字数</div></div>
+          <div class="stat"><div class="v">186</div><div class="l">作者</div></div>
+          <div class="stat"><div class="v">42</div><div class="l">标签</div></div>
+        </div>
+        <div class="bar-row"><span class="lbl"><span class="legend-dot" style="background:#16A34A"></span>已完结</span><div class="bar"><i style="width:40%"></i></div><span>124 本</span></div>
+        <div class="bar-row"><span class="lbl"><span class="legend-dot" style="background:#0EA5E9"></span>连载中</span><div class="bar"><i style="width:60%"></i></div><span>188 本</span></div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <div class="item"><div class="sw" style="background:#3949AB"></div><div class="nm">主色 Primary</div></div>
+      <div class="item"><div class="sw" style="background:#FF6E40"></div><div class="nm">强调 Accent</div></div>
+      <div class="item"><div class="sw" style="background:#FFFFFF"></div><div class="nm">表面 Surface</div></div>
+      <div class="item"><div class="sw" style="background:#F1F3F9"></div><div class="nm">弱底 SoftBg</div></div>
+      <div class="item"><div class="sw" style="background:#16A34A"></div><div class="nm">成功 Success</div></div>
+      <div class="item"><div class="sw" style="background:#DC2626"></div><div class="nm">错误 Error</div></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- 方案 C：暮色书房(暖棕+赤陶,温暖复古) -->
+<!-- ============================================================ -->
+<section class="scheme" id="C">
+  <div class="scheme-head">
+    <div>
+      <div class="title">C. 暮色书房 <span class="rank">方案 C</span></div>
+      <div class="desc">深咖啡棕主色搭配赤陶橙强调,温暖的奶油底色,像黄昏里的旧书房。舒适、怀旧、有温度,适合营造沉浸式阅读的「私人书房」感。</div>
+      <div class="scheme-tags">
+        <span class="pill">咖啡棕 #5D4037</span>
+        <span class="pill">赤陶橙 #D2691E</span>
+        <span class="pill">奶油底</span>
+        <span class="pill">温暖复古</span>
+        <span class="pill">沉浸阅读</span>
+      </div>
+    </div>
+    <div class="swatches">
+      <div class="sw" style="background:#5D4037"></div>
+      <div class="sw" style="background:#D2691E"></div>
+      <div class="sw" style="background:#FBF6EE"></div>
+      <div class="sw" style="background:#8D6E63"></div>
+    </div>
+  </div>
+  <div class="scheme-body">
+    <div class="appwin" style="
+      --s-bg:#F3EBDD; --s-onbg:#3E2723;
+      --s-surface:#FBF6EE; --s-onsurf:#3E2723; --s-onsurf-soft:#795548;
+      --s-primary:#5D4037; --s-accent:#D2691E; --s-primary-glow:rgba(93,64,55,.3);
+      --s-border:rgba(93,64,55,.14); --s-field:#EDE2CE; --s-chip:#E6D9C0;
+      --s-softbg:#EDE2CE; --s-success:#6D9E5C; --s-info:#4E8397; --s-rating:#E0922F;
+    ">
+      <div class="topbar">
+        <div class="logo"><span class="dot"></span>书房</div>
+        <div class="search">🔍 搜索小说、作者…</div>
+        <div class="top-actions">
+          <div class="ico">▦</div><div class="ico">≡</div><div class="ico on">+</div>
+        </div>
+      </div>
+      <div class="filterbar">
+        <span class="chip active">全部</span><span class="chip">连载中</span><span class="chip">已完结</span>
+        <span class="chip">#武侠</span><span class="chip">#言情</span>
+        <span class="sort">排序:导入时间 ↓</span>
+      </div>
+
+      <div class="panel">
+        <h4>书库 · 共 312 部</h4>
+        <div class="grid">
+          <div class="book">
+            <div class="bt">雪中悍刀行</div><div class="ba">烽火戏诸侯</div>
+            <div class="bmeta"><span class="badge done">完结</span><span class="wc">450万字</span></div>
+            <div class="tagline"><span class="tag" style="background:rgba(210,105,30,.18);color:#A0522D">武侠</span></div>
+            <div class="progress"><i style="width:90%"></i></div>
+          </div>
+          <div class="book">
+            <div class="bt">琅琊榜</div><div class="ba">海宴</div>
+            <div class="bmeta"><span class="badge done">完结</span><span class="wc">78万字</span></div>
+            <div class="tagline"><span class="tag" style="background:rgba(93,64,55,.16);color:#5D4037">权谋</span></div>
+            <div class="progress"><i style="width:55%"></i></div>
+          </div>
+          <div class="book">
+            <div class="bt">知否知否</div><div class="ba">关心则乱</div>
+            <div class="bmeta"><span class="badge done">完结</span><span class="wc">142万字</span></div>
+            <div class="tagline"><span class="tag" style="background:rgba(78,131,151,.16);color:#4E8397">言情</span></div>
+            <div class="progress"><i style="width:30%"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h4>书籍详情 · 阅读器</h4>
+        <div class="detail-hero">
+          <div class="cover">🗡️</div>
+          <div class="info">
+            <h5>雪中悍刀行</h5>
+            <div class="sub"><span>👤 烽火戏诸侯</span><span>📄 980章</span><span>📝 450万字</span></div>
+            <div class="stars">★★★★☆</div>
+          </div>
+        </div>
+        <div class="detail-actions">
+          <span class="btn primary">▶ 开始阅读</span>
+          <span class="btn ghost">⬇ 导出 TXT</span>
+        </div>
+        <div class="summary">北凉世子徐凤年,一柄凉刀走江湖。庙堂与江湖交错,少年终要扛起一座北凉城……(暖奶油底,如旧书页的温度。)</div>
+        <div class="reader" style="margin-top:14px;border-top:1px dashed var(--s-border);padding-top:12px;">
+          <div class="chap">第一章 · 北凉</div>
+          <div class="body">徐凤年骑驴下江南,腰间不佩刀。老黄挑着个酒葫芦跟在后头,笑得满脸褶子。北凉的雪,今年下得格外早……</div>
+          <div class="nav"><span class="btn">‹ 上一章</span><span class="btn primary">下一章 ›</span></div>
+        </div>
+      </div>
+
+      <div class="panel" style="grid-column:1/-1;">
+        <h4>统计概览</h4>
+        <div class="stats-row">
+          <div class="stat"><div class="v">312</div><div class="l">小说</div></div>
+          <div class="stat"><div class="v">2.1亿</div><div class="l">字数</div></div>
+          <div class="stat"><div class="v">186</div><div class="l">作者</div></div>
+          <div class="stat"><div class="v">42</div><div class="l">标签</div></div>
+        </div>
+        <div class="bar-row"><span class="lbl"><span class="legend-dot" style="background:#6D9E5C"></span>已完结</span><div class="bar"><i style="width:40%"></i></div><span>124 本</span></div>
+        <div class="bar-row"><span class="lbl"><span class="legend-dot" style="background:#4E8397"></span>连载中</span><div class="bar"><i style="width:60%"></i></div><span>188 本</span></div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <div class="item"><div class="sw" style="background:#5D4037"></div><div class="nm">主色 Primary</div></div>
+      <div class="item"><div class="sw" style="background:#D2691E"></div><div class="nm">强调 Accent</div></div>
+      <div class="item"><div class="sw" style="background:#FBF6EE"></div><div class="nm">表面 Surface</div></div>
+      <div class="item"><div class="sw" style="background:#EDE2CE"></div><div class="nm">弱底 SoftBg</div></div>
+      <div class="item"><div class="sw" style="background:#6D9E5C"></div><div class="nm">成功 Success</div></div>
+      <div class="item"><div class="sw" style="background:#B23A48"></div><div class="nm">错误 Error</div></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- 方案 D：墨夜星河(深色优先,青柠强调,科技护眼) -->
+<!-- ============================================================ -->
+<section class="scheme" id="D">
+  <div class="scheme-head">
+    <div>
+      <div class="title">D. 墨夜星河 <span class="rank">方案 D</span></div>
+      <div class="desc">深色优先(Dark-first)主题,近黑底 + 青柠强调色,夜间阅读零刺眼,科技感十足。同时保留可切换的浅色模式,适合熬夜党与 OLED 屏省电。</div>
+      <div class="scheme-tags">
+        <span class="pill">深色优先</span>
+        <span class="pill">青柠强调 #A3E635</span>
+        <span class="pill">OLED 省电</span>
+        <span class="pill">夜间护眼</span>
+        <span class="pill">科技感</span>
+      </div>
+    </div>
+    <div class="swatches">
+      <div class="sw" style="background:#0F1419"></div>
+      <div class="sw" style="background:#A3E635"></div>
+      <div class="sw" style="background:#1A1F26"></div>
+      <div class="sw" style="background:#38BDF8"></div>
+    </div>
+  </div>
+  <div class="scheme-body">
+    <div class="appwin" style="
+      --s-bg:#0F1419; --s-onbg:#E5E7EB;
+      --s-surface:#1A1F26; --s-onsurf:#E5E7EB; --s-onsurf-soft:#9CA3AF;
+      --s-primary:#A3E635; --s-accent:#38BDF8; --s-primary-glow:rgba(163,230,53,.25);
+      --s-border:rgba(255,255,255,.08); --s-field:#252B33; --s-chip:#252B33;
+      --s-softbg:#252B33; --s-success:#4ADE80; --s-info:#38BDF8; --s-rating:#FBBF24;
+    ">
+      <div class="topbar">
+        <div class="logo"><span class="dot"></span>墨夜</div>
+        <div class="search">🔍 搜索小说、作者…</div>
+        <div class="top-actions">
+          <div class="ico">▦</div><div class="ico">≡</div><div class="ico on">+</div>
+        </div>
+      </div>
+      <div class="filterbar">
+        <span class="chip active">全部</span><span class="chip">连载中</span><span class="chip">已完结</span>
+        <span class="chip">#赛博</span><span class="chip">#悬疑</span>
+        <span class="sort">排序:最近阅读 ↓</span>
+      </div>
+
+      <div class="panel">
+        <h4>书库 · 共 312 部</h4>
+        <div class="grid">
+          <div class="book">
+            <div class="bt">第一序列</div><div class="ba">会说话的肘子</div>
+            <div class="bmeta"><span class="badge done">完结</span><span class="wc">620万字</span></div>
+            <div class="tagline"><span class="tag" style="background:rgba(56,189,248,.18);color:#38BDF8">末世</span></div>
+            <div class="progress"><i style="width:88%"></i></div>
+          </div>
+          <div class="book">
+            <div class="bt">深海余烬</div><div class="ba">远瞳</div>
+            <div class="bmeta"><span class="badge ongoing">连载</span><span class="wc">210万字</span></div>
+            <div class="tagline"><span class="tag" style="background:rgba(163,230,53,.2);color:#A3E635">奇幻</span></div>
+            <div class="progress"><i style="width:42%"></i></div>
+          </div>
+          <div class="book">
+            <div class="bt">我们生活在南京</div><div class="ba">拉非客</div>
+            <div class="bmeta"><span class="badge done">完结</span><span class="wc">36万字</span></div>
+            <div class="tagline"><span class="tag" style="background:rgba(251,191,36,.18);color:#FBBF24">科幻</span></div>
+            <div class="progress"><i style="width:100%"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h4>书籍详情 · 阅读器</h4>
+        <div class="detail-hero">
+          <div class="cover">🌌</div>
+          <div class="info">
+            <h5>深海余烬</h5>
+            <div class="sub"><span>👤 远瞳</span><span>📄 512章</span><span>📝 210万字</span></div>
+            <div class="stars">★★★★★</div>
+          </div>
+        </div>
+        <div class="detail-actions">
+          <span class="btn primary">▶ 开始阅读</span>
+          <span class="btn ghost">⬇ 导出 EPUB</span>
+        </div>
+        <div class="summary">大海上漂浮着旧世界的余烬,周铭在一艘失忆的船上醒来,深海之下藏着文明的秘密……(近黑底,夜间阅读零刺眼。)</div>
+        <div class="reader" style="margin-top:14px;border-top:1px dashed var(--s-border);padding-top:12px;">
+          <div class="chap">第一章 · 余烬</div>
+          <div class="body">海面漆黑如墨,只有远处的灯塔亮着一点冷光。周铭扶着船舷,记忆像是被海水泡烂了,只剩下一个名字……</div>
+          <div class="nav"><span class="btn">‹ 上一章</span><span class="btn primary">下一章 ›</span></div>
+        </div>
+      </div>
+
+      <div class="panel" style="grid-column:1/-1;">
+        <h4>统计概览</h4>
+        <div class="stats-row">
+          <div class="stat"><div class="v">312</div><div class="l">小说</div></div>
+          <div class="stat"><div class="v">2.1亿</div><div class="l">字数</div></div>
+          <div class="stat"><div class="v">186</div><div class="l">作者</div></div>
+          <div class="stat"><div class="v">42</div><div class="l">标签</div></div>
+        </div>
+        <div class="bar-row"><span class="lbl"><span class="legend-dot" style="background:#4ADE80"></span>已完结</span><div class="bar"><i style="width:40%"></i></div><span>124 本</span></div>
+        <div class="bar-row"><span class="lbl"><span class="legend-dot" style="background:#38BDF8"></span>连载中</span><div class="bar"><i style="width:60%"></i></div><span>188 本</span></div>
+      </div>
+    </div>
+
+    <!-- 深色方案的浅色对照 -->
+    <div class="modeduo">
+      <div class="mode dark">
+        <strong>夜间模式(默认)</strong><br>底 #0F1419 · 文字 #E5E7EB · 强调青柠
+      </div>
+      <div class="mode light">
+        <strong>日间模式(可切换)</strong><br>底 #FAFAFA · 文字 #1A1A2E · 强调靛绿 #65A30D
+      </div>
+    </div>
+
+    <div class="legend">
+      <div class="item"><div class="sw" style="background:#0F1419"></div><div class="nm">背景 BG</div></div>
+      <div class="item"><div class="sw" style="background:#1A1F26"></div><div class="nm">表面 Surface</div></div>
+      <div class="item"><div class="sw" style="background:#A3E635"></div><div class="nm">强调 Primary</div></div>
+      <div class="item"><div class="sw" style="background:#38BDF8"></div><div class="nm">次强调 Accent</div></div>
+      <div class="item"><div class="sw" style="background:#4ADE80"></div><div class="nm">成功 Success</div></div>
+      <div class="item"><div class="sw" style="background:#F87171"></div><div class="nm">错误 Error</div></div>
+    </div>
+  </div>
+</section>
+
+<div style="max-width:1320px;margin:0 auto;color:#666;font-size:13px;line-height:1.7;">
+  <p>📝 <strong>说明</strong>:以上为配色风格预览,非最终像素级还原。选定后我会按所选方案的色值,落地到 Flutter 的 <code>lib/theme/app_colors.dart</code> 与 <code>app_theme.dart</code>,并重建各页面布局(导航/卡片/间距/字体层级),再做编译验证。</p>
+</div>
+
+</body>
+</html>
