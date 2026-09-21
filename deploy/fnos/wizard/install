@@ -1,0 +1,33 @@
+[
+    {
+        "stepTitle": "配置书库与阅读状态",
+        "items": [
+            {
+                "type": "tips",
+                "helpText": "书库（只读）：NAS 上 novelmgt.db 的绝对路径。misc(fnOS) 默认使用 DX4600 共享库的 CIFS 挂载路径；DX4600 本机部署时填 /volume3/hermes3/novelmgt/novelmgt.db。留空使用默认值。"
+            },
+            {
+                "type": "text",
+                "field": "novel_db_path",
+                "label": "书库文件绝对路径",
+                "rules": [{
+                    "required": false,
+                    "message": "路径错误"
+                }]
+            },
+            {
+                "type": "tips",
+                "helpText": "阅读状态库（可写）：存放进度/书签/笔记和章节标题索引，所有浏览器/设备共享。默认放在本应用数据目录；留空使用默认值。"
+            },
+            {
+                "type": "text",
+                "field": "novel_state_path",
+                "label": "状态库文件绝对路径（可选）",
+                "rules": [{
+                    "required": false,
+                    "message": "路径错误"
+                }]
+            }
+        ]
+    }
+]

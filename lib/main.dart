@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import 'dart:async' show unawaited;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'app.dart';
 import 'services/database_service.dart';
 import 'services/platform_fs.dart';
 import 'services/settings_service.dart';
 import 'providers/database_provider.dart';
 import 'services/nas/nas_backend.dart';
+import 'services/remote_database.dart';
 import 'theme/app_colors.dart';
 import 'utils/database_factory_init.dart';
 import 'utils/zh_converter.dart';
@@ -46,6 +48,34 @@ void main() async {
         customDbPath = normalized;
         await settingsService.setCustomDbPath(normalized);
         debugPrint('customDbPath 已从 .dart_tool 迁移到: $normalized');
+      }
+    }
+
+    // 服务端 API 模式（仅 Web）：同源存在 /api/health 时自动启用。
+    // 由 deploy/api（Dart shelf）或 deploy/fnos（fnOS 应用）提供服务：
+    // 查询在服务端完成（含章节标题索引），书架/搜索/阅读与进度书签笔记
+    // 均由服务器共享，性能远优于浏览器直读大库。
+    if (kIsWeb && Uri.base.queryParameters['nas'] != '1') {
+      var hasApi = false;
+      try {
+        final res = await http
+            .get(Uri.base.resolve('api/health'))
+            .timeout(const Duration(seconds: 3));
+        hasApi = res.statusCode == 200;
+      } catch (_) {}
+      if (hasApi) {
+        debugPrint('检测到服务端 API，启用远程书库模式');
+        final db = RemoteDatabaseService();
+        await db.initialize();
+        runApp(
+          ProviderScope(
+            overrides: [
+              databaseServiceProvider.overrideWithValue(db),
+            ],
+            child: const NovelMgtApp(),
+          ),
+        );
+        return;
       }
     }
 
