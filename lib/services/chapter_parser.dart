@@ -209,6 +209,11 @@ class ChapterParser {
 
   /// 判断一行文本是否为章节标题
   static bool _isChapterTitle(String line) {
+    // 章节标题是短行：超长行即使以「第X章」开头也是正文
+    // （如「第二章的内容开始出现变化，主角踏上了旅程。」）
+    if (line.length > 50) return false;
+    // 标题行不应包含句中标点
+    if (RegExp(r'[。，！？；、“”‘’「」《》]').hasMatch(line)) return false;
     for (final pattern in chapterPatterns) {
       if (pattern.hasMatch(line)) return true;
     }
