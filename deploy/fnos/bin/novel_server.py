@@ -525,12 +525,28 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_error(404)
                 return
         ext = os.path.splitext(full)[1].lower()
+        mtime = os.path.getmtime(full)
+        # 协商缓存：带 If-Modified-Since 则比对 mtime，未变返回 304
+        ims = self.headers.get("If-Modified-Since")
+        if ims:
+            try:
+                from email.utils import parsedate_to_datetime
+                if int(os.path.getmtime(full)) <= parsedate_to_datetime(ims).timestamp():
+                    self.send_response(304)
+                    self.send_header("Cache-Control", "no-cache")
+                    self.send_header("Last-Modified", self.date_time_string(mtime))
+                    self.end_headers()
+                    return
+            except Exception:
+                pass
         with open(full, "rb") as f:
             data = f.read()
         self.send_response(200)
         self.send_header("Content-Type", MIME.get(ext, "application/octet-stream"))
         self.send_header("Content-Length", str(len(data)))
-        if rel.startswith("assets/") or rel in ("main.dart.js",):
+        self.send_header("Last-Modified", self.date_time_string(mtime))
+        # 仅带内容哈希的 assets/ 长缓存；入口与主代码 no-cache（更新即时生效）
+        if rel.startswith("assets/"):
             self.send_header("Cache-Control", "public, max-age=2592000, immutable")
         else:
             self.send_header("Cache-Control", "no-cache")
