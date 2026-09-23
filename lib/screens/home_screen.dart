@@ -188,6 +188,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
           ),
+          // 翻页控制条
+          _buildPageBar(library),
           // 底部统计
           _buildStatusBar(library),
         ],
@@ -285,6 +287,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (t.id == library.selectedTagId) return t.name;
     }
     return '全部标签';
+  }
+
+  /// 翻页控制条：上一页 / 页码 / 下一页（搜索模式一次拉全量，隐藏）
+  Widget _buildPageBar(LibraryState library) {
+    if (library.searchQuery.isNotEmpty) return const SizedBox.shrink();
+    final totalPages = (library.totalCount / LibraryState.pageSize).ceil();
+    if (totalPages <= 1) return const SizedBox.shrink();
+    final page = library.page.clamp(1, totalPages);
+    final theme = Theme.of(context);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        border: Border(top: BorderSide(color: theme.dividerColor)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          IconButton(
+            tooltip: '上一页',
+            icon: const Icon(Icons.chevron_left),
+            onPressed: page > 1
+                ? () => ref.read(libraryProvider.notifier).goToPage(page - 1)
+                : null,
+          ),
+          Text('第 $page / $totalPages 页 · 共 ${library.totalCount} 本',
+              style: theme.textTheme.bodySmall),
+          IconButton(
+            tooltip: '下一页',
+            icon: const Icon(Icons.chevron_right),
+            onPressed: page < totalPages
+                ? () => ref.read(libraryProvider.notifier).goToPage(page + 1)
+                : null,
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildStatusBar(LibraryState library) {
