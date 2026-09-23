@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""小说管理系统 · fnOS 版服务端（路线 B 架构）
+"""YYX书库 · fnOS 版服务端（服务端查询架构）
 
 与「HTTP Range 直读」旧架构的区别：
 - 所有查询在服务端完成（书库 SQLite 在 NAS 本地/CIFS 挂载上直接打开），
@@ -54,15 +54,17 @@ def book_conn():
     return con
 
 
+_state_write_lock = threading.Lock()
+
 def state_conn():
     con = sqlite3.connect(ARGS.state_db, timeout=30)
     con.row_factory = sqlite3.Row
-    con.execute("PRAGMA journal_mode=WAL")
     return con
 
 
 def init_state_db():
     con = state_conn()
+    con.execute("PRAGMA journal_mode=WAL")
     con.executescript(
         """
         CREATE TABLE IF NOT EXISTS reading_progress (
@@ -373,18 +375,26 @@ def user_progress_get(book_id):
 
 
 def user_progress_put(body):
-    con = state_conn()
-    t = now_iso()
-    con.execute(
-        "INSERT INTO reading_progress (bookId, chapterId, scrollPosition, lastReadAt, createdAt) "
-        "VALUES (?,?,?,?,?) ON CONFLICT(bookId) DO UPDATE SET chapterId=excluded.chapterId, "
-        "scrollPosition=excluded.scrollPosition, lastReadAt=excluded.lastReadAt",
-        (body["bookId"], body["chapterId"], body.get("scrollPosition", 0), t, t),
-    )
-    con.commit()
-    row = con.execute("SELECT * FROM reading_progress WHERE bookId=?", (body["bookId"],)).fetchone()
-    con.close()
-    return dict(row)
+    _state_write_lock.acquire()
+    try:
+        t = now_iso()
+        con = state_conn()
+        try:
+            con.execute(
+                "INSERT INTO reading_progress (bookId, chapterId, scrollPosition, lastReadAt, createdAt) "
+                "VALUES (?,?,?,?,?) ON CONFLICT(bookId) DO UPDATE SET chapterId=excluded.chapterId, "
+                "scrollPosition=excluded.scrollPosition, lastReadAt=excluded.lastReadAt",
+                (body["bookId"], body["chapterId"], body.get("scrollPosition", 0), t, t),
+            )
+            con.commit()
+        finally:
+            con.close()
+        con = state_conn()
+        row = con.execute("SELECT * FROM reading_progress WHERE bookId=?", (body["bookId"],)).fetchone()
+        con.close()
+        return dict(row)
+    finally:
+        _state_write_lock.release()
 
 
 def user_list(table, book_id):
@@ -397,37 +407,62 @@ def user_list(table, book_id):
 
 
 def user_insert(table, body, fields):
-    con = state_conn()
     t = now_iso()
-    vals = [body.get(f) for f in fields]
-    cur = con.execute(
-        "INSERT INTO %s (%s) VALUES (%s)" % (table, ",".join(fields), ",".join("?" * len(fields))),
-        vals,
-    )
-    con.commit()
-    row = con.execute("SELECT * FROM %s WHERE id=?" % table, (cur.lastrowid,)).fetchone()
-    con.close()
-    return dict(row)
+    defaults = {
+        "createdAt": t, "updatedAt": t,
+        "position": 0, "note": "", "content": "",
+        "scrollPosition": 0,
+    }
+    vals = [body.get(f, defaults.get(f)) for f in fields]
+    _state_write_lock.acquire()
+    try:
+        con = state_conn()
+        try:
+            cur = con.execute(
+                "INSERT INTO %s (%s) VALUES (%s)"
+                % (table, ",".join(fields), ",".join("?" * len(fields))),
+                vals,
+            )
+            con.commit()
+            rid = cur.lastrowid
+        finally:
+            con.close()
+        con = state_conn()
+        row = con.execute("SELECT * FROM %s WHERE id=?" % table, (rid,)).fetchone()
+        con.close()
+        return dict(row)
+    finally:
+        _state_write_lock.release()
 
 
 def user_update_note(nid, body):
-    con = state_conn()
-    con.execute(
-        "UPDATE notes SET content=?, updatedAt=? WHERE id=?", (body.get("content"), now_iso(), nid)
-    )
-    con.commit()
-    row = con.execute("SELECT * FROM notes WHERE id=?", (nid,)).fetchone()
-    con.close()
-    return dict(row) if row else None
+    _state_write_lock.acquire()
+    try:
+        con = state_conn()
+        try:
+            con.execute(
+                "UPDATE notes SET content=?, updatedAt=? WHERE id=?",
+                (body.get("content"), now_iso(), nid),
+            )
+            con.commit()
+        finally:
+            con.close()
+        con = state_conn()
+        row = con.execute("SELECT * FROM notes WHERE id=?", (nid,)).fetchone()
+        con.close()
+        return dict(row) if row else None
+    finally:
+        _state_write_lock.release()
 
 
 def user_delete(table, rid):
     con = state_conn()
-    cur = con.execute("DELETE FROM %s WHERE id=?" % table, (rid,))
-    con.commit()
-    deleted = cur.rowcount > 0
-    con.close()
-    return {"deleted": deleted}
+    try:
+        cur = con.execute("DELETE FROM %s WHERE id=?" % table, (rid,))
+        con.commit()
+        return {"deleted": cur.rowcount > 0}
+    finally:
+        con.close()
 
 
 # ============================================================
