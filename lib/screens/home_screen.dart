@@ -151,9 +151,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         children: [
           // 筛选栏
           _buildFilterBar(library),
-          // 内容区
+          // 内容区（滚动到底自动加载下一页）
           Expanded(
-            child: AnimatedSwitcher(
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (n) {
+                if (n.metrics.axis == Axis.vertical &&
+                    n.metrics.maxScrollExtent > 0 &&
+                    n.metrics.pixels >= n.metrics.maxScrollExtent - 400) {
+                  ref.read(libraryProvider.notifier).loadNextPage();
+                }
+                return false;
+              },
+              child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 250),
               switchInCurve: Curves.easeOutCubic,
               switchOutCurve: Curves.easeInCubic,
@@ -177,6 +186,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       child: const BookListView(),
                     ),
             ),
+          ),
           ),
           // 底部统计
           _buildStatusBar(library),
