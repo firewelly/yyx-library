@@ -27,6 +27,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _isGridView = false;  // 默认使用列表视图
   final _searchController = TextEditingController();
   final _searchFocusNode = FocusNode();
+  final _pageJumpController = TextEditingController();
 
   @override
   void initState() {
@@ -41,6 +42,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void dispose() {
     _searchController.dispose();
     _searchFocusNode.dispose();
+    _pageJumpController.dispose();
     super.dispose();
   }
 
@@ -321,6 +323,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             onPressed: page < totalPages
                 ? () => ref.read(libraryProvider.notifier).goToPage(page + 1)
                 : null,
+          ),
+          const SizedBox(width: 12),
+          // 快速跳页：输入页码后回车直达
+          SizedBox(
+            width: 64,
+            height: 30,
+            child: TextField(
+              controller: _pageJumpController,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 12),
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              decoration: InputDecoration(
+                hintText: '页码',
+                isDense: true,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              onSubmitted: (v) {
+                final p = int.tryParse(v.trim());
+                if (p != null && p >= 1 && p <= totalPages && p != page) {
+                  ref.read(libraryProvider.notifier).goToPage(p);
+                  _pageJumpController.clear();
+                }
+              },
+            ),
           ),
         ],
       ),
