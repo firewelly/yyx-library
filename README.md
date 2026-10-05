@@ -1,8 +1,9 @@
 # YYX书库（YYX Library）
 
 > 跨平台个人书库管理与阅读器（Flutter）：macOS / Windows / Linux 桌面端 + **Web 端（NAS 网页版）**。
-> Web 端架构：浏览器内 SQLite(WASM) 经 HTTP Range 直读书库文件（对 NAS 完全只读），
-> 服务端仅需任意静态服务器 + 极小状态 API（参考 `tool/`）。
+> Web 端推荐**服务端查询**形态：书库留在 NAS 上（只读），查询与章节标题索引在服务端完成，
+> 客户端只渲染——大库（数 GB / 数万本）下依然秒开、秒搜；也保留浏览器内
+> SQLite(WASM) 经 HTTP Range 直读的零服务端形态（适合中小库或纯静态托管）。
 
 书架管理、阅读器、导入导出、统计、标签。
 
@@ -76,9 +77,17 @@ Web 端支持两种 NAS 部署形态：
 | Web 静态（nginx/Docker） | `deploy/web/` | 任意静态托管，数据在浏览器本地 |
 | 服务端 API（Docker） | `deploy/api/` | UGOS Pro 等支持 Docker 的 NAS（shelf + SQLite + 标题索引） |
 | fnOS 原生应用（fpk） | `deploy/fnos/` | fnOS：Python 服务端 + Web UI 打包为应用，应用中心安装 |
+| UGOS Pro 应用（upk） | `deploy/ugos/` | 绿联云应用中心上架（Docker 应用，内置示例书库） |
 
 客户端会自动探测同源 `GET /api/health`：存在则进入服务端 API 模式
 （书库/搜索/进度书签笔记全部由服务器共享），不存在则回退原有行为。
+
+### 首次安装的初版书库（示例书库）
+
+UGOS / fnOS 形态内置一部**公版示例书库**（四大名著，古籍原文取自维基文库，
+见 `deploy/ugos/fetch_demo_texts.py`）。用户尚未放置自己的 `novelmgt.db` 时，
+服务端以 `--demo-db` 退回示例库，界面直接可浏览、阅读与检索；
+放入自有书库后重启即切换（`/api/health` 的 `demo` 字段标明当前是否示例库）。
 
 ### fnOS 应用构建
 

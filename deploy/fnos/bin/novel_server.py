@@ -45,6 +45,38 @@ def _re_match(pattern, s):
     return re.match(pattern, s)
 
 
+def _db_usable(path):
+    """书库文件存在且可作为书库打开（含 books 表）"""
+    if not path or not os.path.isfile(path):
+        return False
+    try:
+        con = sqlite3.connect(
+            "file:%s?mode=ro" % path.replace("?", "%3f"), uri=True, timeout=10
+        )
+        try:
+            con.execute("SELECT COUNT(*) FROM books").fetchone()
+        finally:
+            con.close()
+        return True
+    except Exception:  # noqa: BLE001
+        return False
+
+
+def resolve_db():
+    """确定实际使用的书库：用户书库不可用时退回示例书库。
+
+    返回 (路径, 是否示例库)。示例库只读，用于首次安装、用户尚未放入自有书库时
+    仍能浏览/阅读，避免界面空白报错。
+    """
+    if _db_usable(ARGS.db):
+        return ARGS.db, False
+    if ARGS.demo_db and _db_usable(ARGS.demo_db):
+        log("用户书库不可用（%s），改用示例书库: %s" % (ARGS.db, ARGS.demo_db))
+        return ARGS.demo_db, True
+    log("警告: 书库文件不存在: %s（服务仍启动，接口会报错）" % ARGS.db)
+    return ARGS.db, False
+
+
 def book_conn():
     """只读打开书库（每次调用新建连接，避免线程共享问题）"""
     con = sqlite3.connect(
@@ -562,7 +594,9 @@ class Handler(BaseHTTPRequestHandler):
                 con = book_conn()
                 n = con.execute("SELECT COUNT(*) FROM books").fetchone()[0]
                 con.close()
-                return self.send_json({"ok": True, "books": n, "indexReady": INDEX_READY})
+                return self.send_json({"ok": True, "books": n,
+                                       "indexReady": INDEX_READY,
+                                       "demo": bool(getattr(ARGS, "demo", False))})
             if path == "/api/books":
                 return self.send_json(api_books(q))
             m = _re_match(r"^/api/books/(\d+)$", path)
@@ -663,17 +697,22 @@ def main():
     ap.add_argument("--db", required=True)
     ap.add_argument("--state-db", required=True)
     ap.add_argument("--port", type=int, default=12702)
+    ap.add_argument("--demo-db", default="",
+                    help="用户书库不可用时退回的示例书库（只读）")
     ARGS = ap.parse_args()
+    ARGS.demo = False
 
-    if not os.path.isfile(ARGS.db):
-        log("警告: 书库文件不存在: %s（服务仍启动，接口会报错）" % ARGS.db)
+    ARGS.db, ARGS.demo = resolve_db()
+    if ARGS.demo:
+        log("当前使用示例书库（放入自有书库后重启即切换）")
+
     init_state_db()
     log("状态库就绪: %s" % ARGS.state_db)
 
     threading.Thread(target=build_title_index, daemon=True).start()
 
     srv = ThreadingHTTPServer(("0.0.0.0", ARGS.port), Handler)
-    log("novelmgt fnOS 版已启动: http://0.0.0.0:%d (db=%s)" % (ARGS.port, ARGS.db))
+    log("novelmgt 服务已启动: http://0.0.0.0:%d (db=%s)" % (ARGS.port, ARGS.db))
     srv.serve_forever()
 
 

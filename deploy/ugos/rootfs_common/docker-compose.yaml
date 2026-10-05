@@ -1,0 +1,23 @@
+services:
+  app:
+    image: novelmgt-app:10.0.1
+    container_name: novelmgt
+    restart: always
+    ports:
+      - "12702:12702"
+    volumes:
+      - ./db:/app/db:ro
+      - ./state:/app/state
+    environment:
+      - TZ={{.TZ}}
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request as u; u.urlopen(\"http://127.0.0.1:12702/api/health\", timeout=5)"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

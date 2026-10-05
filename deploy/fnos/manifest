@@ -1,5 +1,5 @@
 appname         = novelmgt
-version         = 2.0.0
+version         = 2.0.1
 desc            = YYX书库：服务端直接读取 NAS 上的 SQLite 书库并建立标题索引，支持书架/搜索/阅读/进度书签笔记同步，无需下载整库。
 arch            = x86_64
 platform        = x86
@@ -8,7 +8,7 @@ maintainer_url  = https://github.com/firewelly
 distributor     = firewelly
 distributor_url = https://github.com/firewelly
 os_min_ver      = 0.8.1
-helpurl         = https://github.com/firewelly/FnOS-terminal
+helpurl         = https://github.com/firewelly/yyx-library/blob/main/docs/USER_GUIDE.md
 ctl_stop        = true
 desktop_uidir   = ui
 display_name    = YYX书库

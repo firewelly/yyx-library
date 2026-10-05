@@ -47,3 +47,8 @@ app.*.map.json
 # 本地构建与发布产物
 dist/
 *.log
+
+# UGOS 打包产物（示例书库由 demo_texts/ 生成；upk 由 build_upk.sh 产出）
+deploy/ugos/novelmgt-demo.db
+deploy/ugos/build/
+deploy/ugos/__pycache__/
