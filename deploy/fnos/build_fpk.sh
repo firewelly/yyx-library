@@ -21,12 +21,19 @@ if [ ! -f "$ROOT/build/web/index.html" ]; then
   exit 1
 fi
 
-rm -rf "$DIST" "$FNOS/app" && mkdir -p "$DIST" "$FNOS/app/bin" "$FNOS/app/ui"
+rm -rf "$DIST" "$FNOS/app" && mkdir -p "$DIST" "$FNOS/app/bin" "$FNOS/app/ui" "$FNOS/app/demo"
 
-# 载荷：服务端 + 前端
+# 载荷：服务端 + 前端 + 示例书库（用户尚未放置自有书库时兜底）
 cp "$FNOS/bin/novel_server.py" "$FNOS/app/bin/"
 chmod +x "$FNOS/app/bin/novel_server.py"
 cp -R "$ROOT/build/web/." "$FNOS/app/ui/"
+DEMO_DB="$ROOT/deploy/ugos/novelmgt-demo.db"
+if [ -f "$DEMO_DB" ]; then
+  cp "$DEMO_DB" "$FNOS/app/demo/novelmgt-demo.db"
+  echo "已内置示例书库: $DEMO_DB"
+else
+  echo "提示：未找到 $DEMO_DB（先运行 deploy/ugos/make_demo_db.py）；本次不内置示例书库" >&2
+fi
 find "$FNOS/app" -name "._*" -delete 2>/dev/null || true
 
 # app.tgz（fnOS 的载荷包）

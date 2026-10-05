@@ -1,0 +1,65 @@
+spec_version: "2.1"
+app_id: com.firewell.novelmgt
+version: 10.0.1
+support_arch:
+  - amd64
+product_series:
+  - nasync
+supports:
+  - app
+  - pc
+is_docker_app: true
+only_admin: false
+port: 12702
+open_type: tab
+tag_types:
+  - utility
+depend_fw_version: 1.13.0.0000
+depend_docker_version: 20.10.0
+support_migration: true
+allow_add_access_path: true
+permissions:
+  - NETWORK.ACCESS_INTERNET
+privacy_policy_link:
+  - https://github.com/firewelly/yyx-library/blob/main/PRIVACY.md
+license_agreement_link:
+  - https://github.com/firewelly/yyx-library/blob/main/LICENSE
+source_code_link:
+  - https://github.com/firewelly/yyx-library
+technical_support_link:
+  - https://github.com/firewelly/yyx-library/issues
+i18n:
+  en-US:
+    name: YYX Library
+    description: >-
+      YYX Library is a personal novel library manager and reader for your NAS. After
+      installation, any browser on your computer, tablet or phone can open the same
+      address and share one library. Library queries and full-text search run locally
+      on the NAS, so browsing the shelf and searching stay fast even with a very large
+      collection; reading progress, bookmarks and notes are stored on the NAS and shared
+      across all your devices. A sample library of four classic Chinese novels is
+      included on first install, so you can try browsing, reading and searching right
+      away; put your own novelmgt.db into the app data directory to switch to your
+      personal library. Companion desktop apps for macOS, Windows and Linux support
+      TXT/EPUB/PDF/MOBI import with automatic chapter detection, simplified/traditional
+      Chinese conversion, tags and reading statistics.
+    author: firewelly
+    official: https://github.com/firewelly/yyx-library
+    help: https://github.com/firewelly/yyx-library/blob/main/docs/USER_GUIDE.md
+    publisher: firewelly
+    publisher_link: https://github.com/firewelly
+  zh-CN:
+    name: YYX书库
+    description: >-
+      YYX书库是个人小说书库的管理与阅读工具，部署在 NAS 上后，电脑、平板和手机浏览器
+      打开同一地址即可共用一个书库。书库查询与全文检索都在 NAS 本地完成，书架浏览和
+      搜索响应很快，书库很大也不卡；阅读进度、书签与笔记集中保存在 NAS 上，多设备自动
+      同步。首次安装自带四大名著示例书库，无需准备任何文件即可体验浏览、阅读与检索；
+      将自己的 novelmgt.db 放入应用数据目录后即为个人书库。配套桌面端
+      （macOS/Windows/Linux）支持 TXT/EPUB/PDF/MOBI 导入、自动章节识别与去重、
+      简繁转换、标签管理与阅读统计。
+    author: firewelly
+    official: https://github.com/firewelly/yyx-library
+    help: https://github.com/firewelly/yyx-library/blob/main/docs/USER_GUIDE.md
+    publisher: firewelly
+    publisher_link: https://github.com/firewelly

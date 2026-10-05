@@ -50,5 +50,5 @@ service_prestart ()
     fi
     echo "service_prestart: db=${NOVEL_DB} state=${NOVEL_STATE} port=${NOVEL_PORT}" >> ${LOG_FILE}
 
-    SERVICE_COMMAND="python3 ${TRIM_APPDEST}/bin/novel_server.py --web-dir ${TRIM_APPDEST}/ui --db ${NOVEL_DB} --state-db ${NOVEL_STATE} --port ${NOVEL_PORT}"
+    SERVICE_COMMAND="python3 ${TRIM_APPDEST}/bin/novel_server.py --web-dir ${TRIM_APPDEST}/ui --db ${NOVEL_DB} --state-db ${NOVEL_STATE} --demo-db ${TRIM_APPDEST}/demo/novelmgt-demo.db --port ${NOVEL_PORT}"
 }
