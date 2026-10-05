@@ -1,4 +1,4 @@
-# 小说管理系统 - 远程书库 API + 静态 Web 一体容器（路线 B）
+# YYX书库 - 远程书库 API + 静态 Web 一体容器
 # 挂载：
 #   /data/novelmgt.db  共享书库数据库（只读使用）
 #   /data              books 共享文件夹（预留）

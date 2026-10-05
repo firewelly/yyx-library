@@ -1,4 +1,4 @@
-# 小说管理系统 - Flutter Web 静态部署镜像（路线 A）
+# YYX书库 - Flutter Web 静态部署镜像
 # 构建产物 build/web 由构建脚本/CI 生成后拷入，无需在容器内装 Flutter。
 #
 # 本机构建镜像：

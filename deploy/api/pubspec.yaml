@@ -1,5 +1,5 @@
 name: novelmgt_api
-description: 小说管理系统远程书库 API（路线 B）
+description: YYX书库远程书库 API（服务端模式）
 publish_to: 'none'
 version: 1.0.0
 
