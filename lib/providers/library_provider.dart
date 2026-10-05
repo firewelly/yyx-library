@@ -18,6 +18,9 @@ class LibraryState {
   final int totalCount;
   final Set<int> selectedBookIds;
   final bool isSelectionMode;
+  final bool isLoadingMore;
+  final bool hasMore;
+  static const int pageSize = 50;
 
   const LibraryState({
     this.books = const [],
@@ -33,6 +36,8 @@ class LibraryState {
     this.totalCount = 0,
     this.selectedBookIds = const {},
     this.isSelectionMode = false,
+    this.isLoadingMore = false,
+    this.hasMore = true,
   });
 
   LibraryState copyWith({
@@ -49,6 +54,8 @@ class LibraryState {
     int? totalCount,
     Set<int>? selectedBookIds,
     bool? isSelectionMode,
+    bool? isLoadingMore,
+    bool? hasMore,
   }) {
     return LibraryState(
       books: books ?? this.books,
@@ -64,6 +71,8 @@ class LibraryState {
       totalCount: totalCount ?? this.totalCount,
       selectedBookIds: selectedBookIds ?? this.selectedBookIds,
       isSelectionMode: isSelectionMode ?? this.isSelectionMode,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      hasMore: hasMore ?? this.hasMore,
     );
   }
 }
@@ -89,6 +98,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
         // 浏览模式：分页加载
         books = await _db.listBooks(
           page: state.page,
+          perPage: LibraryState.pageSize,
           sortBy: state.sortBy,
           order: state.sortOrder,
           tagId: state.selectedTagId,
@@ -113,9 +123,44 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
         totalCount = books.length;
       }
 
-      state = state.copyWith(books: books, totalCount: totalCount, isLoading: false);
+      state = state.copyWith(
+        books: books,
+        totalCount: totalCount,
+        isLoading: false,
+        hasMore: books.length < totalCount,
+      );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  /// 无限滚动：加载下一页并追加（搜索模式一次拉全量，无需追加）
+  Future<void> loadNextPage() async {
+    if (state.isLoading ||
+        state.isLoadingMore ||
+        state.searchQuery.isNotEmpty ||
+        !state.hasMore ||
+        state.books.length >= state.totalCount) {
+      return;
+    }
+    state = state.copyWith(isLoadingMore: true);
+    try {
+      final more = await _db.listBooks(
+        page: state.page + 1,
+        perPage: LibraryState.pageSize,
+        sortBy: state.sortBy,
+        order: state.sortOrder,
+        tagId: state.selectedTagId,
+        status: state.selectedStatus,
+      );
+      state = state.copyWith(
+        books: [...state.books, ...more],
+        page: state.page + 1,
+        isLoadingMore: false,
+        hasMore: more.isNotEmpty && state.books.length + more.length < state.totalCount,
+      );
+    } catch (_) {
+      state = state.copyWith(isLoadingMore: false);
     }
   }
 

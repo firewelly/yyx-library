@@ -1,0 +1,54 @@
+#!/bin/bash
+### Package specific variables and functions（novelmgt 2.0 · 路线B 服务端架构）
+### ----------------------------------------
+
+# 默认书库路径（只读）：misc(fnOS) 上 DX4600 的共享库经 CIFS/SMB 挂载在此；
+# 若在 DX4600 本机安装，向导里填 /volume3/hermes3/novelmgt/novelmgt.db
+NOVEL_DB_DEFAULT="/vol1/mnt/dx4600/hermes3/novelmgt/novelmgt.db"
+DB_CONF="${TRIM_PKGVAR}/db.conf"
+
+# 默认状态库路径（可写）：进度/书签/笔记 + 章节标题索引，跟应用数据目录走
+NOVEL_STATE_DEFAULT="${TRIM_PKGVAR}/novelmgt_state.db"
+STATE_CONF="${TRIM_PKGVAR}/state.conf"
+
+# 服务端口，与 manifest 的 service_port 及 desktop 入口保持一致
+NOVEL_PORT="12702"
+
+_load_conf() {
+    # $1=conf文件 $2=默认值
+    if [ -r "$1" ]; then
+        cat "$1"
+    else
+        printf "%s" "$2"
+    fi
+}
+
+service_postinst ()
+{
+    # 安装/升级时持久化向导里填写的路径（var 目录升级后保留）
+    if [ -n "${novel_db_path}" ]; then
+        printf "%s" "${novel_db_path}" > "${DB_CONF}"
+        echo "novel_db_path = ${novel_db_path}" >> ${LOG_FILE}
+    elif [ ! -r "${DB_CONF}" ]; then
+        printf "%s" "${NOVEL_DB_DEFAULT}" > "${DB_CONF}"
+    fi
+    if [ -n "${novel_state_path}" ]; then
+        printf "%s" "${novel_state_path}" > "${STATE_CONF}"
+        echo "novel_state_path = ${novel_state_path}" >> ${LOG_FILE}
+    elif [ ! -r "${STATE_CONF}" ]; then
+        printf "%s" "${NOVEL_STATE_DEFAULT}" > "${STATE_CONF}"
+    fi
+}
+
+service_prestart ()
+{
+    NOVEL_DB=$(_load_conf "${DB_CONF}" "${NOVEL_DB_DEFAULT}")
+    NOVEL_STATE=$(_load_conf "${STATE_CONF}" "${NOVEL_STATE_DEFAULT}")
+
+    if [ ! -r "${NOVEL_DB}" ]; then
+        echo "WARNING: 书库文件不可读: ${NOVEL_DB}（服务仍会启动，打开应用会提示书库缺失）" >> ${LOG_FILE}
+    fi
+    echo "service_prestart: db=${NOVEL_DB} state=${NOVEL_STATE} port=${NOVEL_PORT}" >> ${LOG_FILE}
+
+    SERVICE_COMMAND="python3 ${TRIM_APPDEST}/bin/novel_server.py --web-dir ${TRIM_APPDEST}/ui --db ${NOVEL_DB} --state-db ${NOVEL_STATE} --port ${NOVEL_PORT}"
+}

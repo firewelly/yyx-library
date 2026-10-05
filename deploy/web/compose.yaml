@@ -1,0 +1,13 @@
+# UGOS Pro（DXP4800）Docker 部署：在 Docker → 项目/Compose 中导入本文件
+# 前置：把构建好的 novelmgt-web.tar 镜像导入（或与 Dockerfile 同目录用 build 方式）
+services:
+  novelmgt-web:
+    image: novelmgt-web:latest
+    # 如 UGOS 支持从 Dockerfile 构建，可注释 image 改用：
+    # build:
+    #   context: ../..
+    #   dockerfile: deploy/web/Dockerfile
+    container_name: novelmgt-web
+    restart: unless-stopped
+    ports:
+      - "8765:80"   # 访问 http://NAS_IP:8765

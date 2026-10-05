@@ -53,3 +53,31 @@ python -m http.server -d build/web 8080
 - `docs/PRD_FLUTTER.md` 产品需求
 - `docs/DESIGN_FLUTTER.md` 技术设计
 - `docs/REQUIREMENTS.md` 需求实现对照与缺陷清单
+
+## 部署形态（新增：服务端 API 模式）
+
+除桌面端与「NAS 直读」（浏览器 SQLite WASM + HTTP Range 直读，见上文）外，
+本仓库新增**服务端 API 模式**：查询在服务端完成（含章节标题索引），
+适合库文件很大（数 GB）或需要快速搜索的 NAS 环境。
+
+| 形态 | 目录 | 适用 |
+|------|------|------|
+| Web 静态（nginx/Docker） | `deploy/web/` | 任意静态托管，数据在浏览器本地 |
+| 服务端 API（Docker） | `deploy/api/` | UGOS Pro 等支持 Docker 的 NAS（shelf + SQLite + 标题索引） |
+| fnOS 原生应用（fpk） | `deploy/fnos/` | fnOS：Python 服务端 + Web UI 打包为应用，应用中心安装 |
+
+客户端会自动探测同源 `GET /api/health`：存在则进入服务端 API 模式
+（书库/搜索/进度书签笔记全部由服务器共享），不存在则回退原有行为。
+
+### fnOS 应用构建
+
+```bash
+flutter build web --release          # 生成 build/web
+deploy/fnos/build_fpk.sh             # 输出 deploy/fnos/dist/novelmgt-fnos-<version>.fpk
+```
+
+安装后向导里填写只读书库路径（如 `/vol1/mnt/<server>/.../novelmgt.db`，或本机 `/volume3/.../novelmgt.db`）
+与可写状态库路径（进度/书签/笔记 + 标题索引，默认在应用数据目录）。
+
+实测（4,529 本 / 69.8 万章 / 5.1GB 库）：书库加载约 15s，书名/章节标题搜索 0.5s 内返回；
+章节标题索引首次启动后台构建约 1 分钟，落状态库、重启复用。
