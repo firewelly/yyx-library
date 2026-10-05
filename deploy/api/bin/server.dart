@@ -1,5 +1,5 @@
 // ignore_for_file: avoid_print
-/// 小说管理系统 - 远程书库 API（路线 B）
+/// YYX书库 - 远程书库 API（服务端模式）
 ///
 /// 架构：
 /// - /data/novelmgt.db  共享书库（只读打开，避免多端写入冲突；由导入侧整库更新）

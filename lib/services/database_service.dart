@@ -450,11 +450,14 @@ class DatabaseService {
       }
     }
 
-    // 获取完整书籍（含标签）
+    // 获取完整书籍（含标签与章节数）
     final books = <Book>[];
     for (final id in bookIds) {
       final book = await getBook(id);
-      if (book != null) books.add(book);
+      if (book != null) {
+        final chapterCount = await getChapterCount(id);
+        books.add(book.copyWith(chapterCount: chapterCount));
+      }
     }
     return books;
   }

@@ -1,7 +1,7 @@
 name: novelmgt_flutter
-description: YYX书库（YYX Library）— 个人书库管理与阅读 - Flutter 版
+description: YYX书库（YYX Library）— 跨平台个人书库管理与阅读器（macOS/Windows/Linux/Web/fnOS）：书架管理、多格式导入、在线阅读、爬虫抓取、NAS 服务端书库
 publish_to: 'none'
-version: 1.0.3+1
+version: 2.0.0+2
 
 environment:
   sdk: '>=3.8.0 <4.0.0'
