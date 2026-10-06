@@ -13,6 +13,7 @@
     python3 make_demo_db.py [输出路径]      # 默认 ./novelmgt-demo.db
 """
 
+import gzip
 import json
 import os
 import sqlite3
@@ -131,6 +132,18 @@ def to_simplified(text):
         return text
 
 
+# 与桌面端 lib/utils/content_codec.dart（ContentCodec）同策略：
+# 超过阈值的章节写入为 gzip blob（读取端明文/压缩自动识别）
+COMPRESS_THRESHOLD_CHARS = 4096
+
+
+def content_value(text):
+    """按 ContentCodec 策略编码章节正文：小章节明文，大章节 gzip blob"""
+    if len(text) < COMPRESS_THRESHOLD_CHARS:
+        return text
+    return sqlite3.Binary(gzip.compress(text.encode("utf-8"), 6))
+
+
 def load_work(slug, texts_dir):
     path = os.path.join(texts_dir, "%s.json" % slug)
     if not os.path.isfile(path):
@@ -195,7 +208,7 @@ def build(path, texts_dir):
             rows.append((
                 book_id, ci, ci,
                 to_simplified(ch["title"]),
-                to_simplified(ch["text"]),
+                content_value(to_simplified(ch["text"])),
                 ("https://zh.wikisource.org/wiki/%s" % ch["page"]) if ch.get("page") else None,
                 stamp, stamp, "txt",
             ))
