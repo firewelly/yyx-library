@@ -54,6 +54,9 @@ NAS 形态为**服务端查询架构**：Python 标准库服务端提供 `/api/*
 4. ~~【fnOS 2.0.1 fpk 升级】~~ **已完成（2026-10-11）**：EQ14（192.168.3.153）在线后经
    `appcenter-cli` 卸载重装 2.0.1 fpk，向导变量（真库路径）自动保留；API + Web UI 全流程、
    示例库兜底（demo-db）、跨会话进度持久化全部实测通过。appcenter-cli 用法与坑见 fnos-app-development 记忆。
+   **10-25 补修桌面图标**：CLI 装包缺 `appcenter.app_service` 注册导致 fnOS 桌面不出图标；
+   已补注册+图标并验证（脚本 `deploy/fnos/register_after_cli_install.sh`）。
+   残留：应用中心详情页"打开"钮灰（GUI 卸载重装可彻底修复），桌面图标与 `:12702` 直访正常。
 5. （可选）**把迁移后的真库挂到已安装应用**：拷贝
    `/volume2/docker/novelmgt/db/novelmgt.db`（2.61GB）→ `/volume2/@appstore/com.firewell.novelmgt/db/`
    并重启容器；注意审核员看到的就是这个库（当前为示例库模式）。
