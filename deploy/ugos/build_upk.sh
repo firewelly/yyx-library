@@ -70,6 +70,8 @@ if [ "$SKIP_IMAGE" -eq 0 ]; then
   cp "$UGOS/Dockerfile" "$STAGE/Dockerfile"
   find "$STAGE" -name "._*" -delete 2>/dev/null || true
   find "$STAGE" -name ".DS_Store" -delete 2>/dev/null || true
+  # 字体回退离线化（gstatic → 本地镜像，见 tool/patch_web_offline_fonts.py）
+  python3 "$ROOT/tool/patch_web_offline_fonts.py" "$STAGE/ui/main.dart.js"
   docker build --platform linux/amd64 -t "$IMAGE" "$STAGE"
 else
   echo "==> 跳过镜像构建（--skip-image）"
