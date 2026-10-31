@@ -42,10 +42,15 @@
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
   <script>
-    // 强制 CanvasKit 从本地 canvaskit/ 目录加载。
-    // 受限网络（无法访问 gstatic.com CDN）下，若不设置此项，Flutter Web 会因
-    // 下载 canvaskit 失败而停留在空白页。本地副本由 flutter build web 生成。
-    window.flutterConfiguration = { canvasKitBaseUrl: 'canvaskit/' };
+    // 强制 CanvasKit 与字体回退全部从本地加载（隐私审计：消除对 gstatic.com 的运行时请求；
+    // 国内网络下 gstatic 不可达会导致白屏/中文豆腐块）。
+    // - canvaskit/ 本地副本由 flutter build web 生成；
+    // - fonts.gstatic.com/s/ 本地镜像（Noto Sans SC/TC、Color Emoji、Roboto、Symbols，
+    //   SIL OFL 许可，允许随包分发）配合 flutter build web --no-web-resources-cdn 使用。
+    window.flutterConfiguration = {
+      canvasKitBaseUrl: 'canvaskit/',
+      fontFallbackBaseUrl: 'fonts.gstatic.com/s/'
+    };
   </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>

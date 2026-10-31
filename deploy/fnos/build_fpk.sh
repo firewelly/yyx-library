@@ -27,6 +27,8 @@ rm -rf "$DIST" "$FNOS/app" && mkdir -p "$DIST" "$FNOS/app/bin" "$FNOS/app/ui" "$
 cp "$FNOS/bin/novel_server.py" "$FNOS/app/bin/"
 chmod +x "$FNOS/app/bin/novel_server.py"
 cp -R "$ROOT/build/web/." "$FNOS/app/ui/"
+# 字体回退离线化（gstatic → 本地镜像，见 tool/patch_web_offline_fonts.py）
+python3 "$ROOT/tool/patch_web_offline_fonts.py" "$FNOS/app/ui/main.dart.js"
 # 桌面图标：fnOS 桌面按 ui/images/icon_{64,256}.png 取图（build/web 无此目录）
 mkdir -p "$FNOS/app/ui/images"
 cp "$FNOS/ICON.PNG" "$FNOS/app/ui/images/icon_64.png"
