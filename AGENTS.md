@@ -30,7 +30,7 @@ NAS 形态为**服务端查询架构**：Python 标准库服务端提供 `/api/*
 
 ## 当前状态（截至 2026-10-31）
 
-- **10-31 Web 远程导入修复并发布 v10.0.2**（upk 10.0.2.0002 + fpk 2.0.2）：
+- **10-31 Web 远程导入修复并发布 v10.0.2**（upk 10.0.2.0003 + fpk 2.0.2）：
   ① 服务端 novel_server.py 新增导入写入端点（books/chapters rw + DELETE），书库连接仍默认只读、
   写操作全局锁串行化；docker-compose 的 db 挂载由 `:ro` 改读写（升级后已自动重渲染）。
   ② 客户端 RemoteDatabaseService 覆写导入所需写方法（findBookByTitleAndAuthor/createBook/
@@ -39,8 +39,10 @@ NAS 形态为**服务端查询架构**：Python 标准库服务端提供 `/api/*
   FormatException → 兜底按 UTF-8 解出全文乱码 → 章节切不开（紫川.txt 316 万字挤成 1 章）。
   修复：TextDecode 增加宽容 GBK 解码（结构扫描按字符边界切段，坏序列替换 U+FFFD，82ms/4MB），
   探测的 GBK 步骤同样改宽容解码。回归测试见 test/text_decode_test.dart。
-  E2E（DXP4800 实测）：紫川导入 165 章、书架/详情/阅读/翻章/进度/搜索、43.5MB 超限友好提示、
-  UGOS 桌面快捷方式点击直达 `:12702` 全部通过。注意 demo 模式导入的书随容器重建丢失（真实库放 `db/`）。
+  ④ **Web 导入上限 30MB→100MB**（与桌面端统一，PR #8）。
+  E2E（DXP4800 实测）：紫川导入 165 章、45MB 重生之妖孽人生导入 6715 章、书架/详情/阅读/翻章/
+  进度/搜索、超限友好提示、UGOS 桌面快捷方式点击直达 `:12702` 全部通过。
+  注意 demo 模式导入的书随容器重建丢失（真实库放 `db/`）。
 - 审核进展：YYX书库 10-15 重新提交、10-18 补发附件，**等绿联回复**；另一应用 NasOC 走 126 线程
   （台账 OneDrive `FnOS_opencode/ugos_opencode/store/REVIEW-STATUS.md`），10-17 已提交 v0.1.0.0010 修复、10-18 补发承诺函。
 
