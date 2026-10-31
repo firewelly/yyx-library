@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:path/path.dart' as p;
 import 'package:epubx/epubx.dart';
 import '../models/models.dart';
@@ -74,16 +73,12 @@ class ImportService {
   }) async {
     try {
       // 大文件防护：导入链路为整本解析，超大文件内存峰值会数倍于文件体积。
-      // Web 端受浏览器堆限制更严格（SQLite WASM 也在同一进程内）。
-      const webLimitMb = 30;
-      const desktopLimitMb = 100;
-      const limitMb = kIsWeb ? webLimitMb : desktopLimitMb;
+      // 桌面与 Web 统一 100MB：Web 远程导入整本在浏览器内解码、切章后上传
+      // 服务端，100MB 级文本（内存中 UTF-16 约两倍体积）现代浏览器可承受。
+      const limitMb = 100;
       if (bytes.lengthInBytes > limitMb * 1024 * 1024) {
         final sizeMb = (bytes.lengthInBytes / 1024 / 1024).toStringAsFixed(1);
-        return ImportResult.failure(
-          '文件过大（${sizeMb}MB），超过${kIsWeb ? 'Web 端' : '桌面端'} ${limitMb}MB 上限'
-          '${kIsWeb ? '，请使用桌面端导入' : ''}',
-        );
+        return ImportResult.failure('文件过大（${sizeMb}MB），超过 ${limitMb}MB 上限');
       }
       // 读取文件并检测编码
       String content;
