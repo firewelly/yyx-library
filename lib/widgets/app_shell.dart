@@ -42,6 +42,32 @@ class AppShell extends ConsumerWidget {
     final width = MediaQuery.sizeOf(context).width;
     final extended = width >= 1280;
 
+    // 手机等窄屏：侧边 rail 挤压内容（390px 宽被吃掉 ~90px），改用底部导航栏
+    if (width < 700) {
+      final bottomIndex =
+          location.startsWith('/settings') ? _destinations.length : _selectedIndex;
+      return Scaffold(
+        body: child,
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: bottomIndex,
+          onDestinationSelected: (i) => context.go(_destinations[i].path),
+          destinations: [
+            for (final d in _destinations)
+              NavigationDestination(
+                icon: Icon(d.icon),
+                selectedIcon: Icon(d.selectedIcon),
+                label: d.label,
+              ),
+            const NavigationDestination(
+              icon: Icon(Icons.settings_outlined),
+              selectedIcon: Icon(Icons.settings),
+              label: '设置',
+            ),
+          ],
+        ),
+      );
+    }
+
     return Scaffold(
       body: Row(
         children: [

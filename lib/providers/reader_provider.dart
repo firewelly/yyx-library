@@ -19,6 +19,10 @@ class ReaderState {
   final double lineHeight;
   final int currentScrollPosition;
 
+  /// 待滚动的目标位置：翻章为 0（回顶部），按进度打开为上次位置。
+  /// 由 reader_screen 消费（jumpTo 后清零），避免渲染器沿用上一章的滚动偏移。
+  final double pendingScrollTo;
+
   const ReaderState({
     this.currentBook,
     this.currentChapter,
@@ -32,6 +36,7 @@ class ReaderState {
     this.marginSize = 60.0,
     this.lineHeight = 1.8,
     this.currentScrollPosition = 0,
+    this.pendingScrollTo = 0,
   });
 
   /// 当前章节索引
@@ -65,6 +70,7 @@ class ReaderState {
     double? marginSize,
     double? lineHeight,
     int? currentScrollPosition,
+    double? pendingScrollTo,
   }) {
     return ReaderState(
       currentBook: currentBook ?? this.currentBook,
@@ -79,6 +85,7 @@ class ReaderState {
       marginSize: marginSize ?? this.marginSize,
       lineHeight: lineHeight ?? this.lineHeight,
       currentScrollPosition: currentScrollPosition ?? this.currentScrollPosition,
+      pendingScrollTo: pendingScrollTo ?? this.pendingScrollTo,
     );
   }
 }
@@ -102,11 +109,18 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
         state = state.copyWith(isLoading: false, error: '书籍不存在');
         return;
       }
-      // 轻量加载：只加载章节元数据（不含内容），用于导航列表
-      final chapters = await _db.getChapterList(bookId);
-      final progress = await _db.getProgress(bookId);
-      final bookmarks = await _db.getBookmarks(bookId);
-      final notes = await _db.getNotesByBook(bookId);
+      // 轻量加载：只加载章节元数据（不含内容），用于导航列表。
+      // 四个请求互相独立，并行以缩短首开耗时（大书章节列表最大 ~1.4MB）。
+      final results = await Future.wait([
+        _db.getChapterList(bookId),
+        _db.getProgress(bookId),
+        _db.getBookmarks(bookId),
+        _db.getNotesByBook(bookId),
+      ]);
+      final chapters = results[0] as List<Chapter>;
+      final progress = results[1] as ReadingProgress?;
+      final bookmarks = results[2] as List<Bookmark>;
+      final notes = results[3] as List<Note>;
 
       // 确定起始章节：深链章节 > 阅读进度 > 第一章
       Chapter? startChapter;
@@ -127,8 +141,13 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
         startChapter = startChapter.copyWith(content: content ?? '');
       }
 
-      // 从全局设置加载阅读参数（持久化）
+      // 从全局设置加载阅读参数（持久化）。
+      // 恢复进度时滚回上次位置（仅当起始章节就是进度章节）。
       final settings = _settingsNotifier.state.settings;
+      final resumeOffset =
+          startChapter != null && progress != null && startChapter.id == progress.chapterId
+              ? progress.scrollPosition.toDouble()
+              : 0.0;
       state = state.copyWith(
         currentBook: book,
         currentChapter: startChapter,
@@ -140,6 +159,7 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
         fontSize: settings.fontSize,
         marginSize: settings.marginSize,
         lineHeight: settings.lineHeight,
+        pendingScrollTo: resumeOffset,
       );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
@@ -151,6 +171,17 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
     final matching = state.chapters.where((c) => c.id == chapterId);
     if (matching.isEmpty) return;
     var chapter = matching.first;
+    final bookId = state.currentBook?.id;
+    if (bookId == null) return;
+
+    // 离开当前章前，先把当前滚动位置记到当前章节名下
+    if (state.currentChapter?.id != null) {
+      await _db.updateProgress(
+        bookId,
+        state.currentChapter!.id!,
+        scrollPosition: state.currentScrollPosition,
+      );
+    }
 
     // 按需加载该章节的完整内容
     if (chapter.id != null) {
@@ -158,17 +189,15 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
       chapter = chapter.copyWith(content: content ?? '');
     }
 
-    // 保存进度（包括当前滚动位置的快照值）
-    if (state.currentBook != null) {
-      await _db.updateProgress(
-        state.currentBook!.id!,
-        chapterId,
-        scrollPosition: state.currentScrollPosition,
-      );
-    }
-
-    final progress = await _db.getProgress(state.currentBook!.id!);
-    state = state.copyWith(currentChapter: chapter, progress: progress, currentScrollPosition: 0);
+    // 进度指向新章节、位置回到顶部（渲染层消费 pendingScrollTo 后跳顶）
+    await _db.updateProgress(bookId, chapterId, scrollPosition: 0);
+    final progress = await _db.getProgress(bookId);
+    state = state.copyWith(
+      currentChapter: chapter,
+      progress: progress,
+      currentScrollPosition: 0,
+      pendingScrollTo: 0,
+    );
   }
 
   /// 上一章
@@ -208,6 +237,13 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
   /// 更新滚动位置（由 reader_screen 的 ScrollController 调用）
   void updateScrollPosition(int position) {
     state = state.copyWith(currentScrollPosition: position);
+  }
+
+  /// 渲染层已消费待滚动位置（jumpTo 完成），清零避免重复触发
+  void consumePendingScroll() {
+    if (state.pendingScrollTo != 0) {
+      state = state.copyWith(pendingScrollTo: 0);
+    }
   }
 
   /// 保存当前阅读进度到数据库

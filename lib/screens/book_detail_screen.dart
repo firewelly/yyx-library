@@ -33,6 +33,11 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
   ReadingProgress? _progress;
   bool _isLoading = true;
 
+  /// 章节目录渐进渲染：shrinkWrap 网格会一次性构建全部子项，
+  /// 数千章的书会把主 isolate 卡死数秒——先渲染首批，点「显示更多」追加。
+  static const int _chapterPageSize = 300;
+  int _chapterLimit = _chapterPageSize;
+
   @override
   void initState() {
     super.initState();
@@ -317,36 +322,83 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
               ),
             ),
 const SizedBox(height: 16),
-            // 章节目录
-            Row(
-              children: [
-                Expanded(
-                  child: Text('📑 章节目录（共 ${chapters.length} 章）',
-                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.search, size: 20),
-                  tooltip: '章节搜索',
-                  onPressed: () => _showChapterSearch(context),
-                ),
-              ],
+            // 章节目录渐进渲染（标题行在 _buildChapterCatalog 内）
+            // shrinkWrap 网格对数千章的书会全量构建子项导致首开卡死数秒。
+            _buildChapterCatalog(context, book, chapters),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 章节目录（渐进渲染 + 窄屏全宽行）
+  Widget _buildChapterCatalog(BuildContext context, Book book, List<Chapter> chapters) {
+    final theme = Theme.of(context);
+    final visibleCount = chapters.length > _chapterLimit ? _chapterLimit : chapters.length;
+    final visible = chapters.take(visibleCount).toList();
+    final remaining = chapters.length - visibleCount;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text('📑 章节目录（共 ${chapters.length} 章）',
+                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
             ),
-            const SizedBox(height: 8),
-            // 响应式网格：根据宽度动态调整列数
-            LayoutBuilder(
-              builder: (layoutContext, constraints) {
-                // 根据宽度计算列数：每150px一列，最少2列，最多8列
-                final crossAxisCount = (constraints.maxWidth / 150).floor().clamp(2, 8);
-                return GridView.builder(
+            IconButton(
+              icon: const Icon(Icons.search, size: 20),
+              tooltip: '章节搜索',
+              onPressed: () => _showChapterSearch(context),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        LayoutBuilder(
+          builder: (layoutContext, constraints) {
+            final isNarrow = constraints.maxWidth < 480;
+            if (isNarrow) {
+              // 手机：全宽章节行（网格单元格太窄，标题截断不可用）
+              return Column(
+                children: [
+                  for (final chapter in visible)
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.tonal(
+                        style: FilledButton.styleFrom(
+                          alignment: Alignment.centerLeft,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                        onPressed: () => context.go('/reader/${book.id}?chapterId=${chapter.id}'),
+                        onLongPress: () => _showChapterMenu(context, chapter),
+                        child: Text(
+                          '第${chapter.chapterNumber}章 ${chapter.title}',
+                          style: const TextStyle(fontSize: 13),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  if (remaining > 0) _buildLoadMoreButton(),
+                ],
+              );
+            }
+            // 平板/桌面：按宽度分列的网格
+            final crossAxisCount = (constraints.maxWidth / 150).floor().clamp(2, 8);
+            return Column(
+              children: [
+                GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: crossAxisCount,
-                    childAspectRatio: 2.5,  // 更紧凑的高度
+                    childAspectRatio: 2.5,
                     crossAxisSpacing: 8,
                     mainAxisSpacing: 6,
                   ),
-                  itemCount: chapters.length,
+                  itemCount: visibleCount,
                   itemBuilder: (gridContext, index) {
                     final chapter = chapters[index];
                     return FilledButton.tonal(
@@ -360,11 +412,28 @@ const SizedBox(height: 16),
                       ),
                     );
                   },
-                );
-              },
-            ),
-          ],
+                ),
+                if (remaining > 0) _buildLoadMoreButton(),
+              ],
+            );
+          },
         ),
+      ],
+    );
+  }
+
+  Widget _buildLoadMoreButton() {
+    final remaining = (_chapters?.length ?? 0) - _chapterLimit;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: OutlinedButton.icon(
+        icon: const Icon(Icons.expand_more, size: 18),
+        label: Text('显示更多章节（还有 $remaining 章）'),
+        onPressed: () {
+          setState(() {
+            _chapterLimit += 500;
+          });
+        },
       ),
     );
   }
