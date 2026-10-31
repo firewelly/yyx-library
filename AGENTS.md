@@ -26,7 +26,10 @@ NAS 形态为**服务端查询架构**：Python 标准库服务端提供 `/api/*
 - **DXP4800（主测试机，UGOS Pro amd64）**：`ssh frie@192.168.3.146`（密钥已配）；Web 界面 `https://192.168.3.146:9443`，账号 `frie`（口令同 sudo）。已安装 YYX书库 10.0.1.0003，入口 `http://192.168.3.146:12702`（当前示例库模式；应用数据目录 `/volume2/@appstore/com.firewell.novelmgt/`）。注意 12704/12705 是已清理的临时测试端口。
 - **GitHub 访问必须走代理**：`https_proxy=socks5h://127.0.0.1:1080`。`gh release upload` 传大文件会卡死 → 用 curl 直传 `https://uploads.github.com/.../assets?name=...`。
 - **upk 开发者签名按设备绑定**：每台测试设备需绿联按其 SN 签发 `.sig`，在目标设备 应用中心 → 设置 → App development 上传（DXP4800 已配，`/ugreen/.config/ugdev.sig`，有效至 2027-09-07）。
-- 上架材料与审核往来：OneDrive `Novel_scraber/novelmgt_flutter/docs/ugreen_review_20260914/`（台账 README.md、回执/、详情图/、安装包/+SHA256SUMS）。
+- 上架材料与审核往来：OneDrive `Novel_scraber/novelmgt_flutter/docs/ugreen_review_20260914/`
+  仅存文档（台账 README.md、回执/、空白模板）；**安装包/详情图等产物不放 OneDrive**——
+  最终 release 一律在 GitHub Releases（YYX v10.0.2、NasOC v0.1.0.0011 均含全部资产），
+  当前跟进材料在 `~/Downloads/YYX跟进材料_20261031/`、`~/Downloads/NasOC回信材料_20261031/`（仅本地）。
 
 ## 当前状态（截至 2026-10-31）
 
