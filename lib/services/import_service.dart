@@ -207,7 +207,7 @@ class ImportService {
     String? filePath,
   }) async {
     try {
-      final createdBook = await _db.db.transaction((txn) async {
+      final createdBook = await _db.runInTransaction((txn) async {
         final now = DateTime.now().toIso8601String();
         // 事务内必须用事务对象执行（executor: txn），否则外层连接等锁
         final book = await _db.createBook(Book(

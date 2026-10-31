@@ -33,11 +33,7 @@ class TextDecode {
       case 'gbk':
       case 'gb2312':
       case 'gb18030':
-        try {
-          return gbk.decode(bytes);
-        } catch (_) {
-          return utf8.decode(bytes, allowMalformed: true);
-        }
+        return _gbkTolerantDecode(bytes);
       case 'big5':
         try {
           return Big5.decode(bytes);
@@ -64,11 +60,7 @@ class TextDecode {
         // 采样段严格有效；全文解码用宽容模式，避免恰好切在多字节字符边界的极端情况
         return utf8.decode(bytes, allowMalformed: true);
       case 'gbk':
-        try {
-          return gbk.decode(bytes);
-        } catch (_) {
-          return utf8.decode(bytes, allowMalformed: true);
-        }
+        return _gbkTolerantDecode(bytes);
       case 'big5':
         try {
           return Big5.decode(bytes);
@@ -88,11 +80,11 @@ class TextDecode {
       if (_looksValidChineseText(text)) return 'utf-8';
     } catch (_) {}
 
-    // 2. GBK / GB18030（Big5 字节常被 GBK 解成假名/生僻字，有效性检查会拒绝）
-    try {
-      final text = gbk.decode(sample);
-      if (_looksValidChineseText(text)) return 'gbk';
-    } catch (_) {}
+    // 2. GBK / GB18030（Big5 字节常被 GBK 解成假名/生僻字，有效性检查会拒绝）。
+    //    用宽容解码而非严格 gbk.decode：坏序列（GB18030 四字节等）抛错会让
+    //    GBK 被整体跳过，落入 UTF-8 兜底产出全文乱码。
+    final gbkText = _gbkTolerantDecode(sample);
+    if (_looksValidChineseText(gbkText)) return 'gbk';
 
     // 3. Big5
     try {
@@ -131,5 +123,97 @@ class TextDecode {
     if (hanCount > 0 && kanaOrPua / hanCount > 0.005) return false;
     if (hanCount == 0 && kanaOrPua > 0) return false;
     return true;
+  }
+
+  /// 宽容 GBK 解码：charset 包的 gbk 遇到 GB18030 四字节序列会抛
+  /// FormatException（第二字节 0x30-0x39，常见于含生僻字的网络下载 txt）。
+  /// 表现为：探测采样通过，全量解码抛错，兜底按 UTF-8 解出全文乱码。
+  ///
+  /// 做法：按 GBK/GB18030 字节结构做 O(n) 扫描，在字符边界上把字节流
+  /// 切成「结构完好段」（整体 gbk.decode，快路径）与「坏序列」（替换为
+  /// U+FFFD，与 Python errors='replace' 语义一致）。
+  ///
+  /// 结构规则：0x00-0x7F 单字节；lead(0x81-0xFE)+second：
+  /// - second 0x30-0x39 → GB18030 四字节序列（charset 不支持，FFFD 跳 4；
+  ///   结构不完整时按非法处理跳 1）
+  /// - second 0x40-0x7E / 0x80-0xFE → 结构合法的双字节对（进完好段）
+  /// - 其余（<0x30、0x7F、0xFF）→ 非法，lead 记 FFFD 跳 1
+  /// - 0x80 / 0xFF / 末尾悬挂 lead → FFD
+  static String _gbkTolerantDecode(Uint8List bytes) {
+    final out = StringBuffer();
+    final n = bytes.length;
+    int segStart = 0;
+    int i = 0;
+    while (i < n) {
+      final b = bytes[i];
+      if (b < 0x80) {
+        i++;
+        continue;
+      }
+      if (b == 0x80 || b == 0xFF) {
+        _flushSegment(bytes, segStart, i, out);
+        out.write('\uFFFD');
+        i++;
+        segStart = i;
+        continue;
+      }
+      // lead 0x81-0xFE
+      if (i + 1 >= n) {
+        // 末尾悬挂 lead
+        _flushSegment(bytes, segStart, i, out);
+        out.write('\uFFFD');
+        break;
+      }
+      final b2 = bytes[i + 1];
+      if (b2 >= 0x30 && b2 <= 0x39) {
+        // GB18030 四字节序列（charset 的 gbk 不支持 → FFFD 整体跳过）
+        final complete = i + 3 < n &&
+            bytes[i + 2] >= 0x81 && bytes[i + 2] <= 0xFE &&
+            bytes[i + 3] >= 0x30 && bytes[i + 3] <= 0x39;
+        _flushSegment(bytes, segStart, i, out);
+        out.write('\uFFFD');
+        i += complete ? 4 : 1;
+        segStart = i;
+        continue;
+      }
+      if ((b2 >= 0x40 && b2 <= 0x7E) || (b2 >= 0x80 && b2 <= 0xFE)) {
+        i += 2; // 结构合法的双字节对，留在完好段
+        continue;
+      }
+      // 非法第二字节
+      _flushSegment(bytes, segStart, i, out);
+      out.write('\uFFFD');
+      i++;
+      segStart = i;
+    }
+    _flushSegment(bytes, segStart, n, out);
+    return out.toString();
+  }
+
+  /// 解码一个结构完好的字节段；段内若仍有表级非法对（GBK 未映射组合），
+  /// 退化为逐字节对解码，坏对替换 FFFD。
+  static void _flushSegment(Uint8List bytes, int start, int end, StringBuffer out) {
+    if (end <= start) return;
+    try {
+      out.write(gbk.decode(Uint8List.sublistView(bytes, start, end)));
+      return;
+    } catch (_) {}
+    for (int i = start; i < end;) {
+      final b = bytes[i];
+      if (b < 0x80) {
+        out.writeCharCode(b);
+        i++;
+        continue;
+      }
+      if (i + 2 <= end) {
+        try {
+          out.write(gbk.decode(Uint8List.sublistView(bytes, i, i + 2)));
+          i += 2;
+          continue;
+        } catch (_) {}
+      }
+      out.write('\uFFFD');
+      i++;
+    }
   }
 }

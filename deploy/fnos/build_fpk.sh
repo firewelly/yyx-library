@@ -27,6 +27,11 @@ rm -rf "$DIST" "$FNOS/app" && mkdir -p "$DIST" "$FNOS/app/bin" "$FNOS/app/ui" "$
 cp "$FNOS/bin/novel_server.py" "$FNOS/app/bin/"
 chmod +x "$FNOS/app/bin/novel_server.py"
 cp -R "$ROOT/build/web/." "$FNOS/app/ui/"
+# 桌面图标：fnOS 桌面按 ui/images/icon_{64,256}.png 取图（build/web 无此目录）
+mkdir -p "$FNOS/app/ui/images"
+cp "$FNOS/ICON.PNG" "$FNOS/app/ui/images/icon_64.png"
+cp "$FNOS/ICON.PNG" "$FNOS/app/ui/images/icon.png"
+cp "$FNOS/ICON_256.PNG" "$FNOS/app/ui/images/icon_256.png"
 DEMO_DB="$ROOT/deploy/ugos/novelmgt-demo.db"
 if [ -f "$DEMO_DB" ]; then
   cp "$DEMO_DB" "$FNOS/app/demo/novelmgt-demo.db"

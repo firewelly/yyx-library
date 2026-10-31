@@ -6,7 +6,7 @@
 #   demo/ 示例书库（四大名著，公版）——用户尚未放入自有书库时兜底
 #
 # 书库与阅读状态由 docker-compose 挂载：
-#   ./db    用户书库目录（放置 novelmgt.db；只读挂载）
+#   ./db    用户书库目录（放置 novelmgt.db；Web 导入需服务端写库，故为读写挂载）
 #   ./state 阅读进度/书签/笔记（可写）
 FROM python:3.11-slim
 

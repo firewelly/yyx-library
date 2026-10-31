@@ -103,6 +103,15 @@ class DatabaseService {
     }
   }
 
+  /// 在事务中执行 [fn]（导入等批量写入路径使用，失败整体回滚）。
+  ///
+  /// 通过方法而非直接暴露 `db` 访问事务，是为了让远程模式
+  /// （[RemoteDatabaseService]）可以覆写：远程无跨请求事务，
+  /// 每个写操作各自原子，[fn] 收到的 executor 会被忽略。
+  Future<T> runInTransaction<T>(Future<T> Function(DatabaseExecutor? txn) fn) {
+    return db.transaction<T>((txn) => fn(txn));
+  }
+
   // ============================================================
   // 数据库创建与迁移
   // ============================================================
