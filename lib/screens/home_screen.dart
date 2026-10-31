@@ -104,9 +104,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ]
             : [
-                // 搜索
+                // 搜索（窄屏收窄，避免顶栏图标溢出）
                 SizedBox(
-                  width: 280,
+                  width: MediaQuery.sizeOf(context).width < 700 ? 150 : 280,
                   child: TextField(
                     controller: _searchController,
                     focusNode: _searchFocusNode,

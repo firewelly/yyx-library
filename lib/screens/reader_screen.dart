@@ -58,6 +58,21 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     final state = ref.watch(readerProvider);
     final settings = ref.watch(settingsProvider);
 
+    // 章节切换/进度恢复时，把滚动位置对齐到目标（翻章回顶部；进度恢复到上次位置）。
+    // 必须在新内容布局完成后再 jump，否则会沿用上一章的滚动偏移。
+    ref.listen<ReaderState>(readerProvider, (prev, next) {
+      final chapterChanged = prev?.currentChapter?.id != next.currentChapter?.id;
+      if (chapterChanged && next.currentChapter != null) {
+        final target = next.pendingScrollTo;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted || !_scrollController.hasClients) return;
+          final max = _scrollController.position.maxScrollExtent;
+          _scrollController.jumpTo(target.clamp(0.0, max));
+          ref.read(readerProvider.notifier).consumePendingScroll();
+        });
+      }
+    });
+
     if (state.isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
@@ -303,8 +318,11 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
             Expanded(
               child: SingleChildScrollView(
                 controller: _scrollController,
+                // 窄屏（手机）收窄页边距：设置的边距是为桌面宽屏准备的
                 padding: EdgeInsets.symmetric(
-                  horizontal: settings.settings.marginSize,
+                  horizontal: MediaQuery.sizeOf(context).width < 700
+                      ? (settings.settings.marginSize > 20 ? 16.0 : settings.settings.marginSize)
+                      : settings.settings.marginSize,
                   vertical: 24,
                 ),
                 // 桌面端限制正文宽度 800 居中,提升长文本可读性
