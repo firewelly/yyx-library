@@ -1,12 +1,12 @@
 services:
   app:
-    image: novelmgt-app:10.0.1
+    image: novelmgt-app:10.0.2
     container_name: novelmgt
     restart: always
     ports:
       - "12702:12702"
     volumes:
-      - ./db:/app/db:ro
+      - ./db:/app/db
       - ./state:/app/state
     environment:
       - TZ={{.TZ}}

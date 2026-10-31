@@ -28,8 +28,19 @@ NAS 形态为**服务端查询架构**：Python 标准库服务端提供 `/api/*
 - **upk 开发者签名按设备绑定**：每台测试设备需绿联按其 SN 签发 `.sig`，在目标设备 应用中心 → 设置 → App development 上传（DXP4800 已配，`/ugreen/.config/ugdev.sig`，有效至 2027-09-07）。
 - 上架材料与审核往来：OneDrive `Novel_scraber/novelmgt_flutter/docs/ugreen_review_20260914/`（台账 README.md、回执/、详情图/、安装包/+SHA256SUMS）。
 
-## 当前状态（截至 2026-10-18）
+## 当前状态（截至 2026-10-31）
 
+- **10-31 Web 远程导入修复并发布 v10.0.2**（upk 10.0.2.0002 + fpk 2.0.2）：
+  ① 服务端 novel_server.py 新增导入写入端点（books/chapters rw + DELETE），书库连接仍默认只读、
+  写操作全局锁串行化；docker-compose 的 db 挂载由 `:ro` 改读写（升级后已自动重渲染）。
+  ② 客户端 RemoteDatabaseService 覆写导入所需写方法（findBookByTitleAndAuthor/createBook/
+  createChaptersBatch/updateChapterContent/touchBook/updateBook/deleteBook/runInTransaction）。
+  ③ **TXT 导入乱码根因**：charset 包的 gbk 对 GB18030 四字节序列（第二字节 0x30-0x39）抛
+  FormatException → 兜底按 UTF-8 解出全文乱码 → 章节切不开（紫川.txt 316 万字挤成 1 章）。
+  修复：TextDecode 增加宽容 GBK 解码（结构扫描按字符边界切段，坏序列替换 U+FFFD，82ms/4MB），
+  探测的 GBK 步骤同样改宽容解码。回归测试见 test/text_decode_test.dart。
+  E2E（DXP4800 实测）：紫川导入 165 章、书架/详情/阅读/翻章/进度/搜索、43.5MB 超限友好提示、
+  UGOS 桌面快捷方式点击直达 `:12702` 全部通过。注意 demo 模式导入的书随容器重建丢失（真实库放 `db/`）。
 - 审核进展：YYX书库 10-15 重新提交、10-18 补发附件，**等绿联回复**；另一应用 NasOC 走 126 线程
   （台账 OneDrive `FnOS_opencode/ugos_opencode/store/REVIEW-STATUS.md`），10-17 已提交 v0.1.0.0010 修复、10-18 补发承诺函。
 
@@ -37,6 +48,8 @@ NAS 形态为**服务端查询架构**：Python 标准库服务端提供 `/api/*
   局域网与 UGREENlink 中继（web 端全流程：书架/详情/阅读/翻章/搜索/统计/进度保存）。
 - 存量书库正文已全部 gzip 迁移：5.37GB → 2.61GB（备份 `novelmgt.db.bak-plain-20261006` 保留在原目录）。
 - 回执材料就绪：信息表（10.0.1.0003）、自测用例报告（全部实测项已填「通过」）、详情图 PC×3 + 移动×3。
+- NAS 打包工作区：DXP4800 `~/yyx-repo`（deploy + build/web 的 rsync 目标，跑 `deploy/ugos/build_upk.sh`；
+  ugcli 是文件 `/home/frie/ugcli`，用 `UGCLI=/home/frie/ugcli` 指定）。
 
 ## 剩余待办
 
@@ -50,7 +63,9 @@ NAS 形态为**服务端查询架构**：Python 标准库服务端提供 `/api/*
 3. **【新设备调试签名】**在外机装 upk 需先为该设备 SN 申请 `.sig`
    （开发者平台添加设备 SN，或回信 developers_bd@ugreen.com 报型号+SN），
    拿到后在目标设备 App development 标签上传；upk 仅 amd64、要求 UGOS Pro ≥1.13。
-   **DX4600（SN EC554JJ11230BF62）已于 2026-10-19 邮件申请，等绿联回复**；收到后上传其 App development。
+   **DX4600（SN EC554JJ11230BF62）2026-10-19 邮件申请；绿联要求补 MAC+管理员用户名，
+   10-26 已回信提供（MAC `98:6e:e8:21:a6:4f` eth0 主网卡 / 用户名 frie），签名承诺提供后 5 个工作日内出**；
+   收到后上传其 App development。
 4. ~~【fnOS 2.0.1 fpk 升级】~~ **已完成（2026-10-11）**：EQ14（192.168.3.153）在线后经
    `appcenter-cli` 卸载重装 2.0.1 fpk，向导变量（真库路径）自动保留；API + Web UI 全流程、
    示例库兜底（demo-db）、跨会话进度持久化全部实测通过。appcenter-cli 用法与坑见 fnos-app-development 记忆。

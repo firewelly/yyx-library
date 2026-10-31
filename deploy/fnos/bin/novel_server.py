@@ -19,9 +19,18 @@
   GET  /api/user/progress?bookId=        POST /api/user/progress
   GET  /api/user/bookmarks?bookId=       POST /api/user/bookmarks   DELETE /api/user/bookmarks/<id>
   GET  /api/user/notes?bookId=           POST /api/user/notes       PUT/DELETE /api/user/notes/<id>
+
+导入写入（Web 端远程导入，2026-10 新增）：
+  GET  /api/books/by-title?title=&author=   按标题+作者查重（与客户端导入去重口径一致）
+  POST /api/books                          创建书籍（含标签 find-or-create）
+  PUT  /api/books/<id>                     更新书籍字段（含标签重挂）
+  POST /api/books/<id>/touch               仅更新 updatedAt
+  POST /api/books/<id>/chapters            创建单章或批量（{"chapters":[...]}）
+  PUT  /api/chapters/<id>/content          更新章节正文，返回 {oldLength}（-1/0/>0 同客户端语义）
 """
 
 import argparse
+import gzip
 import json
 import re
 import os
@@ -84,6 +93,72 @@ def book_conn():
     )
     con.row_factory = sqlite3.Row
     return con
+
+
+_book_write_lock = threading.Lock()
+
+def book_conn_rw():
+    """读写打开书库（仅导入写入端点使用；查询端点仍走只读连接）。
+
+    书库默认只读是查询架构的安全默认；导入功能需要写库，因此
+    写连接独立于此，全部写操作经 _book_write_lock 串行化，避免多线程
+    同时写导致 database is locked。
+    """
+    con = sqlite3.connect(ARGS.db.replace("?", "%3f"), timeout=30)
+    con.row_factory = sqlite3.Row
+    return con
+
+
+# 与客户端 ContentCodec.compressThresholdChars 对齐：>=4096 字 gzip 存储
+COMPRESS_THRESHOLD_CHARS = 4096
+
+
+def encode_content(text):
+    """编码为可写入 content 列的值：小章节明文，大章节 gzip blob。
+
+    必须与 Dart 端 ContentCodec.encode 完全一致（读取端两端自适应）。
+    """
+    if text is None:
+        return ""
+    if len(text) >= COMPRESS_THRESHOLD_CHARS:
+        return gzip.compress(text.encode("utf-8"))
+    return text
+
+
+def ensure_tags(con, names):
+    """查找或创建标签（客户端 _ensureTag 语义），返回 tagId 列表"""
+    ids = []
+    for name in names or []:
+        name = (name or "").strip()
+        if not name:
+            continue
+        row = con.execute("SELECT id FROM tags WHERE name=?", (name,)).fetchone()
+        if row:
+            ids.append(row[0])
+        else:
+            cur = con.execute("INSERT INTO tags (name) VALUES (?)", (name,))
+            ids.append(cur.lastrowid)
+    return ids
+
+
+def update_title_index_for_book(con, book_id):
+    """写入后同步单本书的章节标题索引（状态库），保证搜索立即可命中"""
+    try:
+        sc = state_conn()
+        sc.execute("DELETE FROM chapter_title_index WHERE bookId=?", (book_id,))
+        sc.executemany(
+            "INSERT INTO chapter_title_index VALUES (?, ?)",
+            [
+                (book_id, r[0] or "")
+                for r in con.execute(
+                    "SELECT title FROM chapters WHERE bookId=?", (book_id,)
+                )
+            ],
+        )
+        sc.commit()
+        sc.close()
+    except Exception as e:  # noqa: BLE001
+        log("标题索引增量更新失败（bookId=%s）: %r" % (book_id, e))
 
 
 _state_write_lock = threading.Lock()
@@ -498,6 +573,238 @@ def user_delete(table, rid):
 
 
 # ============================================================
+# 导入写入（Web 端远程导入；字段与客户端 Book/Chapter toJson 对齐）
+# ============================================================
+
+BOOK_FIELDS = [
+    "title", "author", "summary", "status", "sourceUrl", "sourceFormat",
+    "filePath", "coverImage", "coverImagePath", "rating", "notes",
+    "wordCount", "lastReadAt", "createdAt", "updatedAt",
+]
+
+
+def api_book_by_title(q):
+    """导入查重：标题（+作者）精确匹配；无作者时仅匹配作者为空的书"""
+    title = (q.get("title", [""])[0] or "").strip()
+    author = (q.get("author", [""])[0] or "").strip()
+    if not title:
+        return None
+    con = book_conn()
+    try:
+        if author:
+            row = con.execute(
+                "SELECT * FROM books WHERE title=? AND author=?", (title, author)
+            ).fetchone()
+        else:
+            row = con.execute(
+                "SELECT * FROM books WHERE title=? AND (author IS NULL OR author='')",
+                (title,),
+            ).fetchone()
+        if row is None:
+            return None
+        return book_row(con, row)
+    finally:
+        con.close()
+
+
+def api_book_create(body):
+    title = (body.get("title") or "").strip()
+    if not title:
+        raise ValueError("title is required")
+    now = now_iso()
+    _book_write_lock.acquire()
+    try:
+        con = book_conn_rw()
+        try:
+            cols, vals = [], []
+            for f in BOOK_FIELDS:
+                if body.get(f) is not None:
+                    cols.append(f)
+                    vals.append(body[f])
+            for f, v in (("createdAt", now), ("updatedAt", now)):
+                if f not in cols:
+                    cols.append(f)
+                    vals.append(v)
+            cur = con.execute(
+                "INSERT INTO books (%s) VALUES (%s)"
+                % (",".join(cols), ",".join("?" * len(cols))),
+                vals,
+            )
+            bid = cur.lastrowid
+            for tag_id in ensure_tags(con, body.get("tags")):
+                con.execute(
+                    "INSERT OR IGNORE INTO book_tags (bookId, tagId) VALUES (?, ?)",
+                    (bid, tag_id),
+                )
+            con.commit()
+            row = con.execute("SELECT * FROM books WHERE id=?", (bid,)).fetchone()
+            return book_row(con, row)
+        finally:
+            con.close()
+    finally:
+        _book_write_lock.release()
+
+
+def api_book_update(bid, body):
+    now = now_iso()
+    _book_write_lock.acquire()
+    try:
+        con = book_conn_rw()
+        try:
+            if con.execute("SELECT id FROM books WHERE id=?", (bid,)).fetchone() is None:
+                return None
+            sets, vals = [], []
+            for f in BOOK_FIELDS:
+                if f in body and body.get(f) is not None:
+                    sets.append(f + "=?")
+                    vals.append(body[f])
+            if sets and "updatedAt" not in sets:
+                sets.append("updatedAt=?")
+                vals.append(now)
+            if sets:
+                con.execute(
+                    "UPDATE books SET %s WHERE id=?" % ",".join(sets), vals + [bid]
+                )
+            if "tags" in body:
+                con.execute("DELETE FROM book_tags WHERE bookId=?", (bid,))
+                for tag_id in ensure_tags(con, body.get("tags")):
+                    con.execute(
+                        "INSERT OR IGNORE INTO book_tags (bookId, tagId) VALUES (?, ?)",
+                        (bid, tag_id),
+                    )
+            con.commit()
+            row = con.execute("SELECT * FROM books WHERE id=?", (bid,)).fetchone()
+            return book_row(con, row)
+        finally:
+            con.close()
+    finally:
+        _book_write_lock.release()
+
+
+def api_book_touch(bid):
+    _book_write_lock.acquire()
+    try:
+        con = book_conn_rw()
+        try:
+            cur = con.execute(
+                "UPDATE books SET updatedAt=? WHERE id=?", (now_iso(), bid)
+            )
+            con.commit()
+            return {"updated": cur.rowcount > 0}
+        finally:
+            con.close()
+    finally:
+        _book_write_lock.release()
+
+
+def api_chapters_create(bid, body):
+    """创建单章或批量（body["chapters"] 为列表时批量）。
+
+    返回与请求顺序一致的章节列表（含服务端生成的 id 与时间戳），
+    客户端据此 copyWith 回填。正文超阈值 gzip 压缩（见 encode_content）。
+    """
+    chapters = body.get("chapters")
+    if not isinstance(chapters, list):
+        chapters = [body]
+    now = now_iso()
+    _book_write_lock.acquire()
+    try:
+        con = book_conn_rw()
+        try:
+            if con.execute("SELECT id FROM books WHERE id=?", (bid,)).fetchone() is None:
+                return None
+            out = []
+            for ch in chapters:
+                num = ch.get("chapterNumber") or (out[-1]["chapterNumber"] + 1 if out else 1)
+                title = (ch.get("title") or "").strip() or ("第%s章" % num)
+                cols, vals = ["bookId", "chapterNumber", "title"], [bid, num, title]
+                for f in ("originalOrder", "sourceUrl", "sourceFormat"):
+                    if ch.get(f) is not None:
+                        cols.append(f)
+                        vals.append(ch[f])
+                cols += ["content", "createdAt", "updatedAt"]
+                vals += [
+                    encode_content(ch.get("content")),
+                    ch.get("createdAt") or now,
+                    ch.get("updatedAt") or now,
+                ]
+                cur = con.execute(
+                    "INSERT INTO chapters (%s) VALUES (%s)"
+                    % (",".join(cols), ",".join("?" * len(cols))),
+                    vals,
+                )
+                out.append({
+                    "id": cur.lastrowid,
+                    "bookId": bid,
+                    "chapterNumber": num,
+                    "originalOrder": ch.get("originalOrder"),
+                    "title": title,
+                    "sourceFormat": ch.get("sourceFormat"),
+                    "createdAt": ch.get("createdAt") or now,
+                    "updatedAt": ch.get("updatedAt") or now,
+                })
+            con.commit()
+            update_title_index_for_book(con, bid)
+            return {"chapters": out}
+        finally:
+            con.close()
+    finally:
+        _book_write_lock.release()
+
+
+def api_chapter_update_content(cid, body):
+    """更新章节正文。返回 oldLength：-1 章节不存在 / 0 无变化 / >0 更新前字符数
+    （与客户端 DatabaseService.updateChapterContent 语义一致）。"""
+    content = body.get("content") or ""
+    _book_write_lock.acquire()
+    try:
+        con = book_conn_rw()
+        try:
+            row = con.execute("SELECT content FROM chapters WHERE id=?", (cid,)).fetchone()
+            if row is None:
+                return {"oldLength": -1}
+            old = decode_content(row["content"])
+            if old == content:
+                return {"oldLength": 0}
+            con.execute(
+                "UPDATE chapters SET content=?, updatedAt=? WHERE id=?",
+                (encode_content(content), now_iso(), cid),
+            )
+            con.commit()
+            return {"oldLength": len(old)}
+        finally:
+            con.close()
+    finally:
+        _book_write_lock.release()
+
+
+def api_book_delete(bid):
+    """删除书籍及其章节/标签关联（进度/书签/笔记在状态库，级联清理）。"""
+    _book_write_lock.acquire()
+    try:
+        con = book_conn_rw()
+        try:
+            if con.execute("SELECT id FROM books WHERE id=?", (bid,)).fetchone() is None:
+                return {"deleted": False}
+            con.execute("DELETE FROM book_tags WHERE bookId=?", (bid,))
+            con.execute("DELETE FROM chapters WHERE bookId=?", (bid,))
+            con.execute("DELETE FROM books WHERE id=?", (bid,))
+            con.commit()
+        finally:
+            con.close()
+        sc = state_conn()
+        try:
+            for table in ("reading_progress", "bookmarks", "notes", "chapter_title_index"):
+                sc.execute("DELETE FROM %s WHERE bookId=?" % table, (bid,))
+            sc.commit()
+        finally:
+            sc.close()
+        return {"deleted": True}
+    finally:
+        _book_write_lock.release()
+
+
+# ============================================================
 # HTTP 层
 # ============================================================
 
@@ -599,6 +906,9 @@ class Handler(BaseHTTPRequestHandler):
                                        "demo": bool(getattr(ARGS, "demo", False))})
             if path == "/api/books":
                 return self.send_json(api_books(q))
+            if path == "/api/books/by-title":
+                b = api_book_by_title(q)
+                return self.send_json(b) if b else self.send_json(None)
             m = _re_match(r"^/api/books/(\d+)$", path)
             if m:
                 b = api_book(int(m.group(1)))
@@ -659,6 +969,15 @@ class Handler(BaseHTTPRequestHandler):
                         "notes", b, ["bookId", "chapterId", "position", "content", "createdAt", "updatedAt"]
                     )
                 )
+            if path == "/api/books":
+                return self.send_json(api_book_create(body))
+            m = _re_match(r"^/api/books/(\d+)/chapters$", path)
+            if m:
+                r = api_chapters_create(int(m.group(1)), body)
+                return self.send_json(r) if r is not None else self.send_json({"error": "book not found"}, 404)
+            m = _re_match(r"^/api/books/(\d+)/touch$", path)
+            if m:
+                return self.send_json(api_book_touch(int(m.group(1))))
             return self.send_json({"error": "unknown endpoint"}, 404)
         except Exception as e:  # noqa: BLE001
             log("POST %s 失败: %r" % (path, e))
@@ -671,6 +990,13 @@ class Handler(BaseHTTPRequestHandler):
             if m:
                 n = user_update_note(int(m.group(1)), self.read_body())
                 return self.send_json(n) if n else self.send_json({"error": "not found"}, 404)
+            m = _re_match(r"^/api/books/(\d+)$", path)
+            if m:
+                b = api_book_update(int(m.group(1)), self.read_body())
+                return self.send_json(b) if b else self.send_json({"error": "not found"}, 404)
+            m = _re_match(r"^/api/chapters/(\d+)/content$", path)
+            if m:
+                return self.send_json(api_chapter_update_content(int(m.group(1)), self.read_body()))
             return self.send_json({"error": "unknown endpoint"}, 404)
         except Exception as e:  # noqa: BLE001
             return self.send_json({"error": str(e)}, 500)
@@ -678,6 +1004,9 @@ class Handler(BaseHTTPRequestHandler):
     def do_DELETE(self):
         path = urllib.parse.urlparse(self.path).path
         try:
+            m = _re_match(r"^/api/books/(\d+)$", path)
+            if m:
+                return self.send_json(api_book_delete(int(m.group(1))))
             m = _re_match(r"^/api/user/bookmarks/(\d+)$", path)
             if m:
                 return self.send_json(user_delete("bookmarks", int(m.group(1))))

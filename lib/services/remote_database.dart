@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:sqflite/sqflite.dart' show DatabaseExecutor;
 
 import '../models/models.dart';
 import '../utils/zh_converter.dart';
@@ -33,7 +34,8 @@ class RemoteDatabaseService extends DatabaseService {
     final req = http.Request(method, _u(path))
       ..headers['content-type'] = 'application/json'
       ..body = jsonEncode(body);
-    final res = await _http.send(req).timeout(const Duration(seconds: 30));
+    // 写入可能携带整本书的章节（Web 导入上限 30MB），超时比查询放宽
+    final res = await _http.send(req).timeout(const Duration(seconds: 120));
     final text = await res.stream.bytesToString();
     if (res.statusCode != 200) {
       throw Exception('API $method $path 失败: HTTP ${res.statusCode}');
@@ -258,5 +260,109 @@ class RemoteDatabaseService extends DatabaseService {
   Future<bool> deleteNote(int id) async {
     await _sendJson('DELETE', '/user/notes/$id', {});
     return true;
+  }
+
+  // ==================== 远程导入写入 ====================
+  // 书库类写入经同源 /api 落到 NAS 书库（服务端 2026-10 起提供导入写入端点）。
+  // executor 参数在远程模式下无意义（无跨请求事务），一律忽略。
+
+  Map<String, Object?> _bookBody(Book b) {
+    final map = Map<String, Object?>.from(b.toJson());
+    map.remove('id');
+    map.remove('tags');
+    map['tags'] = [for (final t in b.tags) t.name];
+    return map;
+  }
+
+  Map<String, Object?> _chapterBody(Chapter c) => {
+        'chapterNumber': c.chapterNumber,
+        'originalOrder': c.originalOrder,
+        'title': c.title,
+        'content': c.content,
+        'sourceUrl': c.sourceUrl,
+        'sourceFormat': c.sourceFormat,
+        'createdAt': c.createdAt,
+        'updatedAt': c.updatedAt,
+      };
+
+  @override
+  Future<Book?> findBookByTitleAndAuthor(String title, {String? author}) async {
+    final row = await _getJson('/books/by-title', {
+      'title': title,
+      if (author != null && author.isNotEmpty) 'author': author,
+    });
+    return row == null ? null : _bookFrom(row);
+  }
+
+  @override
+  Future<Book> createBook(Book book, {DatabaseExecutor? executor}) async {
+    final row = await _sendJson('POST', '/books', _bookBody(book)) as Map;
+    return _bookFrom(row);
+  }
+
+  @override
+  Future<Book> updateBook(Book book) async {
+    if (book.id == null) throw ArgumentError('Book ID cannot be null for update');
+    final row = await _sendJson('PUT', '/books/${book.id}', _bookBody(book)) as Map;
+    return _bookFrom(row);
+  }
+
+  @override
+  Future<void> touchBook(int bookId) async {
+    await _sendJson('POST', '/books/$bookId/touch', {});
+  }
+
+  @override
+  Future<Chapter> createChapter(Chapter chapter, {DatabaseExecutor? executor}) async {
+    final row = await _sendJson(
+      'POST',
+      '/books/${chapter.bookId}/chapters',
+      _chapterBody(chapter),
+    ) as Map;
+    return _chapterWithIds(chapter, row);
+  }
+
+  @override
+  Future<List<Chapter>> createChaptersBatch(
+    List<Chapter> chapters, {
+    DatabaseExecutor? executor,
+  }) async {
+    if (chapters.isEmpty) return const [];
+    final data = await _sendJson(
+      'POST',
+      '/books/${chapters.first.bookId}/chapters',
+      {'chapters': [for (final c in chapters) _chapterBody(c)]},
+    ) as Map;
+    final rows = (data['chapters'] as List).cast<Map>();
+    return [
+      for (var i = 0; i < chapters.length; i++) _chapterWithIds(chapters[i], rows[i]),
+    ];
+  }
+
+  Chapter _chapterWithIds(Chapter c, Map row) => c.copyWith(
+        id: (row['id'] as num?)?.toInt(),
+        createdAt: (row['createdAt'] as String?) ?? c.createdAt,
+        updatedAt: (row['updatedAt'] as String?) ?? c.updatedAt,
+      );
+
+  @override
+  Future<int> updateChapterContent(int chapterId, String newContent) async {
+    final row = await _sendJson('PUT', '/chapters/$chapterId/content', {
+      'content': newContent,
+    }) as Map;
+    return (row['oldLength'] as num?)?.toInt() ?? 0;
+  }
+
+  @override
+  Future<T> runInTransaction<T>(Future<T> Function(DatabaseExecutor? txn) fn) {
+    // 远程无跨请求事务：每个写端点各自原子。整书导入中途失败会留下
+    // 缺章的半本书，但重新导入走增量合并路径即可补齐（自愈）。
+    return fn(null);
+  }
+
+  @override
+  Future<bool> deleteBook(int id) async {
+    final row = await _sendJson('DELETE', '/books/$id', {}) as Map;
+    return row['deleted'] == true;
   }
 }

@@ -9,7 +9,7 @@
                   ├─ /            Flutter Web 静态资源（ui/）
                   ├─ /api/books…  书库查询（服务端打开 SQLite，读全书库）
                   └─ /api/user/…  进度 / 书签 / 笔记（状态库，可写）
-     挂载：./db    用户书库目录（novelmgt.db，只读）
+     挂载：./db    用户书库目录（novelmgt.db，读写——Web 端远程导入需要服务端写库）
            ./state 阅读状态（novelmgt_state.db，升级保留）
 ```
 
