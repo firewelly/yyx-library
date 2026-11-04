@@ -483,7 +483,7 @@ trailing: SegmentedButton<String>(
                   ListTile(
                     leading: const Icon(Icons.menu_book),
                     title: Text(t('YYX书库（YYX Library）')),
-                    subtitle: Text(t('版本 1.0.3 · 开源许可 BSD-3-Clause')),
+                    subtitle: Text(t('版本 {ver} · 开源许可 BSD-3-Clause', {'ver': '10.0.3'})),
                   ),
                 ],
               ),

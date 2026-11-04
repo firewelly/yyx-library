@@ -322,7 +322,7 @@ const Map<String, String> kEnTranslations = {
   '点击右侧按钮选择文件夹': 'Tap the button on the right to pick a folder',
   '爬取失败: {e}': 'Crawl failed: {e}',
   '爬虫': 'Crawler',
-  '版本 1.0.3 · 开源许可 BSD-3-Clause': 'Version 1.0.3 · Open source under BSD-3-Clause',
+  '版本 {ver} · 开源许可 BSD-3-Clause': 'Version {ver} · Open source under BSD-3-Clause',
   '状态': 'Status',
   '状态: {p1}': 'Status: {p1}',
   '状态分布': 'Status distribution',
