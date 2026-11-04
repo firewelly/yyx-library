@@ -130,8 +130,14 @@ async def flow_detail(app: App, rep: Report):
 
 
 async def flow_reader(app: App, rep: Report):
-    books = app.api("/books?perPage=1")["books"]
+    # 选一本「确实有章节」的书：最近更新的可能是不带章节的测试残留/空书
+    books = app.api("/books?perPage=10")["books"]
     bid = books[0]["id"] if books else 1
+    for b in books:
+        d = app.api(f"/books/{b['id']}")
+        if (d or {}).get("chapterCount"):
+            bid = b["id"]
+            break
     await app.open(f"/reader/{bid}", wait_ms=9000)
 
     c = rep.case("R-1", "第一章内容渲染")
