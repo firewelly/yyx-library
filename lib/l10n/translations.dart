@@ -351,7 +351,6 @@ const Map<String, String> kEnTranslations = {
   '笔记已添加': 'Note added',
   '第 {page} / {totalPages} 页 · 共 {p3} 本': 'Page {page} / {totalPages} · {p3} books',
   '第{num}章': 'Chapter {num}',
-  '第{num}章 {title}': 'Chapter {num} {title}',
   '第{p1}章': 'Chapter {p1}',
   '简介': 'Summary',
   '简介: {p1}': 'Summary: {p1}',

@@ -15,22 +15,12 @@ class Formatters {
     return count.toString();
   }
 
-
-  /// 章节标题是否已自带编号（第X章/回/节/卷、Chapter N、N. 等）
-  static final RegExp chapterNumberPrefix = RegExp(
-    r'^\s*(?:第\s*[0-9一二三四五六七八九十百千万亿零〇两廿卅壹贰叁肆伍陆柒捌玖拾佰仟萬億]+\s*[章回节卷话集部篇]'
-    r'|chapter\s+[0-9ivxlcdm]+|\d+\s*[.、:：])',
-    caseSensitive: false,
-  );
-
-  /// 章节显示标题：标题已带编号则原样显示，否则拼「第N章」前缀
+  /// 章节显示标题：直接显示标题原文（爬取/导入的标题本身已含「第X章」等编号，
+  /// 不再额外拼序号）；仅当标题为空时用「第N章」兜底。
   static String chapterTitle(int? number, String? title) {
     final name = (title ?? '').trim();
-    if (name.isEmpty) {
-      return number == null ? '' : t('第{num}章', {'num': number});
-    }
-    if (number == null || chapterNumberPrefix.hasMatch(name)) return name;
-    return t('第{num}章 {title}', {'num': number, 'title': name});
+    if (name.isNotEmpty) return name;
+    return number == null ? '' : t('第{num}章', {'num': number});
   }
 
   /// 格式化日期 → "2026-04-08"
