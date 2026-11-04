@@ -1,7 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:novelmgt_flutter/l10n/s.dart';
 import 'package:novelmgt_flutter/utils/formatters.dart';
 
 void main() {
+  setUpAll(() {
+    S.configure('zh'); // 默认断言中文格式
+  });
   group('Formatters', () {
     test('formatWordCount formats large numbers', () {
       expect(Formatters.formatWordCount(0), '0');

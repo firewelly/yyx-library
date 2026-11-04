@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/s.dart';
 
 /// 阅读主题 —— 阅读器内的背景与文字配色
 ///
@@ -35,54 +36,54 @@ class ReaderTheme {
 }
 
 /// 全部内置阅读主题
-const List<ReaderTheme> kReaderThemes = [
+final List<ReaderTheme> kReaderThemes = [
   // 纯白
   ReaderTheme(
     id: 'paper',
-    name: '纯白',
-    background: Color(0xFFFFFFFF),
-    text: Color(0xFF1F2937),
-    secondaryText: Color(0xFF9CA3AF),
-    titleColor: Color(0xFF1F2937),
-    accent: Color(0xFF3949AB),
-    surface: Color(0xFFF3F4F6),
-    border: Color(0xFFE5E7EB),
+    name: t('纯白'),
+    background: const Color(0xFFFFFFFF),
+    text: const Color(0xFF1F2937),
+    secondaryText: const Color(0xFF9CA3AF),
+    titleColor: const Color(0xFF1F2937),
+    accent: const Color(0xFF3949AB),
+    surface: const Color(0xFFF3F4F6),
+    border: const Color(0xFFE5E7EB),
   ),
   // 米黄护眼(默认)
   ReaderTheme(
     id: 'sepia',
-    name: '米黄',
-    background: Color(0xFFF5E6C8),
-    text: Color(0xFF4A3728),
-    secondaryText: Color(0xFFA08B6F),
-    titleColor: Color(0xFF3E2F1E),
-    accent: Color(0xFF8B6914),
-    surface: Color(0xFFEAD9B8),
-    border: Color(0xFFDFC9A4),
+    name: t('米黄'),
+    background: const Color(0xFFF5E6C8),
+    text: const Color(0xFF4A3728),
+    secondaryText: const Color(0xFFA08B6F),
+    titleColor: const Color(0xFF3E2F1E),
+    accent: const Color(0xFF8B6914),
+    surface: const Color(0xFFEAD9B8),
+    border: const Color(0xFFDFC9A4),
   ),
   // 纯黑 OLED
   ReaderTheme(
     id: 'dark',
-    name: '深黑',
-    background: Color(0xFF000000),
-    text: Color(0xFFB8BFC9),
-    secondaryText: Color(0xFF5A6472),
-    titleColor: Color(0xFFD1D5DB),
-    accent: Color(0xFF6B8AFD),
-    surface: Color(0xFF111318),
-    border: Color(0xFF1F242C),
+    name: t('深黑'),
+    background: const Color(0xFF000000),
+    text: const Color(0xFFB8BFC9),
+    secondaryText: const Color(0xFF5A6472),
+    titleColor: const Color(0xFFD1D5DB),
+    accent: const Color(0xFF6B8AFD),
+    surface: const Color(0xFF111318),
+    border: const Color(0xFF1F242C),
   ),
   // 浅绿
   ReaderTheme(
     id: 'green',
-    name: '浅绿',
-    background: Color(0xFFDCE8D2),
-    text: Color(0xFF2F3B2B),
-    secondaryText: Color(0xFF8A9784),
-    titleColor: Color(0xFF26301F),
-    accent: Color(0xFF4C7A3D),
-    surface: Color(0xFFCFDEC3),
-    border: Color(0xFFBECCAC),
+    name: t('浅绿'),
+    background: const Color(0xFFDCE8D2),
+    text: const Color(0xFF2F3B2B),
+    secondaryText: const Color(0xFF8A9784),
+    titleColor: const Color(0xFF26301F),
+    accent: const Color(0xFF4C7A3D),
+    surface: const Color(0xFFCFDEC3),
+    border: const Color(0xFFBECCAC),
   ),
 ];
 

@@ -28,6 +28,7 @@ AppSettings _$AppSettingsFromJson(Map<String, dynamic> json) => AppSettings(
   readerZhVariant: json['readerZhVariant'] as String? ?? 'original',
   defaultEncoding: json['defaultEncoding'] as String? ?? 'auto',
   libraryRootPath: json['libraryRootPath'] as String? ?? '',
+  language: json['language'] as String? ?? 'system',
 );
 
 Map<String, dynamic> _$AppSettingsToJson(AppSettings instance) =>
@@ -49,4 +50,5 @@ Map<String, dynamic> _$AppSettingsToJson(AppSettings instance) =>
       'readerZhVariant': instance.readerZhVariant,
       'defaultEncoding': instance.defaultEncoding,
       'libraryRootPath': instance.libraryRootPath,
+      'language': instance.language,
     };

@@ -14,13 +14,15 @@ class AppTheme {
   static const double maxLineHeight = 3.0;
 
   /// 浅色主题
-  static ThemeData lightTheme([AppPalette palette = AppPalette.paletteB]) {
+  static ThemeData lightTheme([AppPalette? palette]) {
+    palette ??= AppPalette.paletteB;
     final colorScheme = AppColors.lightColorScheme(palette);
     return _buildTheme(colorScheme, Brightness.light);
   }
 
   /// 深色主题
-  static ThemeData darkTheme([AppPalette palette = AppPalette.paletteB]) {
+  static ThemeData darkTheme([AppPalette? palette]) {
+    palette ??= AppPalette.paletteB;
     final colorScheme = AppColors.darkColorScheme(palette);
     return _buildTheme(colorScheme, Brightness.dark);
   }

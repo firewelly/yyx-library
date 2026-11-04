@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:path/path.dart' as p;
 import 'database_service.dart';
 import 'platform_fs.dart';
+import '../l10n/s.dart';
 
 /// 备份与恢复服务
 ///
@@ -18,7 +19,7 @@ class BackupService {
   /// 返回备份文件路径
   Future<String> backup({String? targetDir}) async {
     if (kIsWeb) {
-      throw UnsupportedError('Web 端暂不支持数据库备份，请在桌面端操作');
+      throw UnsupportedError(t('Web 端暂不支持数据库备份，请在桌面端操作'));
     }
 
     final dir = targetDir ?? await PlatformFs.defaultBackupDir();
@@ -31,12 +32,12 @@ class BackupService {
     // 获取源数据库路径
     final sourcePath = _db.dbFilePath;
     if (sourcePath == null) {
-      throw StateError('数据库未初始化');
+      throw StateError(t('数据库未初始化'));
     }
 
     // 复制数据库文件
     if (!await PlatformFs.fileExists(sourcePath)) {
-      throw Exception('数据库文件不存在: $sourcePath');
+      throw Exception(t('数据库文件不存在: {sourcePath}', {'sourcePath': sourcePath}));
     }
     await PlatformFs.copyFile(sourcePath, backupPath);
 
@@ -56,17 +57,17 @@ class BackupService {
   /// 从备份文件恢复数据库
   Future<void> restore(String backupFilePath) async {
     if (kIsWeb) {
-      throw UnsupportedError('Web 端暂不支持数据库恢复，请在桌面端操作');
+      throw UnsupportedError(t('Web 端暂不支持数据库恢复，请在桌面端操作'));
     }
 
     if (!await PlatformFs.fileExists(backupFilePath)) {
-      throw Exception('备份文件不存在: $backupFilePath');
+      throw Exception(t('备份文件不存在: {backupFilePath}', {'backupFilePath': backupFilePath}));
     }
 
     // 获取当前数据库路径
     final dbFile = _db.dbFilePath;
     if (dbFile == null) {
-      throw StateError('数据库未初始化');
+      throw StateError(t('数据库未初始化'));
     }
 
     // 关闭当前数据库

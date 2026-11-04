@@ -10,6 +10,7 @@ import 'database_service.dart';
 import 'pdf_importer.dart';
 import 'mobi_importer.dart';
 import 'platform_fs.dart';
+import '../l10n/s.dart';
 
 /// 支持导入的文件扩展名
 const List<String> kSupportedImportExtensions = [
@@ -45,7 +46,7 @@ class ImportService {
     try {
       final bytes = await PlatformFs.readBytes(filePath);
       if (bytes == null) {
-        return ImportResult.failure('文件不存在: $filePath');
+        return ImportResult.failure(t('文件不存在: {filePath}', {'filePath': filePath}));
       }
       return await importTxtBytes(
         p.basename(filePath),
@@ -56,7 +57,7 @@ class ImportService {
         encoding: encoding,
       );
     } catch (e) {
-      return ImportResult.failure('导入失败: $e');
+      return ImportResult.failure(t('导入失败: {e}', {'e': e}));
     }
   }
 
@@ -78,7 +79,7 @@ class ImportService {
       const limitMb = 100;
       if (bytes.lengthInBytes > limitMb * 1024 * 1024) {
         final sizeMb = (bytes.lengthInBytes / 1024 / 1024).toStringAsFixed(1);
-        return ImportResult.failure('文件过大（${sizeMb}MB），超过 ${limitMb}MB 上限');
+        return ImportResult.failure(t('文件过大（{p1}MB），超过 {p2}MB 上限', {'p1': sizeMb, 'p2': limitMb}));
       }
       // 读取文件并检测编码
       String content;
@@ -86,7 +87,7 @@ class ImportService {
         // 编码：手动指定（设置页默认编码）或自动探测 UTF-8→GBK→Big5
         content = await TextDecode.decode(bytes, encoding: encoding);
       } catch (e) {
-        return ImportResult.failure('编码检测失败: $e');
+        return ImportResult.failure(t('编码检测失败: {e}', {'e': e}));
       }
 
       // 从文件名提取书名（去掉扩展名）
@@ -115,7 +116,7 @@ class ImportService {
         filePath: sourcePath ?? fileName,
       );
     } catch (e) {
-      return ImportResult.failure('导入失败: $e');
+      return ImportResult.failure(t('导入失败: {e}', {'e': e}));
     }
   }
 
@@ -173,9 +174,9 @@ class ImportService {
 
     String message;
     if (updatedCount > 0 || addedCount > 0) {
-      message = '《${existingBook.title}»已更新：新增 $addedCount 章，更新 $updatedCount 章内容';
+      message = t('《{p1}»已更新：新增 {addedCount} 章，更新 {updatedCount} 章内容', {'p1': existingBook.title, 'addedCount': addedCount, 'updatedCount': updatedCount});
     } else {
-      message = '《${existingBook.title}»无变化，跳过';
+      message = t('《{p1}»无变化，跳过', {'p1': existingBook.title});
     }
 
     return ImportResult.success(
@@ -245,13 +246,13 @@ class ImportService {
       }[sourceFormat] ??
           '';
       return ImportResult.success(
-        message: '成功导入《$title》，共 ${chapters.length} 章$extLabel',
+        message: t('成功导入《{title}》，共 {p2} 章{extLabel}', {'title': title, 'p2': chapters.length, 'extLabel': extLabel}),
         bookId: createdBook.id,
         bookTitle: createdBook.title,
         chapterCount: chapters.length,
       );
     } catch (e) {
-      return ImportResult.failure('导入失败（已回滚）: $e');
+      return ImportResult.failure(t('导入失败（已回滚）: {e}', {'e': e}));
     }
   }
 
@@ -264,7 +265,7 @@ class ImportService {
     try {
       final bytes = await PlatformFs.readBytes(filePath);
       if (bytes == null) {
-        return ImportResult.failure('文件不存在: $filePath');
+        return ImportResult.failure(t('文件不存在: {filePath}', {'filePath': filePath}));
       }
       return await importEpubBytes(
         p.basename(filePath),
@@ -274,7 +275,7 @@ class ImportService {
         sourcePath: filePath,
       );
     } catch (e) {
-      return ImportResult.failure('EPUB导入失败: $e');
+      return ImportResult.failure(t('EPUB导入失败: {e}', {'e': e}));
     }
   }
 
@@ -314,7 +315,7 @@ class ImportService {
           final contentText = _stripHtmlTags(htmlFile.Content ?? '');
           if (contentText.trim().isEmpty) continue;
 
-          final title = htmlFile.FileName ?? '第${originalOrder + 1}章';
+          final title = htmlFile.FileName ?? t('第{p1}章', {'p1': originalOrder + 1});
           final extractedNum = ChapterParser.extractChapterNumber(title);
           totalWords += contentText.length;
           originalOrder++;
@@ -361,7 +362,7 @@ class ImportService {
         filePath: sourcePath ?? fileName,
       );
     } catch (e) {
-      return ImportResult.failure('EPUB导入失败: $e');
+      return ImportResult.failure(t('EPUB导入失败: {e}', {'e': e}));
     }
   }
 
@@ -409,9 +410,9 @@ class ImportService {
 
     String message;
     if (updatedCount > 0 || addedCount > 0) {
-      message = '《${existingBook.title}»已更新：新增 $addedCount 章，更新 $updatedCount 章内容';
+      message = t('《{p1}»已更新：新增 {addedCount} 章，更新 {updatedCount} 章内容', {'p1': existingBook.title, 'addedCount': addedCount, 'updatedCount': updatedCount});
     } else {
-      message = '《${existingBook.title}»无变化，跳过';
+      message = t('《{p1}»无变化，跳过', {'p1': existingBook.title});
     }
 
     return ImportResult.success(
@@ -433,7 +434,7 @@ class ImportService {
     void Function(int current, int total, String message)? progressCallback,
   }) async {
     if (!await PlatformFs.dirExists(folderPath)) {
-      return const BatchImportResult(errors: ['文件夹不存在']);
+      return BatchImportResult(errors: [t('文件夹不存在')]);
     }
 
     // 收集所有支持格式的文件（跳过 0 字节文件）
@@ -446,7 +447,7 @@ class ImportService {
     final total = allFiles.length;
 
     if (total == 0) {
-      return const BatchImportResult(errors: ['未找到可导入的文件(TXT/EPUB/PDF/MOBI)']);
+      return BatchImportResult(errors: [t('未找到可导入的文件(TXT/EPUB/PDF/MOBI)')]);
     }
 
     int succeeded = 0;
@@ -457,7 +458,7 @@ class ImportService {
 
     for (int i = 0; i < allFiles.length; i++) {
       final filePath = allFiles[i];
-      progressCallback?.call(i + 1, total, '正在导入: ${p.basename(filePath)}');
+      progressCallback?.call(i + 1, total, t('正在导入: {p1}', {'p1': p.basename(filePath)}));
 
       // 按扩展名自动分派到对应导入器
       final result =
@@ -471,7 +472,7 @@ class ImportService {
             await PlatformFs.deleteFile(filePath);
           } catch (_) {}
         }
-      } else if (result.message.contains('已存在')) {
+      } else if (result.message.contains(t('已存在'))) {
         // 重复书籍，计为跳过而非失败
         skipped++;
       } else {
@@ -515,7 +516,7 @@ class ImportService {
   }) async {
     try {
       if (bytes.isEmpty) {
-        return ImportResult.failure('文件不存在或为空: $fileName');
+        return ImportResult.failure(t('文件不存在或为空: {fileName}', {'fileName': fileName}));
       }
 
       final parsed = await PdfImporter.parseBytes(bytes, fileName: fileName);
@@ -525,7 +526,7 @@ class ImportService {
       final totalWords = chapters.fold(0, (sum, ch) => sum + ch.content.length);
 
       if (chapters.isEmpty) {
-        return ImportResult.failure('PDF 内容为空或无法解析');
+        return ImportResult.failure(t('PDF 内容为空或无法解析'));
       }
 
       // 检查是否已存在
@@ -548,7 +549,7 @@ class ImportService {
     } on PdfImportException catch (e) {
       return ImportResult.failure(e.message);
     } catch (e) {
-      return ImportResult.failure('PDF 导入失败: $e');
+      return ImportResult.failure(t('PDF 导入失败: {e}', {'e': e}));
     }
   }
 
@@ -577,7 +578,7 @@ class ImportService {
   }) async {
     try {
       if (bytes.isEmpty) {
-        return ImportResult.failure('文件不存在或为空: $fileName');
+        return ImportResult.failure(t('文件不存在或为空: {fileName}', {'fileName': fileName}));
       }
 
       final parsed = await MobiImporter.parseBytes(bytes, fileName: fileName);
@@ -587,7 +588,7 @@ class ImportService {
       final totalWords = chapters.fold(0, (sum, ch) => sum + ch.content.length);
 
       if (chapters.isEmpty) {
-        return ImportResult.failure('Kindle 文件内容为空或无法解析');
+        return ImportResult.failure(t('Kindle 文件内容为空或无法解析'));
       }
 
       // 检查是否已存在
@@ -610,7 +611,7 @@ class ImportService {
     } on MobiImportException catch (e) {
       return ImportResult.failure(e.message);
     } catch (e) {
-      return ImportResult.failure('Kindle 导入失败: $e');
+      return ImportResult.failure(t('Kindle 导入失败: {e}', {'e': e}));
     }
   }
 
@@ -633,7 +634,7 @@ class ImportService {
         ext.endsWith('.azw3')) {
       return importMobiFile(filePath, author: author, tags: tags);
     }
-    return ImportResult.failure('不支持的文件格式: $filePath');
+    return ImportResult.failure(t('不支持的文件格式: {filePath}', {'filePath': filePath}));
   }
 
   /// 根据文件名扩展名自动选择导入方法（字节版，桌面与 Web 通用）。
@@ -660,7 +661,7 @@ class ImportService {
         ext.endsWith('.azw3')) {
       return await importMobiBytes(fileName, bytes, author: author, tags: tags);
     }
-    return ImportResult.failure('不支持的文件格式: $fileName');
+    return ImportResult.failure(t('不支持的文件格式: {fileName}', {'fileName': fileName}));
   }
 
   /// 去除 HTML 标签并解码实体(与 PDF/MOBI 导入共用同一实现)

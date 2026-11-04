@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../utils/formatters.dart';
 import '../models/book.dart';
+import '../l10n/s.dart';
 import '../theme/app_colors.dart';
 import 'generated_cover.dart';
 
@@ -190,7 +191,7 @@ class _StatusBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
-        status,
+        t(status),
         style: const TextStyle(
           color: Colors.white,
           fontSize: 10,

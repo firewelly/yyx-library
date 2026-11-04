@@ -15,6 +15,7 @@ import '../models/book.dart';
 import '../models/models.dart';
 import '../theme/app_colors.dart';
 import '../utils/platform_utils.dart';
+import '../l10n/s.dart';
 
 /// 导入页面
 class ImportScreen extends ConsumerStatefulWidget {
@@ -72,7 +73,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
       context: context,
       builder: (dialogCtx) => StatefulBuilder(
         builder: (ctx, setState) => AlertDialog(
-          title: const Text('📖 手动添加小说'),
+          title: Text(t('📖 手动添加小说')),
           content: SizedBox(
             width: 460,
             child: SingleChildScrollView(
@@ -83,25 +84,25 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                   TextField(
                     controller: titleCtrl,
                     autofocus: true,
-                    decoration: const InputDecoration(
-                      labelText: '书名 *',
-                      hintText: '例如：凡人修仙传',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: t('书名 *'),
+                      hintText: t('例如：凡人修仙传'),
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 12),
                   TextField(
                     controller: authorCtrl,
-                    decoration: const InputDecoration(
-                      labelText: '作者',
-                      hintText: '例如：忘语',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: t('作者'),
+                      hintText: t('例如：忘语'),
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
                     initialValue: status,
-                    decoration: const InputDecoration(labelText: '状态', border: OutlineInputBorder()),
+                    decoration: InputDecoration(labelText: t('状态'), border: const OutlineInputBorder()),
                     items: const [
                       DropdownMenuItem(value: '连载中', child: Text('连载中')),
                       DropdownMenuItem(value: '已完结', child: Text('已完结')),
@@ -112,7 +113,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                   // 评分（星形点击）
                   Row(
                     children: [
-                      const Text('评分: '),
+                      Text(t('评分: ')),
                       ...List.generate(5, (i) => IconButton(
                         icon: Icon(
                           i < rating ? Icons.star : Icons.star_border,
@@ -128,14 +129,14 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                           icon: const Icon(Icons.clear, size: 14, color: AppColors.hintText),
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
-                          tooltip: '清除评分',
+                          tooltip: t('清除评分'),
                           onPressed: () => setState(() => rating = 0),
                         ),
                     ],
                   ),
                   const SizedBox(height: 8),
                   // 标签选择
-                  Text('标签', style: Theme.of(ctx).textTheme.titleSmall),
+                  Text(t('标签'), style: Theme.of(ctx).textTheme.titleSmall),
                   const SizedBox(height: 8),
                   // 新建标签
                   Row(
@@ -143,11 +144,11 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                       Expanded(
                         child: TextField(
                           controller: newTagCtrl,
-                          decoration: const InputDecoration(
-                            hintText: '输入新标签名并回车/点击创建...',
+                          decoration: InputDecoration(
+                            hintText: t('输入新标签名并回车/点击创建...'),
                             isDense: true,
-                            border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            border: const OutlineInputBorder(),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           ),
                           onSubmitted: (_) => _createNewTag(ctx, setState, newTagCtrl, db, selectedTags, () async {
                             allTags = await db.getAllTags();
@@ -159,7 +160,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                         onPressed: () => _createNewTag(ctx, setState, newTagCtrl, db, selectedTags, () async {
                           allTags = await db.getAllTags();
                         }),
-                        child: const Text('创建'),
+                        child: Text(t('创建')),
                       ),
                     ],
                   ),
@@ -184,7 +185,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                       }).toList(),
                     )
                   else
-                    const Text('暂无已有标签，保存后可在详情页添加', style: TextStyle(color: AppColors.hintText, fontSize: 12)),
+                    Text(t('暂无已有标签，保存后可在详情页添加'), style: const TextStyle(color: AppColors.hintText, fontSize: 12)),
                 ],
               ),
             ),
@@ -192,14 +193,14 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogCtx),
-              child: const Text('取消'),
+              child: Text(t('取消')),
             ),
             FilledButton(
               onPressed: () async {
                 final title = titleCtrl.text.trim();
                 if (title.isEmpty) {
                   ScaffoldMessenger.of(ctx).showSnackBar(
-                    const SnackBar(content: Text('请输入书名')),
+                    SnackBar(content: Text(t('请输入书名'))),
                   );
                   return;
                 }
@@ -220,11 +221,11 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                 unawaited(ref.read(libraryProvider.notifier).refresh());
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('已添加《$title》')),
+                    SnackBar(content: Text(t('已添加《{title}》', {'title': title}))),
                   );
                 }
               },
-              child: const Text('保存'),
+              child: Text(t('保存')),
             ),
           ],
         ),
@@ -243,7 +244,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
   ) async {
     final name = ctrl.text.trim();
     if (name.isEmpty) {
-      ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('请输入标签名')));
+      ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text(t('请输入标签名'))));
       return;
     }
     try {
@@ -252,10 +253,10 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
       setState(() => selectedTags.add(tag));
       await refreshAll();
       if (!ctx.mounted) return;
-      ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('标签「$name」已创建')));
+      ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text(t('标签「{name}」已创建', {'name': name}))));
     } catch (e) {
       // 标签已存在等情况
-      if (ctx.mounted) ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('创建标签失败: $e')));
+      if (ctx.mounted) ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text(t('创建标签失败: {e}', {'e': e}))));
     }
   }
 
@@ -265,7 +266,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('📥 导入小说')),
+      appBar: AppBar(title: Text(t('📥 导入小说'))),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -282,10 +283,10 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('没有文件要导入？', style: theme.textTheme.titleMedium),
+                          Text(t('没有文件要导入？'), style: theme.textTheme.titleMedium),
                           const SizedBox(height: 4),
                           Text(
-                            '手动添加一本书，然后给它设置状态、标签和评分',
+                            t('手动添加一本书，然后给它设置状态、标签和评分'),
                             style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                           ),
                         ],
@@ -295,7 +296,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                     FilledButton.icon(
                       onPressed: () => _showAddBookDialog(context),
                       icon: const Icon(Icons.edit_note),
-                      label: const Text('手动添加'),
+                      label: Text(t('手动添加')),
                     ),
                   ],
                 ),
@@ -310,19 +311,19 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('导入方式', style: theme.textTheme.titleMedium),
+                      Text(t('导入方式'), style: theme.textTheme.titleMedium),
                       const SizedBox(height: 12),
                       SegmentedButton<bool>(
-                        segments: const [
+                        segments: [
                           ButtonSegment(
                             value: true,
-                            label: Text('选择文件夹'),
-                            icon: Icon(Icons.folder_open),
+                            label: Text(t('选择文件夹')),
+                            icon: const Icon(Icons.folder_open),
                           ),
                           ButtonSegment(
                             value: false,
-                            label: Text('选择文件'),
-                            icon: Icon(Icons.description),
+                            label: Text(t('选择文件')),
+                            icon: const Icon(Icons.description),
                           ),
                         ],
                         selected: {_isFolderMode},
@@ -348,16 +349,16 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('选择文件夹', style: theme.textTheme.titleMedium),
+                      Text(t('选择文件夹'), style: theme.textTheme.titleMedium),
                       const SizedBox(height: 8),
                       Row(
                         children: [
                           Expanded(
                             child: Tooltip(
-                              message: _selectedPath ?? '点击右侧按钮选择文件夹',
+                              message: _selectedPath ?? t('点击右侧按钮选择文件夹'),
                               child: TextField(
                                 decoration: InputDecoration(
-                                  hintText: '选择包含小说文件的文件夹...',
+                                  hintText: t('选择包含小说文件的文件夹...'),
                                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                                   suffixIcon: const Icon(Icons.folder_open),
                                 ),
@@ -370,14 +371,14 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                           FilledButton.icon(
                             onPressed: _pickFolder,
                             icon: const Icon(Icons.folder_open),
-                            label: const Text('浏览'),
+                            label: Text(t('浏览')),
                           ),
                         ],
                       ),
                       const SizedBox(height: 8),
                       CheckboxListTile(
-                        title: const Text('递归查找子文件夹'),
-                        subtitle: const Text('在所有子文件夹中搜索 TXT/EPUB/PDF/MOBI 文件'),
+                        title: Text(t('递归查找子文件夹')),
+                        subtitle: Text(t('在所有子文件夹中搜索 TXT/EPUB/PDF/MOBI 文件')),
                         value: _recursive,
                         onChanged: (v) => setState(() => _recursive = v ?? false),
                         contentPadding: EdgeInsets.zero,
@@ -397,15 +398,15 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('选择文件', style: theme.textTheme.titleMedium),
+                      Text(t('选择文件'), style: theme.textTheme.titleMedium),
                       const SizedBox(height: 8),
                       Row(
                         children: [
                           Expanded(
                             child: Text(
                               _displayNames.isEmpty
-                                  ? '未选择文件'
-                                  : '已选择 ${_displayNames.length} 个文件',
+                                  ? t('未选择文件')
+                                  : t('已选择 {p1} 个文件', {'p1': _displayNames.length}),
                               style: theme.textTheme.bodyMedium,
                             ),
                           ),
@@ -413,7 +414,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                           FilledButton.icon(
                             onPressed: _pickFiles,
                             icon: const Icon(Icons.file_open),
-                            label: const Text('选择文件'),
+                            label: Text(t('选择文件')),
                           ),
                         ],
                       ),
@@ -457,8 +458,8 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
             if (!PlatformUtils.isWeb)
               Card(
                 child: SwitchListTile(
-                  title: const Text('导入后删除原文件'),
-                  subtitle: const Text('导入成功后删除源文件（不可恢复）'),
+                  title: Text(t('导入后删除原文件')),
+                  subtitle: Text(t('导入成功后删除源文件（不可恢复）')),
                   value: _deleteAfter,
                   onChanged: (v) => setState(() => _deleteAfter = v),
                 ),
@@ -495,7 +496,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                     icon: state.isImporting
                         ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: theme.colorScheme.onPrimary))
                         : const Icon(Icons.upload_file),
-                    label: Text(state.isImporting ? '导入中...' : '开始导入'),
+                    label: Text(state.isImporting ? t('导入中...') : t('开始导入')),
                   ),
                 ),
               ),
@@ -526,7 +527,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              state.lastResult!.success ? '导入成功' : '导入失败',
+                              state.lastResult!.success ? t('导入成功') : t('导入失败'),
                               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                             ),
                           ),
@@ -544,7 +545,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                             context.go('/');
                           },
                           icon: const Icon(Icons.home),
-                          label: const Text('返回书架'),
+                          label: Text(t('返回书架')),
                         ),
                       ),
                     ],
@@ -571,7 +572,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              '导入完成: 成功 ${state.batchResult!.succeeded}, 失败 ${state.batchResult!.failed}',
+                              t('导入完成: 成功 {p1}, 失败 {p2}', {'p1': state.batchResult!.succeeded, 'p2': state.batchResult!.failed}),
                               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                             ),
                           ),
@@ -579,13 +580,13 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                       ),
                       if (state.batchResult!.errors.isNotEmpty) ...[
                         const SizedBox(height: 8),
-                        const Text('失败详情:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        Text(t('失败详情:'), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                         ...state.batchResult!.errors.take(5).map((e) => Padding(
                           padding: const EdgeInsets.only(top: 2),
                           child: Text(e, style: TextStyle(fontSize: 12, color: theme.colorScheme.error)),
                         )),
                         if (state.batchResult!.errors.length > 5)
-                          Text('...还有 ${state.batchResult!.errors.length - 5} 个错误', style: const TextStyle(fontSize: 11, color: AppColors.hintText)),
+                          Text(t('...还有 {p1} 个错误', {'p1': state.batchResult!.errors.length - 5}), style: const TextStyle(fontSize: 11, color: AppColors.hintText)),
                       ],
                       const SizedBox(height: 12),
                       SizedBox(
@@ -596,7 +597,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                             context.go('/');
                           },
                           icon: const Icon(Icons.home),
-                          label: const Text('返回书架'),
+                          label: Text(t('返回书架')),
                         ),
                       ),
                     ],
@@ -629,7 +630,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
     setState(() => _errorMessage = null);
     try {
       final result = await FilePicker.platform.getDirectoryPath(
-        dialogTitle: '选择包含小说的文件夹',
+        dialogTitle: t('选择包含小说的文件夹'),
       );
       if (result != null) {
         // 验证文件夹存在并统计可导入文件数(支持 TXT/EPUB/PDF/MOBI/AZW/AZW3)
@@ -643,13 +644,13 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
           setState(() {
             _selectedPath = result;
             if (files.isEmpty) {
-              _errorMessage = '该文件夹中没有找到可导入的文件(TXT/EPUB/PDF/MOBI)';
+              _errorMessage = t('该文件夹中没有找到可导入的文件(TXT/EPUB/PDF/MOBI)');
             }
           });
         }
       }
     } catch (e) {
-      setState(() => _errorMessage = '选择文件夹失败: $e');
+      setState(() => _errorMessage = t('选择文件夹失败: {e}', {'e': e}));
     }
   }
 
@@ -661,7 +662,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
         allowedExtensions: ['txt', 'epub', 'pdf', 'mobi', 'azw', 'azw3'],
         allowMultiple: true,
         withData: PlatformUtils.isWeb, // Web 端必须读取字节（无路径可用）
-        dialogTitle: '选择小说文件（TXT/EPUB/PDF/MOBI）',
+        dialogTitle: t('选择小说文件（TXT/EPUB/PDF/MOBI）'),
       );
       if (result != null && result.files.isNotEmpty) {
         if (PlatformUtils.isWeb) {
@@ -680,7 +681,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
         }
       }
     } catch (e) {
-      setState(() => _errorMessage = '选择文件失败: $e');
+      setState(() => _errorMessage = t('选择文件失败: {e}', {'e': e}));
     }
   }
 

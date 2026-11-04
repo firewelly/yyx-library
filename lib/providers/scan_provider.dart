@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/library_scan_service.dart';
 import 'database_provider.dart';
 import 'import_provider.dart';
+import '../l10n/s.dart';
 
 /// 扫描状态
 class ScanState {
@@ -49,10 +50,10 @@ class ScanNotifier extends StateNotifier<ScanState> {
   Future<void> startScan(List<String> folders) async {
     if (state.isScanning) {
       _service.cancel();
-      state = state.copyWith(statusMessage: '正在取消...');
+      state = state.copyWith(statusMessage: t('正在取消...'));
       return;
     }
-    state = const ScanState(isScanning: true, statusMessage: '准备扫描...');
+    state = ScanState(isScanning: true, statusMessage: t('准备扫描...'));
     try {
       final result = await _service.scanFolders(
         folders,
@@ -67,7 +68,7 @@ class ScanNotifier extends StateNotifier<ScanState> {
         isScanning: false,
         progress: 1.0,
         result: result,
-        statusMessage: '扫描完成',
+        statusMessage: t('扫描完成'),
       );
     } catch (e) {
       state = state.copyWith(isScanning: false, error: e.toString());

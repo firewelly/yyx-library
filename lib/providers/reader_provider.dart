@@ -3,6 +3,7 @@ import '../models/models.dart';
 import '../services/database_service.dart';
 import 'database_provider.dart';
 import 'settings_provider.dart';
+import '../l10n/s.dart';
 
 /// 阅读器状态
 class ReaderState {
@@ -106,7 +107,7 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
     try {
       final book = await _db.getBook(bookId);
       if (book == null) {
-        state = state.copyWith(isLoading: false, error: '书籍不存在');
+        state = state.copyWith(isLoading: false, error: t('书籍不存在'));
         return;
       }
       // 轻量加载：只加载章节元数据（不含内容），用于导航列表。

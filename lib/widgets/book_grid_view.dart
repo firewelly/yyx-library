@@ -5,6 +5,7 @@ import '../models/book.dart';
 import '../providers/library_provider.dart';
 import '../theme/app_colors.dart';
 import 'book_card.dart';
+import '../l10n/s.dart';
 
 /// 书籍网格视图
 class BookGridView extends ConsumerWidget {
@@ -19,7 +20,7 @@ class BookGridView extends ConsumerWidget {
     }
 
     if (state.error != null) {
-      return Center(child: Text('加载失败: ${state.error}'));
+      return Center(child: Text(t('加载失败: {p1}', {'p1': state.error})));
     }
 
     if (state.books.isEmpty) {
@@ -59,12 +60,12 @@ class BookGridView extends ConsumerWidget {
           children: [
             const Icon(Icons.auto_stories_rounded, size: 72, color: AppColors.emptyState),
             const SizedBox(height: 20),
-            Text('书库还是空的', style: theme.textTheme.titleMedium?.copyWith(
+            Text(t('书库还是空的'), style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
             )),
             const SizedBox(height: 8),
             Text(
-              '点击右下角 + 导入你的第一本小说\n支持 TXT / EPUB / PDF / MOBI',
+              t('点击右下角 + 导入你的第一本小说\n支持 TXT / EPUB / PDF / MOBI'),
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(color: AppColors.hintText),
             ),

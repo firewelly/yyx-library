@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:html' as html;
 import 'dart:js_interop';
 import 'dart:typed_data';
+import '../../l10n/s.dart';
 
 /// NAS 只读库的 SQL 执行通道。
 ///
@@ -53,7 +54,7 @@ class NasSqlWorker {
     }));
     unawaited(script.onError.first.then((_) {
       if (!completer.isCompleted) {
-        completer.completeError(StateError('无法加载 $src'));
+        completer.completeError(StateError(t('无法加载 {src}', {'src': src})));
       }
     }));
     html.document.head!.append(script);
@@ -105,13 +106,13 @@ class NasSqlWorker {
     String sql, [
     List<Object?> args = const [],
   ]) async {
-    if (!_ready) throw StateError('NasSqlWorker 尚未 open()');
+    if (!_ready) throw StateError(t('NasSqlWorker 尚未 open()'));
     final String json;
     try {
       json = (await _nasBridge.exec(sql.toJS, args.jsify()).toDart).toDart;
     } catch (e) {
       // 把失败 SQL 带进错误信息，便于在 UI 错误提示里直接定位
-      throw StateError('NAS query 失败 [$sql | args=$args]: $e');
+      throw StateError(t('NAS query 失败 [{sql} | args={args}]: {e}', {'sql': sql, 'args': args, 'e': e}));
     }
     return _rowsFromJson(json);
   }

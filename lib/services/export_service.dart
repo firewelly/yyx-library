@@ -6,6 +6,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'database_service.dart';
 import 'platform_fs.dart';
 import '../utils/web_launcher.dart';
+import '../l10n/s.dart';
 
 /// 导出服务 - TXT/EPUB/PDF/MOBI 导出
 ///
@@ -77,7 +78,7 @@ class ExportService {
       case 'kindle':
         return exportToMobi(bookId, outputDir);
       default:
-        throw ArgumentError('不支持的导出格式: $format');
+        throw ArgumentError(t('不支持的导出格式: {format}', {'format': format}));
     }
   }
 
@@ -99,7 +100,7 @@ class ExportService {
           'epub',
           'application/epub+zip'
         ),
-      _ => throw ArgumentError('不支持的导出格式: $format'),
+      _ => throw ArgumentError(t('不支持的导出格式: {format}', {'format': format})),
     };
 
     final fileName = fmt == 'mobi' || fmt == 'kindle'
@@ -124,17 +125,17 @@ class ExportService {
     final buffer = StringBuffer();
     buffer.writeln(book.title);
     if (book.author != null && book.author!.isNotEmpty) {
-      buffer.writeln('作者: ${book.author}');
+      buffer.writeln(t('作者: {p1}', {'p1': book.author}));
     }
     if (book.summary != null && book.summary!.isNotEmpty) {
-      buffer.writeln('简介: ${book.summary}');
+      buffer.writeln(t('简介: {p1}', {'p1': book.summary}));
     }
-    buffer.writeln('状态: ${book.status}');
+    buffer.writeln(t('状态: {p1}', {'p1': book.status}));
     buffer.writeln('=' * 50);
     buffer.writeln();
 
     for (final chapter in chapters) {
-      buffer.writeln('第${chapter.chapterNumber}章 ${chapter.title}');
+      buffer.writeln(t('第{p1}章 {p2}', {'p1': chapter.chapterNumber, 'p2': chapter.title}));
       buffer.writeln('-' * 30);
       buffer.writeln(chapter.content);
       buffer.writeln();
@@ -156,14 +157,14 @@ class ExportService {
 
     // 元数据
     epubBook.Title = book.title;
-    epubBook.Author = book.author ?? '未知作者';
+    epubBook.Author = book.author ?? t('未知作者');
 
     // 构建 Schema.Package
     final package = EpubPackage();
     final metadata = EpubMetadata();
     metadata.Titles = [book.title];
     final creator = EpubMetadataCreator();
-    creator.Creator = book.author ?? '未知作者';
+    creator.Creator = book.author ?? t('未知作者');
     creator.Role = 'aut';
     metadata.Creators = [creator];
     metadata.Description = book.summary ?? '';
@@ -222,7 +223,7 @@ class ExportService {
 
     final bytes = EpubWriter.writeBook(epubBook);
     if (bytes == null) {
-      throw Exception('EPUB 生成失败');
+      throw Exception(t('EPUB 生成失败'));
     }
     return Uint8List.fromList(bytes);
   }
@@ -298,7 +299,7 @@ class ExportService {
           build: (context) => [
             pw.Header(
               level: 1,
-              text: '第${chapter.chapterNumber}章 ${chapter.title}',
+              text: t('第{p1}章 {p2}', {'p1': chapter.chapterNumber, 'p2': chapter.title}),
             ),
             pw.SizedBox(height: 12),
             pw.Paragraph(

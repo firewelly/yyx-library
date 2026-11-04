@@ -11,6 +11,7 @@ import '../models/chapter.dart';
 import '../utils/html_text.dart';
 import '../utils/text_decode.dart';
 import 'database_service.dart';
+import '../l10n/s.dart';
 
 /// 爬取进度回调
 typedef CrawlProgressCallback = void Function(
@@ -84,7 +85,7 @@ class DartCrawlerEngine implements CrawlerEngine {
       ),
     );
     if (resp.statusCode != 200) {
-      throw CrawlerException('请求失败 HTTP ${resp.statusCode}: $url');
+      throw CrawlerException(t('请求失败 HTTP {p1}: {url}', {'p1': resp.statusCode, 'url': url}));
     }
     return resp;
   }
@@ -170,7 +171,7 @@ class DartCrawlerEngine implements CrawlerEngine {
   Future<List<CrawledBook>> searchBooks(BookSource source, String keyword) async {
     final search = source.search;
     if (search == null) {
-      throw CrawlerException('书源「${source.name}」不支持搜索');
+      throw CrawlerException(t('书源「{p1}」不支持搜索', {'p1': source.name}));
     }
     final url = _fillTemplate(search.url, {
       'key': Uri.encodeComponent(keyword),
@@ -231,7 +232,7 @@ class DartCrawlerEngine implements CrawlerEngine {
         ? doc.body
         : doc.querySelector(selector);
     if (contentNode == null) {
-      throw CrawlerException('正文提取失败(选择器: $selector)');
+      throw CrawlerException(t('正文提取失败(选择器: {selector})', {'selector': selector}));
     }
 
     // HTML → 纯文本(保留段落)
@@ -277,9 +278,9 @@ class CrawlImportResult {
   });
 
   String get message {
-    if (isNewBook) return '成功导入《$bookTitle》，共 $chapterCount 章';
-    if (addedCount + updatedCount == 0) return '《$bookTitle》无变化，跳过';
-    return '《$bookTitle》已更新：新增 $addedCount 章，更新 $updatedCount 章';
+    if (isNewBook) return t('成功导入《{bookTitle}》，共 {chapterCount} 章', {'bookTitle': bookTitle, 'chapterCount': chapterCount});
+    if (addedCount + updatedCount == 0) return t('《{bookTitle}》无变化，跳过', {'bookTitle': bookTitle});
+    return t('《{bookTitle}》已更新：新增 {addedCount} 章，更新 {updatedCount} 章', {'bookTitle': bookTitle, 'addedCount': addedCount, 'updatedCount': updatedCount});
   }
 }
 
@@ -307,7 +308,7 @@ class CrawlImporter {
     CrawlProgressCallback? onProgress,
   }) async {
     if (chapters.isEmpty) {
-      throw CrawlerException('没有可导入的章节');
+      throw CrawlerException(t('没有可导入的章节'));
     }
 
     // 去重:查已有书籍

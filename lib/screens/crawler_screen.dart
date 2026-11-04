@@ -8,6 +8,7 @@ import '../services/book_source_store.dart';
 import '../services/crawler_service.dart';
 import '../theme/app_colors.dart';
 import '../utils/platform_utils.dart';
+import '../l10n/s.dart';
 
 /// 爬虫抓取页 —— 书源搜索 + 目录抓取 + 入库
 class CrawlerScreen extends ConsumerStatefulWidget {
@@ -67,11 +68,11 @@ class _CrawlerScreenState extends ConsumerState<CrawlerScreen> {
     final keyword = _searchCtrl.text.trim();
     final source = _selectedSource;
     if (keyword.isEmpty) {
-      setState(() => _error = '请输入书名关键词');
+      setState(() => _error = t('请输入书名关键词'));
       return;
     }
     if (source == null) {
-      setState(() => _error = '没有可用书源，请先在设置中添加');
+      setState(() => _error = t('没有可用书源，请先在设置中添加'));
       return;
     }
     setState(() {
@@ -85,13 +86,13 @@ class _CrawlerScreenState extends ConsumerState<CrawlerScreen> {
       setState(() {
         _results = results;
         _searching = false;
-        if (results.isEmpty) _error = '未找到「$keyword」相关书籍';
+        if (results.isEmpty) _error = t('未找到「{keyword}」相关书籍', {'keyword': keyword});
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _searching = false;
-        _error = '搜索失败: $e';
+        _error = t('搜索失败: {e}', {'e': e});
       });
     }
   }
@@ -113,31 +114,31 @@ class _CrawlerScreenState extends ConsumerState<CrawlerScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (book.author.isNotEmpty)
-              Text('作者: ${book.author}', style: const TextStyle(fontSize: 13)),
-            Text('来源: ${book.sourceName}', style: const TextStyle(fontSize: 13)),
+              Text(t('作者: {p1}', {'p1': book.author}), style: const TextStyle(fontSize: 13)),
+            Text(t('来源: {p1}', {'p1': book.sourceName}), style: const TextStyle(fontSize: 13)),
             const SizedBox(height: 12),
             if (existing != null)
               Text(
-                '⚠️ 书库已有《${existing.title}》，可选择更新章节',
+                t('⚠️ 书库已有《{p1}》，可选择更新章节', {'p1': existing.title}),
                 style: const TextStyle(color: AppColors.warning, fontSize: 13),
               )
             else
-              const Text('将作为新书导入', style: TextStyle(fontSize: 13)),
+              Text(t('将作为新书导入'), style: const TextStyle(fontSize: 13)),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, 'cancel'),
-            child: const Text('取消'),
+            child: Text(t('取消')),
           ),
           if (existing != null)
             TextButton(
               onPressed: () => Navigator.pop(ctx, 'update'),
-              child: const Text('更新到已有书'),
+              child: Text(t('更新到已有书')),
             ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, 'new'),
-            child: Text(existing != null ? '另建新书' : '导入'),
+            child: Text(existing != null ? t('另建新书') : t('导入')),
           ),
         ],
       ),
@@ -160,7 +161,7 @@ class _CrawlerScreenState extends ConsumerState<CrawlerScreen> {
       _crawling = true;
       _cancelRequested = false;
       _progress = 0;
-      _status = '正在抓取目录...';
+      _status = t('正在抓取目录...');
       _error = null;
     });
 
@@ -169,7 +170,7 @@ class _CrawlerScreenState extends ConsumerState<CrawlerScreen> {
 
       // 1. 抓目录
       final toc = await _engine.fetchToc(source, book.url);
-      if (toc.isEmpty) throw CrawlerException('目录为空');
+      if (toc.isEmpty) throw CrawlerException(t('目录为空'));
       if (!mounted) return;
 
       // 2. 更新模式：过滤出库中没有的章节（增量抓取）
@@ -184,7 +185,7 @@ class _CrawlerScreenState extends ConsumerState<CrawlerScreen> {
           final existingNumbers = existingChapters.map((c) => c.chapterNumber).toSet();
           toFetch = toc.where((c) => !existingNumbers.contains(c.chapterNumber)).toList();
           setState(() {
-            _status = '书库已有 $existingCount 章，本次抓取 ${toFetch.length} 个新章节';
+            _status = t('书库已有 {existingCount} 章，本次抓取 {p2} 个新章节', {'existingCount': existingCount, 'p2': toFetch.length});
           });
         }
       }
@@ -192,7 +193,7 @@ class _CrawlerScreenState extends ConsumerState<CrawlerScreen> {
         setState(() {
           _crawling = false;
           _progress = 1.0;
-          _status = '《${book.title}»目录无新增章节';
+          _status = t('《{p1}»目录无新增章节', {'p1': book.title});
         });
         return;
       }
@@ -206,7 +207,7 @@ class _CrawlerScreenState extends ConsumerState<CrawlerScreen> {
         if (_cancelRequested) break;
         setState(() {
           _progress = (i / toFetch.length).clamp(0.0, 0.9);
-          _status = '抓取章节 ${i + 1}/${toFetch.length}: ${toFetch[i].title}';
+          _status = t('抓取章节 {p1}/{p2}: {p3}', {'p1': i + 1, 'p2': toFetch.length, 'p3': toFetch[i].title});
         });
         String? content;
         for (int attempt = 0; attempt < 2 && content == null; attempt++) {
@@ -236,7 +237,7 @@ class _CrawlerScreenState extends ConsumerState<CrawlerScreen> {
         setState(() {
           _crawling = false;
           _status = '';
-          _error = _cancelRequested ? '已取消（未抓取到任何章节）' : '抓取失败: $lastError';
+          _error = _cancelRequested ? t('已取消（未抓取到任何章节）') : t('抓取失败: {lastError}', {'lastError': lastError});
         });
         return;
       }
@@ -244,7 +245,7 @@ class _CrawlerScreenState extends ConsumerState<CrawlerScreen> {
       // 4. 入库（取消时把已抓到的部分入库）
       setState(() {
         _progress = 0.95;
-        _status = '正在写入书库...';
+        _status = t('正在写入书库...');
       });
       final importer = CrawlImporter(ref.read(databaseServiceProvider));
       final result = await importer.importChapters(
@@ -258,11 +259,15 @@ class _CrawlerScreenState extends ConsumerState<CrawlerScreen> {
 
       final skippedNote = failed.isEmpty
           ? ''
-          : '（${failed.length} 章抓取失败已跳过: ${failed.take(3).join('、')}${failed.length > 3 ? ' 等' : ''}）';
+          : t('（{count} 章抓取失败已跳过: {titles}{more}）', {
+              'count': failed.length,
+              'titles': failed.take(3).join(t('、')),
+              'more': failed.length > 3 ? t(' 等') : '',
+            });
       setState(() {
         _crawling = false;
         _progress = 1.0;
-        _status = '${_cancelRequested ? '已取消，' : ''}${result.message}$skippedNote';
+        _status = '${_cancelRequested ? t('已取消，') : ''}${result.message}$skippedNote';
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('${result.message}$skippedNote')),
@@ -273,7 +278,7 @@ class _CrawlerScreenState extends ConsumerState<CrawlerScreen> {
       if (!mounted) return;
       setState(() {
         _crawling = false;
-        _error = '爬取失败: $e';
+        _error = t('爬取失败: {e}', {'e': e});
         _status = '';
       });
     }
@@ -283,7 +288,7 @@ class _CrawlerScreenState extends ConsumerState<CrawlerScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('🕷️ 爬虫抓取')),
+      appBar: AppBar(title: Text(t('🕷️ 爬虫抓取'))),
       body: Column(
         children: [
           // 搜索区
@@ -299,9 +304,9 @@ class _CrawlerScreenState extends ConsumerState<CrawlerScreen> {
                       flex: 2,
                       child: DropdownButtonFormField<BookSource>(
                         initialValue: _selectedSource,
-                        decoration: const InputDecoration(
-                          labelText: '书源',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: t('书源'),
+                          border: const OutlineInputBorder(),
                           isDense: true,
                         ),
                         items: _sources.map((s) => DropdownMenuItem(
@@ -318,7 +323,7 @@ class _CrawlerScreenState extends ConsumerState<CrawlerScreen> {
                       child: TextField(
                         controller: _searchCtrl,
                         decoration: InputDecoration(
-                          hintText: '输入书名或关键词...',
+                          hintText: t('输入书名或关键词...'),
                           border: const OutlineInputBorder(),
                           isDense: true,
                           suffixIcon: _searching
@@ -337,7 +342,7 @@ class _CrawlerScreenState extends ConsumerState<CrawlerScreen> {
                     const SizedBox(width: 12),
                     FilledButton(
                       onPressed: _searching ? null : _search,
-                      child: const Text('搜索'),
+                      child: Text(t('搜索')),
                     ),
                   ],
                 ),
@@ -355,16 +360,16 @@ class _CrawlerScreenState extends ConsumerState<CrawlerScreen> {
 
           // Web 端 CORS 提示
           if (PlatformUtils.isWeb)
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, size: 16, color: AppColors.warning),
-                  SizedBox(width: 6),
+                  const Icon(Icons.info_outline, size: 16, color: AppColors.warning),
+                  const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      'Web 端受浏览器跨域(CORS)限制，多数小说站无法直接抓取；抓取功能建议使用桌面端。',
-                      style: TextStyle(fontSize: 12, color: AppColors.warning),
+                      t('Web 端受浏览器跨域(CORS)限制，多数小说站无法直接抓取；抓取功能建议使用桌面端。'),
+                      style: const TextStyle(fontSize: 12, color: AppColors.warning),
                     ),
                   ),
                 ],
@@ -390,7 +395,7 @@ class _CrawlerScreenState extends ConsumerState<CrawlerScreen> {
                       TextButton.icon(
                         onPressed: _cancelRequested ? null : _cancelCrawl,
                         icon: const Icon(Icons.stop_circle_outlined, size: 16),
-                        label: Text(_cancelRequested ? '正在取消...' : '取消'),
+                        label: Text(_cancelRequested ? t('正在取消...') : t('取消')),
                         style: TextButton.styleFrom(
                           visualDensity: VisualDensity.compact,
                           foregroundColor: AppColors.error,
@@ -444,11 +449,11 @@ class _CrawlerScreenState extends ConsumerState<CrawlerScreen> {
           Icon(Icons.travel_explore,
               size: 64, color: theme.colorScheme.outlineVariant),
           const SizedBox(height: 12),
-          const Text('输入书名搜索，点击结果即可抓取入库',
-              style: TextStyle(color: AppColors.hintText)),
+          Text(t('输入书名搜索，点击结果即可抓取入库'),
+              style: const TextStyle(color: AppColors.hintText)),
           const SizedBox(height: 8),
-          const Text('支持: 书源规则驱动的静态小说站',
-              style: TextStyle(color: AppColors.hintText, fontSize: 12)),
+          Text(t('支持: 书源规则驱动的静态小说站'),
+              style: const TextStyle(color: AppColors.hintText, fontSize: 12)),
         ],
       ),
     );

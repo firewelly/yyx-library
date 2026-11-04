@@ -5,6 +5,7 @@ import '../models/models.dart';
 import '../services/import_service.dart';
 import 'database_provider.dart';
 import 'settings_provider.dart';
+import '../l10n/s.dart';
 
 /// 导入状态
 class ImportState {
@@ -56,7 +57,7 @@ class ImportNotifier extends StateNotifier<ImportState> {
   /// 导入单个文件(自动按扩展名分派:TXT/EPUB/PDF/MOBI/AZW/AZW3)
   Future<void> importFile(String filePath, {String? author, List<String>? tags}) async {
     final extLabel = _formatLabel(filePath);
-    state = state.copyWith(isImporting: true, progress: 0, error: null, statusMessage: '正在导入 $extLabel...');
+    state = state.copyWith(isImporting: true, progress: 0, error: null, statusMessage: t('正在导入 {extLabel}...', {'extLabel': extLabel}));
     try {
       final result = await _importService.importByExtension(
         filePath,
@@ -68,7 +69,7 @@ class ImportNotifier extends StateNotifier<ImportState> {
         isImporting: false,
         progress: 1.0,
         lastResult: result,
-        statusMessage: result.success ? '导入成功' : '导入失败',
+        statusMessage: result.success ? t('导入成功') : t('导入失败'),
         error: result.success ? null : result.message,
       );
     } catch (e) {
@@ -79,7 +80,7 @@ class ImportNotifier extends StateNotifier<ImportState> {
   /// 按字节导入文件（Web 端主入口：file_picker 在 Web 上只有 bytes 无路径）
   Future<void> importBytes(String fileName, Uint8List bytes, {String? author, List<String>? tags}) async {
     final extLabel = _formatLabel(fileName);
-    state = state.copyWith(isImporting: true, progress: 0, error: null, statusMessage: '正在导入 $extLabel...');
+    state = state.copyWith(isImporting: true, progress: 0, error: null, statusMessage: t('正在导入 {extLabel}...', {'extLabel': extLabel}));
     try {
       final result = await _importService.importByBytes(
         fileName,
@@ -92,7 +93,7 @@ class ImportNotifier extends StateNotifier<ImportState> {
         isImporting: false,
         progress: 1.0,
         lastResult: result,
-        statusMessage: result.success ? '导入成功' : '导入失败',
+        statusMessage: result.success ? t('导入成功') : t('导入失败'),
         error: result.success ? null : result.message,
       );
     } catch (e) {
@@ -128,7 +129,7 @@ class ImportNotifier extends StateNotifier<ImportState> {
 
   /// 批量导入文件夹
   Future<void> importFolder(String folderPath, {bool recursive = false, String? author, List<String>? tags, bool deleteAfter = false}) async {
-    state = state.copyWith(isImporting: true, progress: 0, error: null, statusMessage: '正在扫描文件夹...');
+    state = state.copyWith(isImporting: true, progress: 0, error: null, statusMessage: t('正在扫描文件夹...'));
     try {
       final result = await _importService.importFolder(
         folderPath,
@@ -148,7 +149,7 @@ class ImportNotifier extends StateNotifier<ImportState> {
         isImporting: false,
         progress: 1.0,
         batchResult: result,
-        statusMessage: '导入完成: 成功${result.succeeded}, 失败${result.failed}',
+        statusMessage: t('导入完成: 成功{p1}, 失败{p2}', {'p1': result.succeeded, 'p2': result.failed}),
       );
     } catch (e) {
       state = state.copyWith(isImporting: false, error: e.toString());

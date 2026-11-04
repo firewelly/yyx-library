@@ -31,7 +31,18 @@ NAS 形态为**服务端查询架构**：Python 标准库服务端提供 `/api/*
   最终 release 一律在 GitHub Releases（YYX v10.0.2、NasOC v0.1.0.0011 均含全部资产），
   当前跟进材料在 `~/Downloads/YYX跟进材料_20261031/`、`~/Downloads/NasOC回信材料_20261031/`（仅本地）。
 
-## 当前状态（截至 2026-10-31）
+## 当前状态（截至 2026-11-04）
+
+- **11-04 i18n：英文界面 + 中英文切换**（feat/english-ui，待 PR 合并）：
+  轻量 l10n（`lib/l10n/s.dart` 的 `t()`，中文原文为 key，`{name}` 占位符；
+  英文表 `lib/l10n/translations.dart` 452 条），书架顶栏右上角 + 设置页「外观」可切换
+  （system/zh/en，存 Hive `AppSettings.language`）。45 个文件 660+ 处文案已接入；
+  数据串保持中文（书籍状态值、章节解析正则/数词表，见 codemod 豁免清单 scripts/ 下注释）。
+  Codemod：`/tmp` 已删，规则见提交信息；重新生成翻译表跑 `python3 scripts/gen_translations.py`。
+  已知遗留：本地裸 serve build/web 启动报「Null check operator」（main 分支同样复现，
+  与 i18n 无关；NAS 部署形态不受影响），待排查。
+
+## 历史状态（截至 2026-10-31）
 
 - **10-31 v10.0.2 发布**（upk 10.0.2.0007 + fpk 2.0.2；PR #7/#8/#9 已并 main）：
   ① 服务端 novel_server.py 新增导入写入端点（books/chapters rw + DELETE），书库连接仍默认只读、

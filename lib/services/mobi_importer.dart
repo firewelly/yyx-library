@@ -4,6 +4,7 @@ import 'package:kindle_unpack/kindle_unpack.dart';
 import '../utils/html_text.dart';
 import 'chapter_parser.dart';
 import 'platform_fs.dart';
+import '../l10n/s.dart';
 
 /// MOBI / AZW / AZW3 / KF8 导入器
 ///
@@ -21,7 +22,7 @@ class MobiImporter {
       parse(String filePath, {String? bookTitle}) async {
     final bytes = await PlatformFs.readBytes(filePath);
     if (bytes == null) {
-      throw MobiImportException('文件不存在: $filePath');
+      throw MobiImportException(t('文件不存在: {filePath}', {'filePath': filePath}));
     }
     return parseBytes(
       bytes,
@@ -43,11 +44,11 @@ class MobiImporter {
       // DRM 或格式损坏都会在此抛出
       final msg = e.message.toLowerCase();
       if (msg.contains('drm') || msg.contains('decrypt') || msg.contains('protect')) {
-        throw MobiImportException('该 Kindle 文件受 DRM 保护,无法解析。\nDRM 受保护文件不支持导入。');
+        throw MobiImportException(t('该 Kindle 文件受 DRM 保护,无法解析。\nDRM 受保护文件不支持导入。'));
       }
-      throw MobiImportException('Kindle 文件解析失败:${e.message}\n文件可能已损坏或格式不受支持。');
+      throw MobiImportException(t('Kindle 文件解析失败:{p1}\n文件可能已损坏或格式不受支持。', {'p1': e.message}));
     } catch (e) {
-      throw MobiImportException('Kindle 文件解析失败:$e');
+      throw MobiImportException(t('Kindle 文件解析失败:{e}', {'e': e}));
     }
 
     // 元数据
@@ -61,7 +62,7 @@ class MobiImporter {
     final plainText = HtmlText.stripHtml(rawHtml, preserveParagraphs: true);
 
     if (plainText.trim().isEmpty) {
-      throw MobiImportException('Kindle 文件内容为空,无法提取文字。');
+      throw MobiImportException(t('Kindle 文件内容为空,无法提取文字。'));
     }
 
     // 复用章节解析器切分章节

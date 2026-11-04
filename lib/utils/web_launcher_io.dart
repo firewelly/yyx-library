@@ -1,6 +1,7 @@
 /// 桌面端（dart:io）浏览器交互实现。
 library;
 import 'dart:io';
+import '../l10n/s.dart';
 
 /// 平台相关的浏览器交互（桌面端实现）
 class WebLauncher {
@@ -32,6 +33,6 @@ class WebLauncher {
     List<int> bytes, {
     String? mimeType,
   }) async {
-    throw UnsupportedError('浏览器下载仅 Web 端支持');
+    throw UnsupportedError(t('浏览器下载仅 Web 端支持'));
   }
 }

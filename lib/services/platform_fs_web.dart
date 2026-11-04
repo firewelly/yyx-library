@@ -7,11 +7,12 @@ library;
 import 'dart:typed_data';
 
 import 'platform_fs_types.dart';
+import '../l10n/s.dart';
 
 export 'platform_fs_types.dart';
 
 UnsupportedError _unsupported(String what) =>
-    UnsupportedError('Web 端无本地文件系统，不支持$what。请使用导入（选择文件）或导出（浏览器下载）功能。');
+    UnsupportedError(t('Web 端无本地文件系统，不支持{what}。请使用导入（选择文件）或导出（浏览器下载）功能。', {'what': what}));
 
 /// 平台文件系统门面（Web 端实现）
 class PlatformFs {
@@ -22,29 +23,29 @@ class PlatformFs {
   static Future<bool> dirExists(String path) async => false;
 
   static Future<void> ensureDir(String path) async {
-    throw _unsupported('创建目录');
+    throw _unsupported(t('创建目录'));
   }
 
   static Future<Uint8List?> readBytes(String path) async => null;
 
   static Future<String> writeTextFile(String dir, String fileName, String content) async {
-    throw _unsupported('写文件');
+    throw _unsupported(t('写文件'));
   }
 
   static Future<String> writeBytesFile(String dir, String fileName, List<int> bytes) async {
-    throw _unsupported('写文件');
+    throw _unsupported(t('写文件'));
   }
 
   static Future<void> copyFile(String from, String to) async {
-    throw _unsupported('复制文件');
+    throw _unsupported(t('复制文件'));
   }
 
   static Future<void> moveFile(String from, String to) async {
-    throw _unsupported('移动文件');
+    throw _unsupported(t('移动文件'));
   }
 
   static Future<void> deleteFile(String path) async {
-    throw _unsupported('删除文件');
+    throw _unsupported(t('删除文件'));
   }
 
   static Future<DateTime?> lastModified(String path) async => null;
@@ -72,7 +73,7 @@ class PlatformFs {
   }
 
   /// Web 端 Hive 走 IndexedDB（initFlutter 默认行为，无需处理）
-  static Future<String> hiveInitDir() async => throw UnsupportedError('Web 端请使用 Hive.initFlutter');
+  static Future<String> hiveInitDir() async => throw UnsupportedError(t('Web 端请使用 Hive.initFlutter'));
 
   /// Web 端无本地路径概念
   static Future<String?> normalizeLegacyCustomDbPath(String customDbPath, {required String dbName}) async => null;
@@ -93,6 +94,6 @@ class PlatformFs {
   static String effectiveLibraryRoot(String configuredRoot) => configuredRoot;
 
   static Future<String> defaultBackupDir() async {
-    throw _unsupported('默认备份目录');
+    throw _unsupported(t('默认备份目录'));
   }
 }
