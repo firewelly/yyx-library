@@ -112,7 +112,7 @@ class SettingsScreen extends ConsumerWidget {
                                   ),
                                   const SizedBox(height: 6),
                                   Text(
-                                    palette.name,
+                                    t(palette.name),
                                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                       fontWeight: s.themeSeed == palette.id
                                           ? FontWeight.bold
@@ -190,14 +190,14 @@ class SettingsScreen extends ConsumerWidget {
                     width: double.infinity,
                     child: SegmentedButton<String>(
                       segments: [
-                        for (final t in kReaderThemes)
+                        for (final rt in kReaderThemes)
                           ButtonSegment(
-                            value: t.id,
-                            label: Text(t.name),
+                            value: rt.id,
+                            label: Text(t(rt.name)),
                             icon: Icon(
                               Icons.circle,
                               size: 12,
-                              color: t.background,
+                              color: rt.background,
                             ),
                           ),
                       ],
@@ -255,7 +255,7 @@ class SettingsScreen extends ConsumerWidget {
                           : 'auto',
                       items: [
                         for (final (value, label) in TextDecode.encodingOptions)
-                          DropdownMenuItem(value: value, child: Text(label)),
+                          DropdownMenuItem(value: value, child: Text(t(label))),
                       ],
                       onChanged: (v) {
                         if (v != null) {

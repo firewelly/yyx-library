@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../l10n/s.dart';
 
 /// 阅读主题 —— 阅读器内的背景与文字配色
 ///
@@ -40,7 +39,7 @@ final List<ReaderTheme> kReaderThemes = [
   // 纯白
   ReaderTheme(
     id: 'paper',
-    name: t('纯白'),
+    name: '纯白',
     background: const Color(0xFFFFFFFF),
     text: const Color(0xFF1F2937),
     secondaryText: const Color(0xFF9CA3AF),
@@ -52,7 +51,7 @@ final List<ReaderTheme> kReaderThemes = [
   // 米黄护眼(默认)
   ReaderTheme(
     id: 'sepia',
-    name: t('米黄'),
+    name: '米黄',
     background: const Color(0xFFF5E6C8),
     text: const Color(0xFF4A3728),
     secondaryText: const Color(0xFFA08B6F),
@@ -64,7 +63,7 @@ final List<ReaderTheme> kReaderThemes = [
   // 纯黑 OLED
   ReaderTheme(
     id: 'dark',
-    name: t('深黑'),
+    name: '深黑',
     background: const Color(0xFF000000),
     text: const Color(0xFFB8BFC9),
     secondaryText: const Color(0xFF5A6472),
@@ -76,7 +75,7 @@ final List<ReaderTheme> kReaderThemes = [
   // 浅绿
   ReaderTheme(
     id: 'green',
-    name: t('浅绿'),
+    name: '浅绿',
     background: const Color(0xFFDCE8D2),
     text: const Color(0xFF2F3B2B),
     secondaryText: const Color(0xFF8A9784),

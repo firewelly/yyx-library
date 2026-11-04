@@ -15,7 +15,8 @@ class AppShell extends ConsumerWidget {
 
   const AppShell({super.key, required this.child, required this.location});
 
-  static final _allDestinations = [
+  /// 注意：不能用 static final 缓存——t() 结果须随语言切换重新求值
+  static List<({String path, IconData icon, IconData selectedIcon, String label})> get _allDestinations => [
     (path: '/', icon: Icons.local_library_outlined, selectedIcon: Icons.local_library, label: t('书库')),
     (path: '/import', icon: Icons.file_download_outlined, selectedIcon: Icons.file_download, label: t('导入')),
     (path: '/crawler', icon: Icons.travel_explore, selectedIcon: Icons.travel_explore, label: t('爬虫')),

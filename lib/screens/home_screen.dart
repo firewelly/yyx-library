@@ -272,7 +272,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             final selected = (s == t('全部状态') && library.selectedStatus == null) ||
                 library.selectedStatus == s;
             return FilterChip(
-              label: Text(s, style: const TextStyle(fontSize: 12)),
+              label: Text(s == t('全部状态') ? s : t(s), style: const TextStyle(fontSize: 12)),
               selected: selected,
               visualDensity: VisualDensity.compact,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,

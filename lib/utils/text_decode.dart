@@ -3,7 +3,6 @@ import 'dart:typed_data';
 
 import 'package:charset/charset.dart' show gbk;
 import 'package:dart3_big5/big5.dart' show Big5;
-import '../l10n/s.dart';
 
 /// 文本解码工具 —— 多编码支持（UTF-8 / GBK / GB18030 / GB2312 / Big5）
 ///
@@ -18,11 +17,11 @@ class TextDecode {
 
   /// 支持的手动编码选项（设置页「导入设置-默认编码」用）
   static final List<(String, String)> encodingOptions = [
-    ('auto', t('自动检测')),
+    ('auto', '自动检测'),
     ('utf-8', 'UTF-8'),
     ('gbk', 'GBK / GB2312'),
     ('gb18030', 'GB18030'),
-    ('big5', t('Big5（繁体）')),
+    ('big5', 'Big5（繁体）'),
   ];
 
   /// 解码字节为字符串。

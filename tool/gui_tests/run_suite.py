@@ -141,7 +141,13 @@ async def flow_reader(app: App, rep: Report):
     c = rep.case("R-2", "下一章翻章（序号递进）")
     await app.tap("reader.next")
     await app.shot(c, "reader_ch2")
-    prog = app.api(f"/user/progress?bookId={bid}")
+    # 进度保存有去抖：轮询等待落库（最多 ~6s），避免慢环境下误报
+    prog = None
+    for _ in range(12):
+        prog = app.api(f"/user/progress?bookId={bid}")
+        if prog is not None and prog.get("chapterId") is not None:
+            break
+        await app.page.wait_for_timeout(500)
     check(c, prog is not None, f"进度已落库：chapterId={prog and prog.get('chapterId')}")
 
     c = rep.case("R-3", "翻章后回到顶部（回归）")

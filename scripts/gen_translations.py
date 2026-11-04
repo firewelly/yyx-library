@@ -3,7 +3,22 @@
 import json, re, os
 
 os.chdir('/Users/firewell/bin/novelmgt')
-keys = json.load(open('/tmp/all_keys.json'))
+runtime_keys = json.load(open('/tmp/runtime_keys.json'))
+all_keys = json.load(open('/tmp/all_keys.json'))
+# 并集：静态扫描 key + 运行时传入 key（t(palette.name)/t(rt.name)/t(label)/t(book.status) 等）
+keys = sorted(set(runtime_keys) | set(all_keys))
+
+
+EXTRA = {
+ 'Web 端：数据保存在浏览器 IndexedDB 中（清空站点数据会丢失），请定期备份。备份为 SQL 文件，可恢复到 Web 端或导入桌面端。书库扫描与缓存清理请在桌面端使用。': 'Web: data is stored in browser IndexedDB (clearing site data loses it). Back up regularly. Backups are SQL files, restorable on web or importable on desktop. Use library scan and cache cleanup on desktop.',
+ '书库中有 {p1} 条绝对路径、{p2} 条相对路径。跨系统共享数据库需要相对路径。': 'The library has {p1} absolute and {p2} relative paths. Cross-system sharing requires relative paths.',
+ '将删除临时文件与缓存，共 {p1}。\n\n数据库与设置不受影响。此操作不可撤销。': 'This will delete temporary files and cache, {p1} in total.\n\nDatabases and settings are not affected. This cannot be undone.',
+ '将更新 {p1} 本书的作者字段。\n若输入的名字已存在，会合并到该作者名下。': 'This will update the author field of {p1} books.\nIf the entered name already exists, books will be merged under that author.',
+ '扫描完成: 新增 {p1}，更新 {p2}，无变化 {p3}，失败 {p4}，跳过占位 {p5}': 'Scan finished: {p1} added, {p2} updated, {p3} unchanged, {p4} failed, {p5} placeholders skipped',
+ '确定要清空「{p1}」的作者归属吗？\n\n这将把 {p2} 本书的 author 字段置空（书籍本身保留）。\n此操作不可撤销。': 'Clear the author of "{p1}"?\n\nThis will clear the author field of {p2} books (the books are kept).\nThis cannot be undone.',
+ '该 PDF 为扫描图片版,无法提取文字内容。\n请使用文字版 PDF,或先用 OCR 工具转换为文本。': 'This PDF is a scanned-image version with no extractable text.\nPlease use a text-based PDF, or convert it with an OCR tool first.',
+ '首页「扫描书库」会遍历以下文件夹，自动导入新书与更新章节。支持相对路径（以程序所在目录为基准，如 novels、H），跨系统共用同一份配置；OneDrive 未物化（占位）文件会自动跳过。': '"Scan library" on the home page walks these folders and automatically imports new books and chapter updates. Relative paths (based on the app directory, e.g. novels, H) are supported so multiple systems share one config; OneDrive placeholder (unmaterialized) files are skipped automatically.',
+}
 
 def unescape_dart(s):
     return (s.replace('\\\\', '\x00')
@@ -477,7 +492,8 @@ def dart_escape(s):
              .replace('\t', '\\t')
              .replace('$', r'\$'))
 
-missing = [k for k in keys if k not in TRANS]
+TRANS_U = {unescape_dart(k): v for k, v in {**TRANS, **EXTRA}.items()}
+missing = [k for k in keys if k not in TRANS_U]
 if missing:
     print('MISSING', len(missing))
     for k in missing:
@@ -493,10 +509,10 @@ lines = ['''
 const Map<String, String> kEnTranslations = {''']
 count = 0
 for k in keys:
-    if k not in TRANS:
+    rk = k
+    if rk not in TRANS_U:
         continue
-    en = TRANS[k]
-    rk = unescape_dart(k)
+    en = TRANS_U[rk]
     lines.append("  '%s': '%s'," % (dart_escape(rk), dart_escape(en)))
     count += 1
 lines.append('};')

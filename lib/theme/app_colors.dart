@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../l10n/s.dart';
 
 /// 应用色彩系统 —— 方案 B「靛蓝墨海」
 ///
@@ -25,22 +24,22 @@ class AppPalette {
 
   /// A 墨韵书阁（墨绿+暖金，东方书卷气）
   static final paletteA = AppPalette(
-    id: 'a', name: t('墨韵书阁'), seed: const Color(0xFF2F5D50), accent: const Color(0xFFC9A227),
+    id: 'a', name: '墨韵书阁', seed: const Color(0xFF2F5D50), accent: const Color(0xFFC9A227),
   );
 
   /// B 靛蓝墨海（深靛蓝+珊瑚橙，现代专业，默认）
   static final paletteB = AppPalette(
-    id: 'b', name: t('靛蓝墨海'), seed: const Color(0xFF3949AB), accent: const Color(0xFFFF6E40),
+    id: 'b', name: '靛蓝墨海', seed: const Color(0xFF3949AB), accent: const Color(0xFFFF6E40),
   );
 
   /// C 暮色书房（暖棕+赤陶，温暖复古）
   static final paletteC = AppPalette(
-    id: 'c', name: t('暮色书房'), seed: const Color(0xFF5D4037), accent: const Color(0xFFD2691E),
+    id: 'c', name: '暮色书房', seed: const Color(0xFF5D4037), accent: const Color(0xFFD2691E),
   );
 
   /// D 墨夜星河（深色优先，青柠+天蓝，科技护眼）
   static final paletteD = AppPalette(
-    id: 'd', name: t('墨夜星河'), seed: const Color(0xFFA3E635), accent: const Color(0xFF38BDF8),
+    id: 'd', name: '墨夜星河', seed: const Color(0xFFA3E635), accent: const Color(0xFF38BDF8),
   );
 
   static AppPalette byId(String id) => all.firstWhere(
