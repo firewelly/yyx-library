@@ -434,7 +434,7 @@ async def run(args):
         evidence = EVIDENCE_ROOT / stamp
         rep = Report(evidence)
         size = (1440, 900) if view == "desktop" else (390, 844)
-        ctx = await browser.new_context(viewport={"width": size[0], "height": size[1]})
+        ctx = await browser.new_context(viewport={"width": size[0], "height": size[1]}, locale="zh-CN")
         page = await ctx.new_page()
         app = App(page, args.base, view, evidence)
 
@@ -477,7 +477,7 @@ async def main():
         from playwright.async_api import async_playwright
         p = await async_playwright().start()
         browser = await p.chromium.launch(headless=True)
-        page = await (await browser.new_context(viewport={"width": 1440, "height": 900})).new_page()
+        page = await (await browser.new_context(viewport={"width": 1440, "height": 900}, locale="zh-CN")).new_page()
         EVIDENCE_ROOT.mkdir(parents=True, exist_ok=True)
         await calibrate(page, args.base)
         await browser.close(); await p.stop()
