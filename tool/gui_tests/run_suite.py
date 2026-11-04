@@ -163,11 +163,24 @@ async def flow_reader(app: App, rep: Report):
     check(c, True, f"{before} → 键盘翻章后截图")
 
     c = rep.case("R-4", "重开书恢复上次阅读章节（回归）")
-    prog = app.api(f"/user/progress?bookId={bid}")
+
+    async def _stable_progress(bid, tries=12):
+        # 进度保存有去抖：读到连续两次一致才算稳定
+        last = None
+        for _ in range(tries):
+            cur = app.api(f"/user/progress?bookId={bid}")
+            key = (cur or {}).get("chapterId")
+            if cur is not None and key is not None and key == last:
+                return cur
+            last = key
+            await app.page.wait_for_timeout(500)
+        return last and app.api(f"/user/progress?bookId={bid}")
+
+    prog = await _stable_progress(bid)
     await app.open("/")
     await app.open(f"/reader/{bid}", wait_ms=9000)
     await app.shot(c, "reader_reopen")
-    prog2 = app.api(f"/user/progress?bookId={bid}")
+    prog2 = await _stable_progress(bid)
     check(c, prog2 is not None and prog2.get("chapterId") == (prog or {}).get("chapterId"),
           f"重进后进度章节一致（{prog2 and prog2.get('chapterId')}）")
 
