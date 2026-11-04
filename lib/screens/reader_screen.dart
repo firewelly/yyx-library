@@ -11,6 +11,7 @@ import '../providers/database_provider.dart';
 import '../theme/app_colors.dart';
 import '../theme/reader_themes.dart';
 import '../utils/constants.dart';
+import '../utils/formatters.dart';
 import '../utils/zh_converter.dart';
 import '../l10n/s.dart';
 
@@ -406,7 +407,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     if (state.currentChapter == null) return;
 
     final titleController = TextEditingController(
-      text: t('第{p1}章 {p2}', {'p1': state.currentChapter!.chapterNumber, 'p2': state.currentChapter!.title}),
+      text: Formatters.chapterTitle(state.currentChapter!.chapterNumber, state.currentChapter!.title),
     );
 
     showDialog(
@@ -758,7 +759,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                           title: Text(bm.title ?? t('未命名书签')),
                           subtitle: Text(
                             bm.chapterTitle != null
-                                ? t('第{num}章 {title}', {'num': bm.chapterNumber ?? '?', 'title': bm.chapterTitle})
+                                ? Formatters.chapterTitle(bm.chapterNumber, bm.chapterTitle)
                                 : '',
                             style: const TextStyle(fontSize: 12),
                           ),
@@ -831,7 +832,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                           ),
                           subtitle: Text(
                             note.chapterTitle != null
-                                ? t('第{num}章 {title}', {'num': note.chapterNumber ?? '?', 'title': note.chapterTitle})
+                                ? Formatters.chapterTitle(note.chapterNumber, note.chapterTitle)
                                 : '',
                             style: const TextStyle(fontSize: 12),
                           ),

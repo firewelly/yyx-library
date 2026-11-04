@@ -5,6 +5,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'database_service.dart';
 import 'platform_fs.dart';
+import '../utils/formatters.dart';
 import '../utils/web_launcher.dart';
 import '../l10n/s.dart';
 
@@ -135,7 +136,7 @@ class ExportService {
     buffer.writeln();
 
     for (final chapter in chapters) {
-      buffer.writeln(t('第{p1}章 {p2}', {'p1': chapter.chapterNumber, 'p2': chapter.title}));
+      buffer.writeln(Formatters.chapterTitle(chapter.chapterNumber, chapter.title));
       buffer.writeln('-' * 30);
       buffer.writeln(chapter.content);
       buffer.writeln();
@@ -299,7 +300,7 @@ class ExportService {
           build: (context) => [
             pw.Header(
               level: 1,
-              text: t('第{p1}章 {p2}', {'p1': chapter.chapterNumber, 'p2': chapter.title}),
+              text: Formatters.chapterTitle(chapter.chapterNumber, chapter.title),
             ),
             pw.SizedBox(height: 12),
             pw.Paragraph(

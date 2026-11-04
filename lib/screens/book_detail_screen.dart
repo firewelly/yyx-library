@@ -375,7 +375,7 @@ const SizedBox(height: 16),
                         onPressed: () => context.go('/reader/${book.id}?chapterId=${chapter.id}'),
                         onLongPress: () => _showChapterMenu(context, chapter),
                         child: Text(
-                          t('第{p1}章 {p2}', {'p1': chapter.chapterNumber, 'p2': chapter.title}),
+                          Formatters.chapterTitle(chapter.chapterNumber, chapter.title),
                           style: const TextStyle(fontSize: 13),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -406,7 +406,7 @@ const SizedBox(height: 16),
                       onPressed: () => context.go('/reader/${book.id}?chapterId=${chapter.id}'),
                       onLongPress: () => _showChapterMenu(context, chapter),
                       child: Text(
-                        t('第{p1}章 {p2}', {'p1': chapter.chapterNumber, 'p2': chapter.title}),
+                        Formatters.chapterTitle(chapter.chapterNumber, chapter.title),
                         style: const TextStyle(fontSize: 11),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -766,7 +766,7 @@ const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Text(
-                t('第{p1}章 {p2}', {'p1': chapter.chapterNumber, 'p2': chapter.title}),
+                Formatters.chapterTitle(chapter.chapterNumber, chapter.title),
                 style: Theme.of(context).textTheme.titleSmall,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -843,7 +843,7 @@ const SizedBox(height: 16),
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(t('确认删除章节')),
-        content: Text(t('确定要删除"第{p1}章 {p2}"吗？此操作不可恢复。', {'p1': chapter.chapterNumber, 'p2': chapter.title})),
+        content: Text(t('确定要删除"{title}"吗？此操作不可恢复。', {'title': Formatters.chapterTitle(chapter.chapterNumber, chapter.title)})),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: Text(t('取消'))),
           FilledButton(

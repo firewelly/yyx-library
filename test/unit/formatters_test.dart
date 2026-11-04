@@ -43,4 +43,36 @@ void main() {
       expect(Formatters.truncate('hello world', 5), 'hello...');
     });
   });
+
+  group('Formatters.chapterTitle 去重编号', () {
+    test('标题已带「第X章」不再重复拼序号', () {
+      expect(Formatters.chapterTitle(2, '第2章 武魂觉醒'), '第2章 武魂觉醒');
+      expect(Formatters.chapterTitle(31, '第1章 武魂觉醒'), '第1章 武魂觉醒');
+      expect(Formatters.chapterTitle(9, '第两百章 大战'), '第两百章 大战');
+      expect(Formatters.chapterTitle(4, '第十二回 宴桃园'), '第十二回 宴桃园');
+      expect(Formatters.chapterTitle(6, '第三节 出发'), '第三节 出发');
+      expect(Formatters.chapterTitle(8, '第一卷 风起'), '第一卷 风起');
+    });
+    test('英文/数字编号同样识别', () {
+      expect(Formatters.chapterTitle(5, 'Chapter 5: Awaken'), 'Chapter 5: Awaken');
+      expect(Formatters.chapterTitle(7, '7. 起始'), '7. 起始');
+      expect(Formatters.chapterTitle(12, '12、异变'), '12、异变');
+    });
+    test('标题无编号时补「第N章」', () {
+      expect(Formatters.chapterTitle(3, '武动乾坤'), '第3章 武动乾坤');
+      expect(Formatters.chapterTitle(10, '  未命名  '), '第10章 未命名');
+    });
+    test('空标题兜底', () {
+      expect(Formatters.chapterTitle(1, ''), '第1章');
+      expect(Formatters.chapterTitle(1, null), '第1章');
+      expect(Formatters.chapterTitle(null, ''), '');
+      expect(Formatters.chapterTitle(null, '第5章 独立标题'), '第5章 独立标题');
+    });
+    test('英文界面输出 Chapter 前缀', () {
+      S.configure('en');
+      expect(Formatters.chapterTitle(3, '武动乾坤'), 'Chapter 3 武动乾坤');
+      expect(Formatters.chapterTitle(2, '第2章 武魂觉醒'), '第2章 武魂觉醒');
+      S.configure('zh');
+    });
+  });
 }

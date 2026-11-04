@@ -3,10 +3,7 @@
 import json, re, os
 
 os.chdir('/Users/firewell/bin/novelmgt')
-runtime_keys = json.load(open('/tmp/runtime_keys.json'))
-all_keys = json.load(open('/tmp/all_keys.json'))
-# 并集：静态扫描 key + 运行时传入 key（t(palette.name)/t(rt.name)/t(label)/t(book.status) 等）
-keys = sorted(set(runtime_keys) | set(all_keys))
+keys = json.load(open('/tmp/runtime_keys.json'))
 
 
 EXTRA = {
@@ -377,6 +374,9 @@ TRANS = {
  '第 {page} / {totalPages} 页 · 共 {p3} 本': 'Page {page} / {totalPages} · {p3} books',
  '第{num}章 {title}': 'Chapter {num} {title}',
  '第{p1}章': 'Chapter {p1}',
+ '第{num}章': 'Chapter {num}',
+ '第{num}章 {title}': 'Chapter {num} {title}',
+ '确定要删除"{title}"吗？此操作不可恢复。': 'Delete "{title}"? This cannot be undone.',
  '第{p1}章 {p2}': 'Chapter {p1} {p2}',
  '简介': 'Summary',
  '简介: {p1}': 'Summary: {p1}',
