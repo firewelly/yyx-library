@@ -71,6 +71,13 @@ class SettingsService {
     await _save();
   }
 
+  /// 界面语言: 'system' / 'zh' / 'en'
+  String get language => _settings.language;
+  Future<void> setLanguage(String lang) async {
+    _settings = _settings.copyWith(language: lang);
+    await _save();
+  }
+
   double get fontSize => _settings.fontSize;
   Future<void> setFontSize(double size) async {
     _settings = _settings.copyWith(fontSize: size);

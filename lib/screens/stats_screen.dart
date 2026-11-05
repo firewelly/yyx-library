@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../providers/stats_provider.dart';
 import '../utils/formatters.dart';
 import '../theme/app_colors.dart';
+import '../l10n/s.dart';
 
 /// 统计页面
 class StatsScreen extends ConsumerWidget {
@@ -15,7 +16,7 @@ class StatsScreen extends ConsumerWidget {
 
     if (state.isLoading) {
       return Scaffold(
-        appBar: AppBar(title: const Text('📊 统计')),
+        appBar: AppBar(title: Text(t('📊 统计'))),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -24,7 +25,7 @@ class StatsScreen extends ConsumerWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('📊 统计')),
+      appBar: AppBar(title: Text(t('📊 统计'))),
       body: RefreshIndicator(
         onRefresh: () => ref.read(statsProvider.notifier).refresh(),
         child: ListView(
@@ -37,17 +38,17 @@ class StatsScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('总览', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                    Text(t('总览'), style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 12),
                     Wrap(
                       spacing: 24,
                       runSpacing: 12,
                       children: [
-                        _StatItem(label: '小说', value: '${stats.totalBooks}', icon: Icons.menu_book),
-                        _StatItem(label: '章节', value: '${stats.totalChapters}', icon: Icons.article),
-                        _StatItem(label: '字数', value: Formatters.formatWordCount(stats.totalWords), icon: Icons.text_fields),
-                        _StatItem(label: '作者', value: '${stats.totalAuthors}', icon: Icons.person),
-                        _StatItem(label: '标签', value: '${stats.totalTags}', icon: Icons.label),
+                        _StatItem(label: t('小说'), value: '${stats.totalBooks}', icon: Icons.menu_book),
+                        _StatItem(label: t('章节'), value: '${stats.totalChapters}', icon: Icons.article),
+                        _StatItem(label: t('字数'), value: Formatters.formatWordCount(stats.totalWords), icon: Icons.text_fields),
+                        _StatItem(label: t('作者'), value: '${stats.totalAuthors}', icon: Icons.person),
+                        _StatItem(label: t('标签'), value: '${stats.totalTags}', icon: Icons.label),
                       ],
                     ),
                   ],
@@ -63,7 +64,7 @@ class StatsScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('状态分布', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      Text(t('状态分布'), style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 12),
                       ...stats.statusDistribution.entries.map((e) => Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4),
@@ -77,7 +78,7 @@ class StatsScreen extends ConsumerWidget {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Text(e.key),
+                            Text(t(e.key)),
                             const Spacer(),
                             Text('${e.value}', style: const TextStyle(fontWeight: FontWeight.bold)),
                           ],
@@ -96,7 +97,7 @@ class StatsScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('评分分布', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      Text(t('评分分布'), style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 12),
                       ...stats.ratingDistribution.entries.map((e) => Padding(
                         padding: const EdgeInsets.symmetric(vertical: 2),
@@ -104,9 +105,9 @@ class StatsScreen extends ConsumerWidget {
                           children: [
                             ...List.generate(5, (i) => Icon(Icons.star, size: 14, color: i < e.key ? AppColors.ratingStar : AppColors.emptyState)),
                             const SizedBox(width: 8),
-                            Text('${e.key}星'),
+                            Text(t('{p1}星', {'p1': e.key})),
                             const Spacer(),
-                            Text('${e.value}本'),
+                            Text(t('{p1}本', {'p1': e.value})),
                           ],
                         ),
                       )),
@@ -123,19 +124,19 @@ class StatsScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('标签 TOP ${stats.topTags.length}', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      Text(t('标签 TOP {p1}', {'p1': stats.topTags.length}), style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 12),
-                      ...stats.topTags.map((t) => Padding(
+                      ...stats.topTags.map((tg) => Padding(
                         padding: const EdgeInsets.symmetric(vertical: 2),
                         child: Row(
                           children: [
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                              decoration: BoxDecoration(color: AppColors.tagColors[stats.topTags.indexOf(t) % AppColors.tagColors.length].withValues(alpha: 0.2), borderRadius: BorderRadius.circular(10)),
-                              child: Text(t.name, style: const TextStyle(fontSize: 12)),
+                              decoration: BoxDecoration(color: AppColors.tagColors[stats.topTags.indexOf(tg) % AppColors.tagColors.length].withValues(alpha: 0.2), borderRadius: BorderRadius.circular(10)),
+                              child: Text(tg.name, style: const TextStyle(fontSize: 12)),
                             ),
                             const Spacer(),
-                            Text('${t.count}本'),
+                            Text(t('{p1}本', {'p1': tg.count})),
                           ],
                         ),
                       )),
@@ -152,7 +153,7 @@ class StatsScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('作者 TOP ${stats.topAuthors.length}', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      Text(t('作者 TOP {p1}', {'p1': stats.topAuthors.length}), style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 12),
                       ...stats.topAuthors.map((a) => Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4),
@@ -161,7 +162,7 @@ class StatsScreen extends ConsumerWidget {
                             const Icon(Icons.person, size: 18, color: AppColors.hintText),
                             const SizedBox(width: 8),
                             Expanded(child: Text(a.name, maxLines: 1, overflow: TextOverflow.ellipsis)),
-                            Text('${a.count}本', style: const TextStyle(fontWeight: FontWeight.bold)),
+                            Text(t('{p1}本', {'p1': a.count}), style: const TextStyle(fontWeight: FontWeight.bold)),
                           ],
                         ),
                       )),
@@ -178,7 +179,7 @@ class StatsScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('最近阅读', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      Text(t('最近阅读'), style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 12),
                       ...stats.recentlyRead.take(5).map((b) => ListTile(
                         dense: true,

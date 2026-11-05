@@ -9,6 +9,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import 'platform_fs_types.dart';
+import '../l10n/s.dart';
 
 export 'platform_fs_types.dart';
 
@@ -170,12 +171,12 @@ Get-ChildItem -LiteralPath \$args[0] -Recurse -File | ForEach-Object {
     try {
       dirs.add((await getTemporaryDirectory()).path);
     } catch (e) {
-      debugPrint('getTemporaryDirectory 失败: $e');
+      debugPrint(t('getTemporaryDirectory 失败: {e}', {'e': e}));
     }
     try {
       dirs.add((await getApplicationSupportDirectory()).path);
     } catch (e) {
-      debugPrint('getApplicationSupportDirectory 失败: $e');
+      debugPrint(t('getApplicationSupportDirectory 失败: {e}', {'e': e}));
     }
     return dirs;
   }
@@ -249,11 +250,11 @@ Get-ChildItem -LiteralPath \$args[0] -Recurse -File | ForEach-Object {
           final src = File(p.join(docs.path, name));
           if (await src.exists()) {
             await src.copy(p.join(hiveDir.path, name));
-            debugPrint('已迁移 Hive box: ${src.path}');
+            debugPrint(t('已迁移 Hive box: {p1}', {'p1': src.path}));
           }
         }
       } catch (e) {
-        debugPrint('Hive box 迁移检查失败: $e');
+        debugPrint(t('Hive box 迁移检查失败: {e}', {'e': e}));
       }
     }
     return hiveDir.path;
@@ -269,10 +270,10 @@ Get-ChildItem -LiteralPath \$args[0] -Recurse -File | ForEach-Object {
     try {
       if (!File(targetPath).existsSync() && File(sourcePath).existsSync()) {
         await File(sourcePath).copy(targetPath);
-        debugPrint('已迁移 customDb 数据库: $sourcePath -> $targetPath');
+        debugPrint(t('已迁移 customDb 数据库: {sourcePath} -> {targetPath}', {'sourcePath': sourcePath, 'targetPath': targetPath}));
       }
     } catch (e) {
-      debugPrint('customDb 迁移失败: $e');
+      debugPrint(t('customDb 迁移失败: {e}', {'e': e}));
     }
     return appDir.path;
   }
@@ -289,7 +290,7 @@ Get-ChildItem -LiteralPath \$args[0] -Recurse -File | ForEach-Object {
 
     final appDir = await getApplicationSupportDirectory();
     final targetPath = p.join(appDir.path, dbName);
-    debugPrint('数据库稳定目录: ${appDir.path} (目标文件存在: ${File(targetPath).existsSync()})');
+    debugPrint(t('数据库稳定目录: {p1} (目标文件存在: {p2})', {'p1': appDir.path, 'p2': File(targetPath).existsSync()}));
     if (File(targetPath).existsSync()) return appDir.path;
 
     // 旧位置 1：当前工作目录的 .dart_tool（App/Flutter 工具链共用形态）
@@ -303,11 +304,11 @@ Get-ChildItem -LiteralPath \$args[0] -Recurse -File | ForEach-Object {
       try {
         if (await legacy.exists() && await legacy.length() > 0) {
           await legacy.copy(targetPath);
-          debugPrint('已迁移数据库: ${legacy.path} -> $targetPath');
+          debugPrint(t('已迁移数据库: {p1} -> {targetPath}', {'p1': legacy.path, 'targetPath': targetPath}));
           break;
         }
       } catch (e) {
-        debugPrint('数据库迁移检查失败(${legacy.path}): $e');
+        debugPrint(t('数据库迁移检查失败({p1}): {e}', {'p1': legacy.path, 'e': e}));
       }
     }
     return appDir.path;

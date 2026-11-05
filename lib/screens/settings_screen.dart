@@ -17,6 +17,7 @@ import '../utils/constants.dart';
 import '../utils/platform_utils.dart';
 import '../utils/text_decode.dart';
 import '../utils/web_launcher.dart';
+import '../l10n/s.dart';
 
 /// 设置页面
 class SettingsScreen extends ConsumerWidget {
@@ -30,7 +31,7 @@ class SettingsScreen extends ConsumerWidget {
     final cache = ref.watch(cacheProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('⚙️ 设置')),
+      appBar: AppBar(title: Text(t('⚙️ 设置'))),
       body: _adaptiveBody(context, [
           // 主题设置
           Card(
@@ -39,24 +40,40 @@ class SettingsScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('外观', style: Theme.of(context).textTheme.titleMedium),
+                  Text(t('外观'), style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 12),
                   // 主题模式
                   SizedBox(
                     width: double.infinity,
                     child: SegmentedButton<ThemeMode>(
-                      segments: const [
-                        ButtonSegment(value: ThemeMode.system, label: Text('跟随系统'), icon: Icon(Icons.brightness_auto)),
-                        ButtonSegment(value: ThemeMode.light, label: Text('浅色'), icon: Icon(Icons.light_mode)),
-                        ButtonSegment(value: ThemeMode.dark, label: Text('深色'), icon: Icon(Icons.dark_mode)),
+                      segments: [
+                        ButtonSegment(value: ThemeMode.system, label: Text(t('跟随系统')), icon: const Icon(Icons.brightness_auto)),
+                        ButtonSegment(value: ThemeMode.light, label: Text(t('浅色')), icon: const Icon(Icons.light_mode)),
+                        ButtonSegment(value: ThemeMode.dark, label: Text(t('深色')), icon: const Icon(Icons.dark_mode)),
                       ],
                       selected: {settings.themeMode},
                       onSelectionChanged: (modes) => ref.read(settingsProvider.notifier).setThemeMode(modes.first),
                     ),
                   ),
                   const SizedBox(height: 16),
+                  // 界面语言
+                  Text(t('界面语言')),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: SegmentedButton<String>(
+                      segments: [
+                        ButtonSegment(value: 'system', label: Text(t('跟随系统'))),
+                        ButtonSegment(value: 'zh', label: Text(t('简体中文'))),
+                        ButtonSegment(value: 'en', label: const Text('English')),
+                      ],
+                      selected: {s.language},
+                      onSelectionChanged: (langs) => ref.read(settingsProvider.notifier).setLanguage(langs.first),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   // 配色方案
-                  const Text('配色方案'),
+                  Text(t('配色方案')),
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -95,7 +112,7 @@ class SettingsScreen extends ConsumerWidget {
                                   ),
                                   const SizedBox(height: 6),
                                   Text(
-                                    palette.name,
+                                    t(palette.name),
                                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                       fontWeight: s.themeSeed == palette.id
                                           ? FontWeight.bold
@@ -121,11 +138,11 @@ class SettingsScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('阅读设置', style: Theme.of(context).textTheme.titleMedium),
+                  Text(t('阅读设置'), style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 12),
                   // 字体大小
                   Row(children: [
-                    const Text('字体大小'),
+                    Text(t('字体大小')),
                     const Spacer(),
                     Text('${s.fontSize.toInt()}px', style: const TextStyle(fontWeight: FontWeight.bold)),
                   ]),
@@ -139,7 +156,7 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                   // 左右边距
                   Row(children: [
-                    const Text('左右边距'),
+                    Text(t('左右边距')),
                     const Spacer(),
                     Text('${s.marginSize.toInt()}px', style: const TextStyle(fontWeight: FontWeight.bold)),
                   ]),
@@ -153,7 +170,7 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                   // 行间距
                   Row(children: [
-                    const Text('行间距'),
+                    Text(t('行间距')),
                     const Spacer(),
                     Text(s.lineHeight.toStringAsFixed(1), style: const TextStyle(fontWeight: FontWeight.bold)),
                   ]),
@@ -167,20 +184,20 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                   // 阅读主题
                   const SizedBox(height: 8),
-                  const Text('阅读主题'),
+                  Text(t('阅读主题')),
                   const SizedBox(height: 8),
                   SizedBox(
                     width: double.infinity,
                     child: SegmentedButton<String>(
                       segments: [
-                        for (final t in kReaderThemes)
+                        for (final rt in kReaderThemes)
                           ButtonSegment(
-                            value: t.id,
-                            label: Text(t.name),
+                            value: rt.id,
+                            label: Text(t(rt.name)),
                             icon: Icon(
                               Icons.circle,
                               size: 12,
-                              color: t.background,
+                              color: rt.background,
                             ),
                           ),
                       ],
@@ -191,15 +208,15 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                   // 繁简显示（阅读器内也可快捷切换）
                   const SizedBox(height: 12),
-                  const Text('繁简显示'),
+                  Text(t('繁简显示')),
                   const SizedBox(height: 8),
                   SizedBox(
                     width: double.infinity,
                     child: SegmentedButton<String>(
-                      segments: const [
-                        ButtonSegment(value: 'original', label: Text('原文')),
-                        ButtonSegment(value: 'simplified', label: Text('简体')),
-                        ButtonSegment(value: 'traditional', label: Text('繁体')),
+                      segments: [
+                        ButtonSegment(value: 'original', label: Text(t('原文'))),
+                        ButtonSegment(value: 'simplified', label: Text(t('简体'))),
+                        ButtonSegment(value: 'traditional', label: Text(t('繁体'))),
                       ],
                       selected: {s.readerZhVariant},
                       onSelectionChanged: (modes) => ref
@@ -219,18 +236,18 @@ class SettingsScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('导入设置', style: Theme.of(context).textTheme.titleMedium),
+                  Text(t('导入设置'), style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 12),
                   SwitchListTile(
-                    title: const Text('导入后删除原文件'),
-                    subtitle: const Text('导入成功后删除源文件（不可恢复）'),
+                    title: Text(t('导入后删除原文件')),
+                    subtitle: Text(t('导入成功后删除源文件（不可恢复）')),
                     value: s.deleteAfterImport,
                     onChanged: (v) => ref.read(settingsProvider.notifier).setDeleteAfterImport(v),
                   ),
                   // 默认编码（TXT 导入解码；自动= UTF-8→GBK→Big5 探测）
                   ListTile(
-                    title: const Text('TXT 默认编码'),
-                    subtitle: const Text('乱码时可手动指定 GBK / Big5 等编码重新导入'),
+                    title: Text(t('TXT 默认编码')),
+                    subtitle: Text(t('乱码时可手动指定 GBK / Big5 等编码重新导入')),
                     trailing: DropdownButton<String>(
                       value: TextDecode.encodingOptions
                               .any((o) => o.$1 == s.defaultEncoding)
@@ -238,7 +255,7 @@ class SettingsScreen extends ConsumerWidget {
                           : 'auto',
                       items: [
                         for (final (value, label) in TextDecode.encodingOptions)
-                          DropdownMenuItem(value: value, child: Text(label)),
+                          DropdownMenuItem(value: value, child: Text(t(label))),
                       ],
                       onChanged: (v) {
                         if (v != null) {
@@ -251,11 +268,11 @@ class SettingsScreen extends ConsumerWidget {
                   if (!PlatformUtils.isWeb && !PlatformUtils.isMobile)
                     ListTile(
                       leading: const Icon(Icons.folder_shared_outlined),
-                      title: const Text('书库根目录（跨系统共享）'),
+                      title: Text(t('书库根目录（跨系统共享）')),
                       subtitle: Text(
                         s.libraryRootPath.isEmpty
-                            ? '未设置：书籍路径按绝对路径存储'
-                            : '路径基准：${s.libraryRootPath}',
+                            ? t('未设置：书籍路径按绝对路径存储')
+                            : t('路径基准：{p1}', {'p1': s.libraryRootPath}),
                         style: TextStyle(
                           fontSize: 12,
                           color: s.libraryRootPath.isEmpty
@@ -268,7 +285,7 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                   // 默认导出格式
                   ListTile(
-                    title: const Text('默认导出格式'),
+                    title: Text(t('默认导出格式')),
 trailing: SegmentedButton<String>(
                         segments: const [
                           ButtonSegment(value: 'txt', label: Text('TXT')),
@@ -291,13 +308,13 @@ trailing: SegmentedButton<String>(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('数据管理', style: Theme.of(context).textTheme.titleMedium),
+                  Text(t('数据管理'), style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 12),
                   // 书源管理
                   ListTile(
                     leading: const Icon(Icons.travel_explore),
-                    title: const Text('书源管理'),
-                    subtitle: const Text('配置爬虫书源规则'),
+                    title: Text(t('书源管理')),
+                    subtitle: Text(t('配置爬虫书源规则')),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => _showBookSourceManager(context),
                   ),
@@ -307,11 +324,11 @@ trailing: SegmentedButton<String>(
                     // 书库文件夹配置
                     ListTile(
                       leading: const Icon(Icons.folder_copy_outlined),
-                      title: const Text('书库文件夹'),
+                      title: Text(t('书库文件夹')),
                       subtitle: Text(
                         s.libraryFolders.isEmpty
-                            ? '未配置，首页「扫描书库」不可用'
-                            : '已配置 ${s.libraryFolders.length} 个文件夹',
+                            ? t('未配置，首页「扫描书库」不可用')
+                            : t('已配置 {p1} 个文件夹', {'p1': s.libraryFolders.length}),
                         style: const TextStyle(fontSize: 12),
                       ),
                       trailing: const Icon(Icons.chevron_right),
@@ -321,10 +338,10 @@ trailing: SegmentedButton<String>(
                     // 数据库路径配置
                     ListTile(
                       leading: const Icon(Icons.storage),
-                      title: const Text('数据库路径'),
+                      title: Text(t('数据库路径')),
                       subtitle: Text(
                         s.customDbPath.isEmpty
-                            ? '使用默认路径（仅本机可用）'
+                            ? t('使用默认路径（仅本机可用）')
                             : s.customDbPath,
                         style: TextStyle(
                           color: s.customDbPath.isEmpty
@@ -339,13 +356,13 @@ trailing: SegmentedButton<String>(
                     // 缓存清理
                     ListTile(
                       leading: const Icon(Icons.cleaning_services_outlined),
-                      title: const Text('清理缓存'),
+                      title: Text(t('清理缓存')),
                       subtitle: cache.isLoading
                           ? const LinearProgressIndicator()
                           : Text(
                               cache.cacheSize > 0
-                                  ? '临时文件与缓存占用 ${_formatCacheSize(cache.cacheSize)}'
-                                  : '当前无缓存可清理',
+                                  ? t('临时文件与缓存占用 {p1}', {'p1': _formatCacheSize(cache.cacheSize)})
+                                  : t('当前无缓存可清理'),
                               style: TextStyle(
                                 color: cache.cacheSize > 0
                                     ? Theme.of(context).colorScheme.onSurfaceVariant
@@ -367,7 +384,7 @@ trailing: SegmentedButton<String>(
                       ),
                     ListTile(
                       leading: const Icon(Icons.backup),
-                      title: const Text('备份数据库'),
+                      title: Text(t('备份数据库')),
                       subtitle: backup.isBackingUp
                           ? const LinearProgressIndicator()
                           : null,
@@ -378,7 +395,7 @@ trailing: SegmentedButton<String>(
                     ),
                     ListTile(
                       leading: const Icon(Icons.restore),
-                      title: const Text('恢复数据库'),
+                      title: Text(t('恢复数据库')),
                       subtitle: backup.isRestoring
                           ? const LinearProgressIndicator()
                           : null,
@@ -390,7 +407,7 @@ trailing: SegmentedButton<String>(
                     // 备份列表
                     if (backup.backups.isNotEmpty) ...[
                       const Divider(),
-                      Text('最近的备份', style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      Text(t('最近的备份'), style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       )),
                       const SizedBox(height: 4),
@@ -414,8 +431,8 @@ trailing: SegmentedButton<String>(
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Web 端：数据保存在浏览器 IndexedDB 中（清空站点数据会丢失），请定期备份。'
-                              '备份为 SQL 文件，可恢复到 Web 端或导入桌面端。书库扫描与缓存清理请在桌面端使用。',
+                              t('Web 端：数据保存在浏览器 IndexedDB 中（清空站点数据会丢失），请定期备份。'
+                              '备份为 SQL 文件，可恢复到 Web 端或导入桌面端。书库扫描与缓存清理请在桌面端使用。'),
                               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
@@ -427,10 +444,10 @@ trailing: SegmentedButton<String>(
                     // 备份数据库（SQL dump，浏览器下载）
                     ListTile(
                       leading: const Icon(Icons.backup),
-                      title: const Text('备份数据库（下载 SQL）'),
+                      title: Text(t('备份数据库（下载 SQL）')),
                       subtitle: backup.isBackingUp
                           ? const LinearProgressIndicator()
-                          : const Text('导出全部书籍/章节/进度/书签/笔记为 .sql 文件'),
+                          : Text(t('导出全部书籍/章节/进度/书签/笔记为 .sql 文件')),
                       trailing: backup.isBackingUp
                           ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))
                           : const Icon(Icons.chevron_right),
@@ -439,10 +456,10 @@ trailing: SegmentedButton<String>(
                     // 恢复数据库（上传 SQL）
                     ListTile(
                       leading: const Icon(Icons.restore),
-                      title: const Text('恢复数据库（上传 SQL）'),
+                      title: Text(t('恢复数据库（上传 SQL）')),
                       subtitle: backup.isRestoring
                           ? const LinearProgressIndicator()
-                          : const Text('清空当前数据并导入备份文件（不可撤销）'),
+                          : Text(t('清空当前数据并导入备份文件（不可撤销）')),
                       trailing: backup.isRestoring
                           ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))
                           : const Icon(Icons.chevron_right),
@@ -461,12 +478,12 @@ trailing: SegmentedButton<String>(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('关于', style: Theme.of(context).textTheme.titleMedium),
+                  Text(t('关于'), style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 12),
-                  const ListTile(
-                    leading: Icon(Icons.menu_book),
-                    title: Text('YYX书库（YYX Library）'),
-                    subtitle: Text('版本 1.0.3 · 开源许可 BSD-3-Clause'),
+                  ListTile(
+                    leading: const Icon(Icons.menu_book),
+                    title: Text(t('YYX书库（YYX Library）')),
+                    subtitle: Text(t('版本 {ver} · 开源许可 BSD-3-Clause', {'ver': '10.0.3'})),
                   ),
                 ],
               ),
@@ -532,7 +549,7 @@ trailing: SegmentedButton<String>(
       final saved = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: Text(existing == null ? '添加书源' : '编辑书源'),
+          title: Text(existing == null ? t('添加书源') : t('编辑书源')),
           content: SizedBox(
             width: 420,
             child: SingleChildScrollView(
@@ -540,40 +557,40 @@ trailing: SegmentedButton<String>(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextField(controller: nameCtrl,
-                      decoration: const InputDecoration(labelText: '名称 *', border: OutlineInputBorder(), isDense: true)),
+                      decoration: InputDecoration(labelText: t('名称 *'), border: const OutlineInputBorder(), isDense: true)),
                   const SizedBox(height: 8),
                   TextField(controller: baseCtrl,
-                      decoration: const InputDecoration(labelText: '站点地址 * (https://...)', border: OutlineInputBorder(), isDense: true)),
+                      decoration: InputDecoration(labelText: t('站点地址 * (https://...)'), border: const OutlineInputBorder(), isDense: true)),
                   const SizedBox(height: 8),
                   TextField(controller: searchCtrl,
-                      decoration: const InputDecoration(
-                          labelText: '搜索 URL (含 {{key}})',
-                          hintText: '留空则该书源不支持搜索',
-                          border: OutlineInputBorder(), isDense: true)),
+                      decoration: InputDecoration(
+                          labelText: t('搜索 URL (含 {{key}})'),
+                          hintText: t('留空则该书源不支持搜索'),
+                          border: const OutlineInputBorder(), isDense: true)),
                   const SizedBox(height: 8),
                   TextField(controller: searchListCtrl,
-                      decoration: const InputDecoration(labelText: '搜索列表选择器', border: OutlineInputBorder(), isDense: true)),
+                      decoration: InputDecoration(labelText: t('搜索列表选择器'), border: const OutlineInputBorder(), isDense: true)),
                   const SizedBox(height: 8),
                   TextField(controller: tocListCtrl,
-                      decoration: const InputDecoration(labelText: '目录章节选择器', border: OutlineInputBorder(), isDense: true)),
+                      decoration: InputDecoration(labelText: t('目录章节选择器'), border: const OutlineInputBorder(), isDense: true)),
                   const SizedBox(height: 8),
                   TextField(controller: contentSelCtrl,
-                      decoration: const InputDecoration(labelText: '正文选择器', border: OutlineInputBorder(), isDense: true)),
+                      decoration: InputDecoration(labelText: t('正文选择器'), border: const OutlineInputBorder(), isDense: true)),
                 ],
               ),
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('取消')),
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(t('取消'))),
             FilledButton(
               onPressed: () {
                 if (nameCtrl.text.trim().isEmpty || baseCtrl.text.trim().isEmpty) {
-                  ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('名称和站点地址必填')));
+                  ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text(t('名称和站点地址必填'))));
                   return;
                 }
                 Navigator.pop(ctx, true);
               },
-              child: const Text('保存'),
+              child: Text(t('保存')),
             ),
           ],
         ),
@@ -601,7 +618,7 @@ trailing: SegmentedButton<String>(
       await store.upsert(source);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('书源「${source.name}」已保存')));
+            SnackBar(content: Text(t('书源「{p1}」已保存', {'p1': source.name}))));
       }
     }
 
@@ -613,12 +630,12 @@ trailing: SegmentedButton<String>(
         builder: (ctx, setState) {
           final sources = store.getAll();
           return AlertDialog(
-            title: const Text('书源管理'),
+            title: Text(t('书源管理')),
             content: SizedBox(
               width: 440,
               height: 400,
               child: sources.isEmpty
-                  ? const Center(child: Text('暂无书源'))
+                  ? Center(child: Text(t('暂无书源')))
                   : ListView.builder(
                       itemCount: sources.length,
                       itemBuilder: (_, i) {
@@ -641,7 +658,7 @@ trailing: SegmentedButton<String>(
                             children: [
                               IconButton(
                                 icon: const Icon(Icons.edit, size: 18),
-                                tooltip: '编辑',
+                                tooltip: t('编辑'),
                                 onPressed: () async {
                                   await showEditDialog(existing: s);
                                   setState(() {});
@@ -649,7 +666,7 @@ trailing: SegmentedButton<String>(
                               ),
                               IconButton(
                                 icon: const Icon(Icons.delete_outline, size: 18),
-                                tooltip: '删除',
+                                tooltip: t('删除'),
                                 onPressed: () async {
                                   await store.remove(s.name);
                                   setState(() {});
@@ -667,7 +684,7 @@ trailing: SegmentedButton<String>(
                   await store.resetToDefaults();
                   setState(() {});
                 },
-                child: const Text('恢复默认'),
+                child: Text(t('恢复默认')),
               ),
               FilledButton.icon(
                 onPressed: () async {
@@ -675,7 +692,7 @@ trailing: SegmentedButton<String>(
                   setState(() {});
                 },
                 icon: const Icon(Icons.add),
-                label: const Text('添加书源'),
+                label: Text(t('添加书源')),
               ),
             ],
           );
@@ -689,14 +706,14 @@ trailing: SegmentedButton<String>(
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('清理缓存'),
+        title: Text(t('清理缓存')),
         content: Text(
-          '将删除临时文件与缓存，共 ${_formatCacheSize(cache.cacheSize)}。\n\n'
-          '数据库与设置不受影响。此操作不可撤销。',
+          t('将删除临时文件与缓存，共 {p1}。\n\n'
+          '数据库与设置不受影响。此操作不可撤销。', {'p1': _formatCacheSize(cache.cacheSize)}),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('取消')),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('清理')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(t('取消'))),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(t('清理'))),
         ],
       ),
     );
@@ -710,15 +727,15 @@ trailing: SegmentedButton<String>(
         SnackBar(
           content: Text(
             result.success
-                ? '缓存已清理，释放 ${result.formattedFreed}（${result.removedFiles} 个文件）'
-                : '清理完成，但 ${result.errors.length} 个文件失败',
+                ? t('缓存已清理，释放 {p1}（{p2} 个文件）', {'p1': result.formattedFreed, 'p2': result.removedFiles})
+                : t('清理完成，但 {p1} 个文件失败', {'p1': result.errors.length}),
           ),
         ),
       );
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('清理缓存失败: $e')),
+          SnackBar(content: Text(t('清理缓存失败: {e}', {'e': e}))),
         );
       }
     }
@@ -735,13 +752,13 @@ trailing: SegmentedButton<String>(
       final path = await ref.read(backupProvider.notifier).backup();
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('备份成功: $path')),
+          SnackBar(content: Text(t('备份成功: {path}', {'path': path}))),
         );
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('备份失败: $e')),
+          SnackBar(content: Text(t('备份失败: {e}', {'e': e}))),
         );
       }
     }
@@ -750,7 +767,7 @@ trailing: SegmentedButton<String>(
   /// 设置书库根目录（跨系统共享数据库）：选目录后询问是否把已有绝对路径迁移为相对
   Future<void> _handleSetLibraryRoot(BuildContext context, WidgetRef ref) async {
     final root = await FilePicker.platform.getDirectoryPath(
-      dialogTitle: '选择书库根目录（小说库所在目录）',
+      dialogTitle: t('选择书库根目录（小说库所在目录）'),
     );
     if (root == null || !context.mounted) return;
 
@@ -768,18 +785,18 @@ trailing: SegmentedButton<String>(
           context: context,
           builder: (ctx) => StatefulBuilder(
             builder: (ctx, setState) => AlertDialog(
-              title: const Text('转换已有路径'),
+              title: Text(t('转换已有路径')),
               content: SizedBox(
                 width: 480,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('书库中有 ${analysis.absoluteCount} 条绝对路径、${analysis.relativeCount} 条相对路径。'
-                        '跨系统共享数据库需要相对路径。'),
+                    Text(t('书库中有 {p1} 条绝对路径、{p2} 条相对路径。'
+                        '跨系统共享数据库需要相对路径。', {'p1': analysis.absoluteCount, 'p2': analysis.relativeCount})),
                     const SizedBox(height: 12),
-                    const Text('检测到以下可能的旧库根目录（勾选后一并转换）：',
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                    Text(t('检测到以下可能的旧库根目录（勾选后一并转换）：'),
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 4),
                     ...analysis.suggestedRoots.map((r) => CheckboxListTile(
                           dense: true,
@@ -791,15 +808,15 @@ trailing: SegmentedButton<String>(
                               v == true ? selected.add(r) : selected.remove(r)),
                         )),
                     const SizedBox(height: 4),
-                    Text('位于「$root」及勾选目录下的路径将转为相对形式，其余保持不变。',
+                    Text(t('位于「{root}」及勾选目录下的路径将转为相对形式，其余保持不变。', {'root': root}),
                         style: const TextStyle(fontSize: 12),
                         ),
                   ],
                 ),
               ),
               actions: [
-                TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('暂不')),
-                FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('转换')),
+                TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(t('暂不'))),
+                FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(t('转换'))),
               ],
             ),
           ),
@@ -811,7 +828,7 @@ trailing: SegmentedButton<String>(
               );
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('已转换 $count 条书籍路径为相对路径')),
+              SnackBar(content: Text(t('已转换 {count} 条书籍路径为相对路径', {'count': count}))),
             );
           }
         }
@@ -819,14 +836,14 @@ trailing: SegmentedButton<String>(
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('路径分析失败: $e')),
+          SnackBar(content: Text(t('路径分析失败: {e}', {'e': e}))),
         );
       }
     }
 
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('书库根目录已更新')),
+        SnackBar(content: Text(t('书库根目录已更新'))),
       );
     }
   }
@@ -844,13 +861,13 @@ trailing: SegmentedButton<String>(
       );
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('备份已下载: $fileName')),
+          SnackBar(content: Text(t('备份已下载: {fileName}', {'fileName': fileName}))),
         );
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('备份失败: $e')),
+          SnackBar(content: Text(t('备份失败: {e}', {'e': e}))),
         );
       }
     }
@@ -861,11 +878,11 @@ trailing: SegmentedButton<String>(
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('恢复数据库'),
-        content: const Text('警告：恢复将清空当前全部数据（书籍/章节/进度/书签/笔记），导入备份文件内容。此操作不可撤销。\n\n请选择 .sql 备份文件继续。'),
+        title: Text(t('恢复数据库')),
+        content: Text(t('警告：恢复将清空当前全部数据（书籍/章节/进度/书签/笔记），导入备份文件内容。此操作不可撤销。\n\n请选择 .sql 备份文件继续。')),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('取消')),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('继续')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(t('取消'))),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(t('继续'))),
         ],
       ),
     );
@@ -876,7 +893,7 @@ trailing: SegmentedButton<String>(
         type: FileType.custom,
         allowedExtensions: ['sql'],
         withData: true,
-        dialogTitle: '选择 SQL 备份文件',
+        dialogTitle: t('选择 SQL 备份文件'),
       );
       if (result == null || result.files.isEmpty) return;
       final bytes = result.files.single.bytes;
@@ -885,13 +902,13 @@ trailing: SegmentedButton<String>(
       await ref.read(backupProvider.notifier).restoreSql(utf8.decode(bytes));
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('恢复成功，请刷新页面（或重启应用）以刷新界面数据')),
+          SnackBar(content: Text(t('恢复成功，请刷新页面（或重启应用）以刷新界面数据'))),
         );
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('恢复失败: $e')),
+          SnackBar(content: Text(t('恢复失败: {e}', {'e': e}))),
         );
       }
     }
@@ -901,11 +918,11 @@ trailing: SegmentedButton<String>(
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('恢复数据库'),
-        content: const Text('警告：恢复操作将覆盖当前数据库，此操作不可撤销。\n\n请选择备份文件继续。'),
+        title: Text(t('恢复数据库')),
+        content: Text(t('警告：恢复操作将覆盖当前数据库，此操作不可撤销。\n\n请选择备份文件继续。')),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('取消')),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('继续')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(t('取消'))),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(t('继续'))),
         ],
       ),
     );
@@ -916,7 +933,7 @@ trailing: SegmentedButton<String>(
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['db'],
-      dialogTitle: '选择备份文件',
+      dialogTitle: t('选择备份文件'),
     );
 
     if (result == null || result.files.isEmpty) return;
@@ -928,13 +945,13 @@ trailing: SegmentedButton<String>(
       await ref.read(backupProvider.notifier).restore(filePath);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('恢复成功，请重启应用以生效')),
+          SnackBar(content: Text(t('恢复成功，请重启应用以生效'))),
         );
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('恢复失败: $e')),
+          SnackBar(content: Text(t('恢复失败: {e}', {'e': e}))),
         );
       }
     }
@@ -944,11 +961,11 @@ trailing: SegmentedButton<String>(
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('删除备份'),
-        content: const Text('确定要删除此备份吗？此操作不可撤销。'),
+        title: Text(t('删除备份')),
+        content: Text(t('确定要删除此备份吗？此操作不可撤销。')),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('取消')),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('删除')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(t('取消'))),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(t('删除'))),
         ],
       ),
     );
@@ -957,7 +974,7 @@ trailing: SegmentedButton<String>(
       await ref.read(backupProvider.notifier).deleteBackup(path);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('备份已删除')),
+          SnackBar(content: Text(t('备份已删除'))),
         );
       }
     }
@@ -967,38 +984,38 @@ trailing: SegmentedButton<String>(
     final result = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('设置数据库路径'),
+        title: Text(t('设置数据库路径')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('设置自定义数据库路径可以让 macOS、Windows、NAS 等设备共享同一个数据库。'),
+            Text(t('设置自定义数据库路径可以让 macOS、Windows、NAS 等设备共享同一个数据库。')),
             const SizedBox(height: 12),
-            const Text('⚠️ 注意：', style: TextStyle(fontWeight: FontWeight.bold)),
-            const Text('• 修改路径后需要重启应用'),
-            const Text('• 网络路径(NAS)可能有性能问题'),
-            const Text('• 请确保路径有读写权限'),
+            Text(t('⚠️ 注意：'), style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(t('• 修改路径后需要重启应用')),
+            Text(t('• 网络路径(NAS)可能有性能问题')),
+            Text(t('• 请确保路径有读写权限')),
             const SizedBox(height: 12),
-            Text('当前路径：${currentPath.isEmpty ? "默认" : currentPath}',
+            Text(t('当前路径：{path}', {'path': currentPath.isEmpty ? t('默认') : currentPath}),
               style: TextStyle(fontSize: 12, color: Theme.of(ctx).colorScheme.onSurfaceVariant)),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(null),
-            child: const Text('取消'),
+            child: Text(t('取消')),
           ),
           if (currentPath.isNotEmpty)
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(''),
-              child: const Text('恢复默认'),
+              child: Text(t('恢复默认')),
             ),
           FilledButton.icon(
             onPressed: () async {
               Navigator.of(ctx).pop('select');
             },
             icon: const Icon(Icons.folder_open),
-            label: const Text('选择文件夹'),
+            label: Text(t('选择文件夹')),
           ),
         ],
       ),
@@ -1011,19 +1028,19 @@ trailing: SegmentedButton<String>(
       await ref.read(settingsProvider.notifier).setCustomDbPath('');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('已恢复默认路径，重启应用生效')),
+          SnackBar(content: Text(t('已恢复默认路径，重启应用生效'))),
         );
       }
     } else if (result == 'select') {
       // 选择文件夹
       final path = await FilePicker.platform.getDirectoryPath(
-        dialogTitle: '选择数据库存储位置',
+        dialogTitle: t('选择数据库存储位置'),
       );
       if (path != null) {
         await ref.read(settingsProvider.notifier).setCustomDbPath(path);
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('路径已设置: $path，重启应用生效')),
+            SnackBar(content: Text(t('路径已设置: {path}，重启应用生效', {'path': path}))),
           );
         }
       }
@@ -1039,7 +1056,7 @@ trailing: SegmentedButton<String>(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('书库文件夹'),
+          title: Text(t('书库文件夹')),
           content: SizedBox(
             width: 500,
             child: Column(
@@ -1047,9 +1064,9 @@ trailing: SegmentedButton<String>(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '首页「扫描书库」会遍历以下文件夹，自动导入新书与更新章节。'
+                  t('首页「扫描书库」会遍历以下文件夹，自动导入新书与更新章节。'
                   '支持相对路径（以程序所在目录为基准，如 novels、H），跨系统共用同一份配置；'
-                  'OneDrive 未物化（占位）文件会自动跳过。',
+                  'OneDrive 未物化（占位）文件会自动跳过。'),
                   style: TextStyle(fontSize: 12, color: Theme.of(ctx).colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 12),
@@ -1058,7 +1075,7 @@ trailing: SegmentedButton<String>(
                   child: folders.isEmpty
                       ? Center(
                           child: Text(
-                            '尚未添加书库文件夹',
+                            t('尚未添加书库文件夹'),
                             style: TextStyle(color: Theme.of(ctx).colorScheme.onSurfaceVariant),
                           ),
                         )
@@ -1080,7 +1097,7 @@ trailing: SegmentedButton<String>(
                                   : null,
                               trailing: IconButton(
                                 icon: const Icon(Icons.delete_outline, size: 18),
-                                tooltip: '移除',
+                                tooltip: t('移除'),
                                 onPressed: () => setDialogState(() => folders.removeAt(i)),
                               ),
                             );
@@ -1095,9 +1112,9 @@ trailing: SegmentedButton<String>(
                     Expanded(
                       child: TextField(
                         controller: manualCtrl,
-                        decoration: const InputDecoration(
-                          hintText: '相对路径（如 novels）或绝对路径',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          hintText: t('相对路径（如 novels）或绝对路径'),
+                          border: const OutlineInputBorder(),
                           isDense: true,
                         ),
                       ),
@@ -1111,7 +1128,7 @@ trailing: SegmentedButton<String>(
                           manualCtrl.clear();
                         }
                       },
-                      child: const Text('添加'),
+                      child: Text(t('添加')),
                     ),
                   ],
                 ),
@@ -1119,7 +1136,7 @@ trailing: SegmentedButton<String>(
                 FilledButton.tonalIcon(
                   onPressed: () async {
                     final path = await FilePicker.platform.getDirectoryPath(
-                      dialogTitle: '选择书库文件夹',
+                      dialogTitle: t('选择书库文件夹'),
                     );
                     if (path != null) {
                       setDialogState(() {
@@ -1128,14 +1145,14 @@ trailing: SegmentedButton<String>(
                     }
                   },
                   icon: const Icon(Icons.add),
-                  label: const Text('浏览选择文件夹'),
+                  label: Text(t('浏览选择文件夹')),
                 ),
               ],
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('取消')),
-            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('保存')),
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(t('取消'))),
+            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(t('保存'))),
           ],
         ),
       ),
@@ -1145,7 +1162,7 @@ trailing: SegmentedButton<String>(
       await ref.read(settingsProvider.notifier).setLibraryFolders(folders);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('书库文件夹已保存')),
+          SnackBar(content: Text(t('书库文件夹已保存'))),
         );
       }
     }

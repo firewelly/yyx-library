@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../utils/constants.dart';
+import '../l10n/s.dart';
 
 /// 应用外壳 - NavigationRail 常驻侧边导航
 ///
@@ -14,13 +15,14 @@ class AppShell extends ConsumerWidget {
 
   const AppShell({super.key, required this.child, required this.location});
 
-  static const _allDestinations = [
-    (path: '/', icon: Icons.local_library_outlined, selectedIcon: Icons.local_library, label: '书库'),
-    (path: '/import', icon: Icons.file_download_outlined, selectedIcon: Icons.file_download, label: '导入'),
-    (path: '/crawler', icon: Icons.travel_explore, selectedIcon: Icons.travel_explore, label: '爬虫'),
-    (path: '/stats', icon: Icons.bar_chart, selectedIcon: Icons.bar_chart, label: '统计'),
-    (path: '/tags', icon: Icons.label_outline, selectedIcon: Icons.label, label: '标签'),
-    (path: '/authors', icon: Icons.person_outline, selectedIcon: Icons.person, label: '作者'),
+  /// 注意：不能用 static final 缓存——t() 结果须随语言切换重新求值
+  static List<({String path, IconData icon, IconData selectedIcon, String label})> get _allDestinations => [
+    (path: '/', icon: Icons.local_library_outlined, selectedIcon: Icons.local_library, label: t('书库')),
+    (path: '/import', icon: Icons.file_download_outlined, selectedIcon: Icons.file_download, label: t('导入')),
+    (path: '/crawler', icon: Icons.travel_explore, selectedIcon: Icons.travel_explore, label: t('爬虫')),
+    (path: '/stats', icon: Icons.bar_chart, selectedIcon: Icons.bar_chart, label: t('统计')),
+    (path: '/tags', icon: Icons.label_outline, selectedIcon: Icons.label, label: t('标签')),
+    (path: '/authors', icon: Icons.person_outline, selectedIcon: Icons.person, label: t('作者')),
   ];
 
   /// 分发版本(ENABLE_CRAWLER=false)隐藏网络抓取入口
@@ -58,10 +60,10 @@ class AppShell extends ConsumerWidget {
                 selectedIcon: Icon(d.selectedIcon),
                 label: d.label,
               ),
-            const NavigationDestination(
-              icon: Icon(Icons.settings_outlined),
-              selectedIcon: Icon(Icons.settings),
-              label: '设置',
+            NavigationDestination(
+              icon: const Icon(Icons.settings_outlined),
+              selectedIcon: const Icon(Icons.settings),
+              label: t('设置'),
             ),
           ],
         ),
@@ -84,11 +86,11 @@ class AppShell extends ConsumerWidget {
                     leading: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       child: extended
-                          ? const Padding(
-                              padding: EdgeInsets.only(left: 16),
+                          ? Padding(
+                              padding: const EdgeInsets.only(left: 16),
                               child: Align(
                                 alignment: Alignment.centerLeft,
-                                child: Text('📚 YYX书库', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                                child: Text(t('📚 YYX书库'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
                               ),
                             )
                           : const Icon(Icons.menu_book),
@@ -148,7 +150,7 @@ class _SettingsDestination extends ConsumerWidget {
             Icon(selected ? Icons.settings : Icons.settings_outlined,
                 color: selected ? colors.onPrimaryContainer : colors.onSurfaceVariant),
             const SizedBox(height: 4),
-            Text('设置', style: Theme.of(context).textTheme.bodySmall),
+            Text(t('设置'), style: Theme.of(context).textTheme.bodySmall),
           ],
         ),
       ),

@@ -5,6 +5,7 @@ import '../models/book.dart';
 import '../providers/database_provider.dart';
 import '../theme/app_colors.dart';
 import '../utils/formatters.dart';
+import '../l10n/s.dart';
 
 /// 标签管理页面
 class TagsScreen extends ConsumerStatefulWidget {
@@ -49,18 +50,18 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
 
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: const Text('标签管理')),
+        appBar: AppBar(title: Text(t('标签管理'))),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('🏷️ 标签管理'),
+        title: Text(t('🏷️ 标签管理')),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            tooltip: '新建标签',
+            tooltip: t('新建标签'),
             onPressed: () => _showCreateDialog(),
           ),
         ],
@@ -72,9 +73,9 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                 children: [
                   const Icon(Icons.label_off, size: 64, color: AppColors.emptyState),
                   const SizedBox(height: 16),
-                  Text('暂无标签', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+                  Text(t('暂无标签'), style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
                   const SizedBox(height: 8),
-                  Text('点击右上角 + 创建新标签', style: theme.textTheme.bodySmall?.copyWith(color: AppColors.hintText)),
+                  Text(t('点击右上角 + 创建新标签'), style: theme.textTheme.bodySmall?.copyWith(color: AppColors.hintText)),
                 ],
               ),
             )
@@ -100,18 +101,18 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                       ),
                     ),
                     title: Text(item.tag.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text('关联 ${item.bookCount} 本小说'),
+                    subtitle: Text(t('关联 {p1} 本小说', {'p1': item.bookCount})),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
                           icon: const Icon(Icons.edit, size: 20),
-                          tooltip: '编辑',
+                          tooltip: t('编辑'),
                           onPressed: () => _showEditDialog(item),
                         ),
                         IconButton(
                           icon: Icon(Icons.delete, size: 20, color: theme.colorScheme.error),
-                          tooltip: '删除',
+                          tooltip: t('删除'),
                           onPressed: () => _confirmDelete(item),
                         ),
                       ],
@@ -142,20 +143,20 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('新建标签'),
+          title: Text(t('新建标签')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: nameCtrl,
-                decoration: const InputDecoration(
-                  labelText: '标签名称',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: t('标签名称'),
+                  border: const OutlineInputBorder(),
                 ),
                 autofocus: true,
               ),
               const SizedBox(height: 16),
-              const Text('选择颜色:'),
+              Text(t('选择颜色:')),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 12,
@@ -184,7 +185,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
+            TextButton(onPressed: () => Navigator.pop(ctx), child: Text(t('取消'))),
             FilledButton(
               onPressed: () async {
                 final name = nameCtrl.text.trim();
@@ -195,7 +196,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                 await db.createTag(name, color: colorHex);
                 await _loadTags();
               },
-              child: const Text('创建'),
+              child: Text(t('创建')),
             ),
           ],
         ),
@@ -214,19 +215,19 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('编辑标签'),
+          title: Text(t('编辑标签')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: nameCtrl,
-                decoration: const InputDecoration(
-                  labelText: '标签名称',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: t('标签名称'),
+                  border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 16),
-              const Text('选择颜色:'),
+              Text(t('选择颜色:')),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 12,
@@ -255,7 +256,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
+            TextButton(onPressed: () => Navigator.pop(ctx), child: Text(t('取消'))),
             FilledButton(
               onPressed: () async {
                 final name = nameCtrl.text.trim();
@@ -266,7 +267,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                 await db.updateTag(item.tag.id!, name: name, color: colorHex);
                 await _loadTags();
               },
-              child: const Text('保存'),
+              child: Text(t('保存')),
             ),
           ],
         ),
@@ -278,10 +279,10 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('确认删除'),
-        content: Text('确定要删除标签"${item.tag.name}"吗？\n这将移除它与 ${item.bookCount} 本小说的关联。'),
+        title: Text(t('确认删除')),
+        content: Text(t('确定要删除标签"{p1}"吗？\n这将移除它与 {p2} 本小说的关联。', {'p1': item.tag.name, 'p2': item.bookCount})),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(t('取消'))),
           FilledButton(
             onPressed: () async {
               Navigator.pop(ctx);
@@ -290,7 +291,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
               await _loadTags();
             },
             style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
-            child: const Text('删除'),
+            child: Text(t('删除')),
           ),
         ],
       ),
@@ -321,7 +322,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Text('${item.tag.name} (${item.bookCount}本)', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  Text(t('{p1} ({p2}本)', {'p1': item.tag.name, 'p2': item.bookCount}), style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                 ],
               ),
             ),
@@ -335,7 +336,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                   }
                   final books = snapshot.data!;
                   if (books.isEmpty) {
-                    return const Center(child: Text('无关联小说'));
+                    return Center(child: Text(t('无关联小说')));
                   }
                   return ListView.builder(
                     controller: scrollController,

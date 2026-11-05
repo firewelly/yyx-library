@@ -14,6 +14,7 @@ import 'services/remote_database.dart';
 import 'theme/app_colors.dart';
 import 'utils/database_factory_init.dart';
 import 'utils/zh_converter.dart';
+import './l10n/s.dart';
 
 
 void main() async {
@@ -26,7 +27,7 @@ void main() async {
 
     // 预加载繁简转换词典（OpenCC，约 1.1MB；不阻塞启动，阅读器/搜索用前会兜底等待）
     unawaited(ZhConverter.instance.ensureLoaded().catchError((Object e) {
-      debugPrint('繁简词典加载失败（繁简切换/繁简搜索将退化为原文匹配）: $e');
+      debugPrint(t('繁简词典加载失败（繁简切换/繁简搜索将退化为原文匹配）: {e}', {'e': e}));
     }));
 
     // 初始化 Hive：桌面端固定在应用支持目录（避开 OneDrive 重定向的文档目录，
@@ -47,7 +48,7 @@ void main() async {
       if (normalized != null) {
         customDbPath = normalized;
         await settingsService.setCustomDbPath(normalized);
-        debugPrint('customDbPath 已从 .dart_tool 迁移到: $normalized');
+        debugPrint(t('customDbPath 已从 .dart_tool 迁移到: {normalized}', {'normalized': normalized}));
       }
     }
 
@@ -64,7 +65,7 @@ void main() async {
         hasApi = res.statusCode == 200;
       } catch (_) {}
       if (hasApi) {
-        debugPrint('检测到服务端 API，启用远程书库模式');
+        debugPrint(t('检测到服务端 API，启用远程书库模式'));
         final db = RemoteDatabaseService();
         await db.initialize();
         runApp(
@@ -111,7 +112,7 @@ void main() async {
     );
   } catch (e, stack) {
     // 如果初始化失败，显示错误界面而不是静默崩溃
-    debugPrint('初始化失败: $e\n$stack');
+    debugPrint(t('初始化失败: {e}\n{stack}', {'e': e, 'stack': stack}));
     runApp(
       MaterialApp(
         home: Scaffold(
@@ -123,7 +124,7 @@ void main() async {
                 children: [
                   const Icon(Icons.error_outline, size: 64, color: AppColors.error),
                   const SizedBox(height: 16),
-                  const Text('应用初始化失败', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text(t('应用初始化失败'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   SelectableText(e.toString(), style: const TextStyle(fontSize: 14, color: AppColors.error)),
                   const SizedBox(height: 16),

@@ -5,6 +5,7 @@ import 'database_service.dart';
 import 'import_service.dart';
 import 'platform_fs.dart';
 import '../models/models.dart';
+import '../l10n/s.dart';
 
 /// 扫描结果统计
 class ScanResult {
@@ -55,7 +56,7 @@ class LibraryScanService {
     final result = ScanResult();
 
     if (kIsWeb) {
-      result.errors.add('Web 端无本地文件系统，不支持书库扫描。请使用文件导入功能。');
+      result.errors.add(t('Web 端无本地文件系统，不支持书库扫描。请使用文件导入功能。'));
       return result;
     }
 
@@ -66,12 +67,12 @@ class LibraryScanService {
       if (await PlatformFs.dirExists(resolved)) {
         validFolders.add(resolved);
       } else {
-        result.errors.add('文件夹不存在: $folder（解析为 $resolved）');
+        result.errors.add(t('文件夹不存在: {folder}（解析为 {resolved}）', {'folder': folder, 'resolved': resolved}));
       }
     }
     if (validFolders.isEmpty) {
       if (result.errors.isEmpty) {
-        result.errors.add('未配置书库文件夹，请先在设置中添加');
+        result.errors.add(t('未配置书库文件夹，请先在设置中添加'));
       }
       return result;
     }
@@ -114,7 +115,7 @@ class LibraryScanService {
       if (_cancelled) break;
       final path = files[i];
       final title = p.basenameWithoutExtension(path).trim();
-      onProgress?.call(i + 1, total, '正在处理: $title');
+      onProgress?.call(i + 1, total, t('正在处理: {title}', {'title': title}));
 
       try {
         final existing = bookByTitle[title];
@@ -141,7 +142,7 @@ class LibraryScanService {
               updatedAt: DateTime.now().toIso8601String(),
             );
           }
-        } else if (r.message.contains('无变化')) {
+        } else if (r.message.contains(t('无变化'))) {
           result.noChange++;
         } else {
           result.failed++;

@@ -61,6 +61,9 @@ class AppSettings {
   /// 各设备配置各自的本机根目录即可共用同一数据库
   final String libraryRootPath;
 
+  /// 界面语言: 'system'（跟随系统）| 'zh' | 'en'
+  final String language;
+
   const AppSettings({
     this.themeMode = 'system',
     this.themeSeed = 'b',
@@ -79,6 +82,7 @@ class AppSettings {
     this.readerZhVariant = 'original',
     this.defaultEncoding = 'auto',
     this.libraryRootPath = '',
+    this.language = 'system',
   });
 
   factory AppSettings.fromJson(Map<String, dynamic> json) =>
@@ -103,6 +107,7 @@ class AppSettings {
     String? readerZhVariant,
     String? defaultEncoding,
     String? libraryRootPath,
+    String? language,
   }) {
     return AppSettings(
       themeMode: themeMode ?? this.themeMode,
@@ -122,6 +127,7 @@ class AppSettings {
       readerZhVariant: readerZhVariant ?? this.readerZhVariant,
       defaultEncoding: defaultEncoding ?? this.defaultEncoding,
       libraryRootPath: libraryRootPath ?? this.libraryRootPath,
+      language: language ?? this.language,
     );
   }
 }

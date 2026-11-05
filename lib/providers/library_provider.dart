@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/models.dart';
 import '../services/database_service.dart';
 import 'database_provider.dart';
+import '../l10n/s.dart';
 
 /// 书库状态
 class LibraryState {
@@ -117,7 +118,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
         if (state.selectedTagId != null) {
           books = books.where((b) => b.tags.map((t) => t.id).contains(state.selectedTagId)).toList();
         }
-        if (state.selectedStatus != null && state.selectedStatus != '全部状态') {
+        if (state.selectedStatus != null && state.selectedStatus != t('全部状态')) {
           books = books.where((b) => b.status == state.selectedStatus).toList();
         }
         totalCount = books.length;

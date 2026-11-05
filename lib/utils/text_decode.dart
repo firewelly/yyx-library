@@ -16,7 +16,7 @@ class TextDecode {
   TextDecode._();
 
   /// 支持的手动编码选项（设置页「导入设置-默认编码」用）
-  static const List<(String, String)> encodingOptions = [
+  static final List<(String, String)> encodingOptions = [
     ('auto', '自动检测'),
     ('utf-8', 'UTF-8'),
     ('gbk', 'GBK / GB2312'),

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'platform_fs.dart';
+import '../l10n/s.dart';
 
 /// 缓存清理结果
 class CacheCleanResult {
@@ -47,8 +48,8 @@ class CacheService {
   /// 清理缓存，返回释放的字节数与删除文件数
   Future<CacheCleanResult> clearCache() async {
     if (kIsWeb) {
-      return const CacheCleanResult(
-        errors: ['Web 端无本地文件缓存，数据存储于浏览器 IndexedDB'],
+      return CacheCleanResult(
+        errors: [t('Web 端无本地文件缓存，数据存储于浏览器 IndexedDB')],
       );
     }
 

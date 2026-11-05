@@ -6,6 +6,7 @@ import '../providers/library_provider.dart';
 import '../theme/app_colors.dart';
 import '../utils/formatters.dart';
 import 'generated_cover.dart';
+import '../l10n/s.dart';
 
 /// 书籍列表视图 - 虚拟化行列表(支持上万本流畅滚动)
 class BookListView extends ConsumerWidget {
@@ -20,7 +21,7 @@ class BookListView extends ConsumerWidget {
     }
 
     if (state.error != null) {
-      return Center(child: Text('加载失败: ${state.error}'));
+      return Center(child: Text(t('加载失败: {p1}', {'p1': state.error})));
     }
 
     if (state.books.isEmpty) {
@@ -32,10 +33,10 @@ class BookListView extends ConsumerWidget {
             children: [
               const Icon(Icons.auto_stories_rounded, size: 72, color: AppColors.emptyState),
               const SizedBox(height: 20),
-              Text('书库还是空的', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+              Text(t('书库还是空的'), style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               Text(
-                '点击右下角 + 导入你的第一本小说\n支持 TXT / EPUB / PDF / MOBI',
+                t('点击右下角 + 导入你的第一本小说\n支持 TXT / EPUB / PDF / MOBI'),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.hintText),
               ),
@@ -133,7 +134,7 @@ class _BookRow extends StatelessWidget {
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        book.author ?? '未知',
+                        book.author ?? t('未知'),
                         style: theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -150,16 +151,16 @@ class _BookRow extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
-                    book.status,
+                    t(book.status),
                     style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
                   ),
                 ),
                 const SizedBox(width: 16),
                 // 字数 / 章节(窄屏隐藏)
                 if (MediaQuery.sizeOf(context).width >= 900) ...[
-                  _Metric(label: '字数', value: Formatters.formatWordCount(book.wordCount)),
+                  _Metric(label: t('字数'), value: Formatters.formatWordCount(book.wordCount)),
                   const SizedBox(width: 20),
-                  _Metric(label: '章节', value: '${book.chapterCount}'),
+                  _Metric(label: t('章节'), value: '${book.chapterCount}'),
                   const SizedBox(width: 20),
                 ],
                 // 评分(窄屏隐藏)

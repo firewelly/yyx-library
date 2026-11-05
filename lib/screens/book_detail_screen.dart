@@ -16,6 +16,7 @@ import '../utils/book_path.dart';
 import '../utils/formatters.dart';
 import '../utils/platform_utils.dart';
 import '../utils/web_launcher.dart';
+import '../l10n/s.dart';
 
 /// 书籍详情页
 class BookDetailScreen extends ConsumerStatefulWidget {
@@ -69,8 +70,8 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
 
     if (_book == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('错误')),
-        body: const Center(child: Text('书籍不存在')),
+        appBar: AppBar(title: Text(t('错误'))),
+        body: Center(child: Text(t('书籍不存在'))),
       );
     }
 
@@ -82,15 +83,15 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          tooltip: '返回书库',
+          tooltip: t('返回书库'),
           onPressed: () => context.go('/'),
         ),
         title: Text(book.title, maxLines: 1, overflow: TextOverflow.ellipsis),
         actions: [
-          IconButton(icon: const Icon(Icons.edit), tooltip: '编辑', onPressed: () => _showEditDialog(context)),
+          IconButton(icon: const Icon(Icons.edit), tooltip: t('编辑'), onPressed: () => _showEditDialog(context)),
           IconButton(
             icon: const Icon(Icons.delete),
-            tooltip: '删除',
+            tooltip: t('删除'),
             onPressed: () => _confirmDelete(context),
           ),
         ],
@@ -130,8 +131,8 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
                                 children: [
                                   if (book.author != null && book.author!.isNotEmpty)
                                     Text('👤 ${book.author}', style: theme.textTheme.bodyMedium),
-                                  Text('📊 ${book.status}', style: theme.textTheme.bodyMedium),
-                                  Text('📄 ${chapters.length} 章', style: theme.textTheme.bodyMedium),
+                                  Text(t('📊 {status}', {'status': t(book.status)}), style: theme.textTheme.bodyMedium),
+                                  Text(t('📄 {p1} 章', {'p1': chapters.length}), style: theme.textTheme.bodyMedium),
                                   Text('📝 ${Formatters.formatWordCount(book.wordCount)}', style: theme.textTheme.bodyMedium),
                                   if (book.sourceFormat != null && book.sourceFormat!.isNotEmpty)
                                     Text('📦 ${book.sourceFormat}', style: theme.textTheme.bodyMedium),
@@ -207,7 +208,7 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
                     // 标签
                     Row(
                       children: [
-                        Text('标签: ', style: theme.textTheme.bodyMedium),
+                        Text(t('标签: '), style: theme.textTheme.bodyMedium),
                         const SizedBox(width: 4),
                         Wrap(
                           spacing: 6,
@@ -221,7 +222,7 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
                             )),
                             ActionChip(
                               avatar: const Icon(Icons.add, size: 14),
-                              label: const Text('添加', style: TextStyle(fontSize: 11)),
+                              label: Text(t('添加'), style: const TextStyle(fontSize: 11)),
                               onPressed: () => _addTag(context),
                               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               visualDensity: VisualDensity.compact,
@@ -234,7 +235,7 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
                     // 评分（可交互）
                     Row(
                       children: [
-                        Text('评分: ', style: theme.textTheme.bodyMedium),
+                        Text(t('评分: '), style: theme.textTheme.bodyMedium),
                         ...List.generate(5, (i) => IconButton(
                           icon: Icon(
                             i < book.rating ? Icons.star : Icons.star_border,
@@ -250,7 +251,7 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
                             icon: const Icon(Icons.clear, size: 14, color: AppColors.hintText),
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
-                            tooltip: '清除评分',
+                            tooltip: t('清除评分'),
                             onPressed: () => _setRating(0),
                           ),
                       ],
@@ -269,7 +270,7 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
                             ),
                             icon: const Icon(Icons.play_arrow, size: 18),
                             label: Text(
-                              '继续阅读 ${_progressPercent(_progress!)}',
+                              t('继续阅读 {p1}', {'p1': _progressPercent(_progress!)}),
                               style: const TextStyle(fontWeight: FontWeight.w600),
                             ),
                           )
@@ -277,24 +278,24 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
                           FilledButton.icon(
                             onPressed: () => context.go('/reader/${book.id}'),
                             icon: const Icon(Icons.menu_book, size: 18),
-                            label: const Text('开始阅读'),
+                            label: Text(t('开始阅读')),
                           ),
                         // 导出菜单(TXT/EPUB/PDF/Kindle)
                         PopupMenuButton<String>(
-                          tooltip: '导出',
+                          tooltip: t('导出'),
                           onSelected: (value) => _export(book, value),
-                          itemBuilder: (_) => const [
+                          itemBuilder: (_) => [
                             PopupMenuItem(value: 'txt', child: Row(children: [
-                              Icon(Icons.description, size: 18), SizedBox(width: 8), Text('导出 TXT'),
+                              const Icon(Icons.description, size: 18), const SizedBox(width: 8), Text(t('导出 TXT')),
                             ])),
                             PopupMenuItem(value: 'epub', child: Row(children: [
-                              Icon(Icons.menu_book, size: 18), SizedBox(width: 8), Text('导出 EPUB'),
+                              const Icon(Icons.menu_book, size: 18), const SizedBox(width: 8), Text(t('导出 EPUB')),
                             ])),
                             PopupMenuItem(value: 'pdf', child: Row(children: [
-                              Icon(Icons.picture_as_pdf, size: 18), SizedBox(width: 8), Text('导出 PDF'),
+                              const Icon(Icons.picture_as_pdf, size: 18), const SizedBox(width: 8), Text(t('导出 PDF')),
                             ])),
                             PopupMenuItem(value: 'mobi', child: Row(children: [
-                              Icon(Icons.tablet_mac, size: 18), SizedBox(width: 8), Text('导出 Kindle'),
+                              const Icon(Icons.tablet_mac, size: 18), const SizedBox(width: 8), Text(t('导出 Kindle')),
                             ])),
                           ],
                           child: Container(
@@ -303,14 +304,14 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(color: Theme.of(context).colorScheme.outline),
                             ),
-                            child: const Row(
+                            child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.download, size: 18),
-                                SizedBox(width: 6),
-                                Text('导出', style: TextStyle(fontWeight: FontWeight.w600)),
-                                SizedBox(width: 4),
-                                Icon(Icons.arrow_drop_down, size: 18),
+                                const Icon(Icons.download, size: 18),
+                                const SizedBox(width: 6),
+                                Text(t('导出'), style: const TextStyle(fontWeight: FontWeight.w600)),
+                                const SizedBox(width: 4),
+                                const Icon(Icons.arrow_drop_down, size: 18),
                               ],
                             ),
                           ),
@@ -344,12 +345,12 @@ const SizedBox(height: 16),
         Row(
           children: [
             Expanded(
-              child: Text('📑 章节目录（共 ${chapters.length} 章）',
+              child: Text(t('📑 章节目录（共 {p1} 章）', {'p1': chapters.length}),
                   style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
             ),
             IconButton(
               icon: const Icon(Icons.search, size: 20),
-              tooltip: '章节搜索',
+              tooltip: t('章节搜索'),
               onPressed: () => _showChapterSearch(context),
             ),
           ],
@@ -374,7 +375,7 @@ const SizedBox(height: 16),
                         onPressed: () => context.go('/reader/${book.id}?chapterId=${chapter.id}'),
                         onLongPress: () => _showChapterMenu(context, chapter),
                         child: Text(
-                          '第${chapter.chapterNumber}章 ${chapter.title}',
+                          Formatters.chapterTitle(chapter.chapterNumber, chapter.title),
                           style: const TextStyle(fontSize: 13),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -405,7 +406,7 @@ const SizedBox(height: 16),
                       onPressed: () => context.go('/reader/${book.id}?chapterId=${chapter.id}'),
                       onLongPress: () => _showChapterMenu(context, chapter),
                       child: Text(
-                        '第${chapter.chapterNumber}章 ${chapter.title}',
+                        Formatters.chapterTitle(chapter.chapterNumber, chapter.title),
                         style: const TextStyle(fontSize: 11),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -428,7 +429,7 @@ const SizedBox(height: 16),
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: OutlinedButton.icon(
         icon: const Icon(Icons.expand_more, size: 18),
-        label: Text('显示更多章节（还有 $remaining 章）'),
+        label: Text(t('显示更多章节（还有 {remaining} 章）', {'remaining': remaining})),
         onPressed: () {
           setState(() {
             _chapterLimit += 500;
@@ -469,14 +470,14 @@ const SizedBox(height: 16),
         final fileName = await exportService.exportDownload(book.id!, format);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('已开始下载: $fileName')),
+            SnackBar(content: Text(t('已开始下载: {fileName}', {'fileName': fileName}))),
           );
         }
         return;
       }
 
       final outputDir = await FilePicker.platform.getDirectoryPath(
-        dialogTitle: '选择导出目录',
+        dialogTitle: t('选择导出目录'),
       );
       if (outputDir == null) return;
 
@@ -490,13 +491,13 @@ const SizedBox(height: 16),
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('导出成功: $filePath')),
+          SnackBar(content: Text(t('导出成功: {filePath}', {'filePath': filePath}))),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('导出失败: $e')),
+          SnackBar(content: Text(t('导出失败: {e}', {'e': e}))),
         );
       }
     }
@@ -512,7 +513,7 @@ const SizedBox(height: 16),
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('编辑书籍'),
+        title: Text(t('编辑书籍')),
         content: SizedBox(
           width: 450,
           child: SingleChildScrollView(
@@ -521,27 +522,27 @@ const SizedBox(height: 16),
               children: [
                 TextField(
                   controller: titleCtrl,
-                  decoration: const InputDecoration(labelText: '书名', border: OutlineInputBorder()),
+                  decoration: InputDecoration(labelText: t('书名'), border: const OutlineInputBorder()),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: authorCtrl,
-                  decoration: const InputDecoration(labelText: '作者', border: OutlineInputBorder()),
+                  decoration: InputDecoration(labelText: t('作者'), border: const OutlineInputBorder()),
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
                   initialValue: status,
-                  decoration: const InputDecoration(labelText: '状态', border: OutlineInputBorder()),
-                  items: const [
-                    DropdownMenuItem(value: '连载中', child: Text('连载中')),
-                    DropdownMenuItem(value: '已完结', child: Text('已完结')),
+                  decoration: InputDecoration(labelText: t('状态'), border: const OutlineInputBorder()),
+                  items: [
+                    DropdownMenuItem(value: '连载中', child: Text(t('连载中'))),
+                    DropdownMenuItem(value: '已完结', child: Text(t('已完结'))),
                   ],
                   onChanged: (v) => status = v ?? status,
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: summaryCtrl,
-                  decoration: const InputDecoration(labelText: '简介', border: OutlineInputBorder()),
+                  decoration: InputDecoration(labelText: t('简介'), border: const OutlineInputBorder()),
                   maxLines: 4,
                 ),
               ],
@@ -549,7 +550,7 @@ const SizedBox(height: 16),
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(t('取消'))),
           FilledButton(
             onPressed: () async {
               Navigator.pop(ctx);
@@ -564,7 +565,7 @@ const SizedBox(height: 16),
               // 刷新书库列表
               unawaited(ref.read(libraryProvider.notifier).refresh());
             },
-            child: const Text('保存'),
+            child: Text(t('保存')),
           ),
         ],
       ),
@@ -585,7 +586,7 @@ const SizedBox(height: 16),
           final availableTags = allTags.where((t) => !existingTagNames.contains(t.name)).toList();
 
           return AlertDialog(
-            title: const Text('添加标签'),
+            title: Text(t('添加标签')),
             content: SizedBox(
               width: 350,
               child: Column(
@@ -601,7 +602,7 @@ const SizedBox(height: 16),
                     },
                   ),
                   const SizedBox(height: 12),
-                  const Text('已有标签:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  Text(t('已有标签:'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                   const SizedBox(height: 4),
                   // 可选标签列表
                   ...availableTags.map((tag) => ListTile(
@@ -615,9 +616,9 @@ const SizedBox(height: 16),
                     },
                   )),
                   if (availableTags.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.all(8),
-                      child: Text('没有更多标签可用', style: TextStyle(color: AppColors.hintText, fontSize: 12)),
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Text(t('没有更多标签可用'), style: const TextStyle(color: AppColors.hintText, fontSize: 12)),
                     ),
                 ],
               ),
@@ -664,7 +665,7 @@ const SizedBox(height: 16),
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setState) => AlertDialog(
-            title: const Text('章节搜索'),
+            title: Text(t('章节搜索')),
             content: SizedBox(
               width: 480,
               child: Column(
@@ -674,7 +675,7 @@ const SizedBox(height: 16),
                     controller: queryController,
                     autofocus: true,
                     decoration: InputDecoration(
-                      hintText: '搜索本书章节标题与正文（简繁同搜）...',
+                      hintText: t('搜索本书章节标题与正文（简繁同搜）...'),
                       prefixIcon: const Icon(Icons.search, size: 20),
                       suffixIcon: queryController.text.isNotEmpty
                           ? IconButton(
@@ -700,7 +701,7 @@ const SizedBox(height: 16),
                   else if (results.isEmpty && queryController.text.trim().isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.all(12),
-                      child: Text('未找到匹配的章节', style: Theme.of(context).textTheme.bodySmall),
+                      child: Text(t('未找到匹配的章节'), style: Theme.of(context).textTheme.bodySmall),
                     )
                   else if (results.isNotEmpty)
                     Flexible(
@@ -746,7 +747,7 @@ const SizedBox(height: 16),
               ),
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('关闭')),
+              TextButton(onPressed: () => Navigator.pop(ctx), child: Text(t('关闭'))),
             ],
           ),
         );
@@ -765,7 +766,7 @@ const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Text(
-                '第${chapter.chapterNumber}章 ${chapter.title}',
+                Formatters.chapterTitle(chapter.chapterNumber, chapter.title),
                 style: Theme.of(context).textTheme.titleSmall,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -774,7 +775,7 @@ const SizedBox(height: 16),
             const Divider(height: 1),
             ListTile(
               leading: const Icon(Icons.edit),
-              title: const Text('编辑章节标题'),
+              title: Text(t('编辑章节标题')),
               onTap: () {
                 Navigator.pop(ctx);
                 _showEditChapterDialog(context, chapter);
@@ -782,7 +783,7 @@ const SizedBox(height: 16),
             ),
             ListTile(
               leading: const Icon(Icons.menu_book),
-              title: const Text('阅读此章'),
+              title: Text(t('阅读此章')),
               onTap: () {
                 Navigator.pop(ctx);
                 context.go('/reader/${widget.bookId}?chapterId=${chapter.id}');
@@ -790,7 +791,7 @@ const SizedBox(height: 16),
             ),
             ListTile(
               leading: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
-              title: Text('删除章节', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              title: Text(t('删除章节'), style: TextStyle(color: Theme.of(context).colorScheme.error)),
               onTap: () {
                 Navigator.pop(ctx);
                 _confirmDeleteChapter(context, chapter);
@@ -809,17 +810,17 @@ const SizedBox(height: 16),
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('编辑章节标题'),
+        title: Text(t('编辑章节标题')),
         content: TextField(
           controller: titleCtrl,
-          decoration: const InputDecoration(
-            labelText: '章节标题',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: t('章节标题'),
+            border: const OutlineInputBorder(),
           ),
           autofocus: true,
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(t('取消'))),
           FilledButton(
             onPressed: () async {
               final newTitle = titleCtrl.text.trim();
@@ -829,7 +830,7 @@ const SizedBox(height: 16),
               await db.updateChapter(chapter.copyWith(title: newTitle));
               await _loadBook();
             },
-            child: const Text('保存'),
+            child: Text(t('保存')),
           ),
         ],
       ),
@@ -841,10 +842,10 @@ const SizedBox(height: 16),
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('确认删除章节'),
-        content: Text('确定要删除"第${chapter.chapterNumber}章 ${chapter.title}"吗？此操作不可恢复。'),
+        title: Text(t('确认删除章节')),
+        content: Text(t('确定要删除"{title}"吗？此操作不可恢复。', {'title': Formatters.chapterTitle(chapter.chapterNumber, chapter.title)})),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(t('取消'))),
           FilledButton(
             onPressed: () async {
               Navigator.pop(ctx);
@@ -853,7 +854,7 @@ const SizedBox(height: 16),
               await _loadBook();
             },
             style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
-            child: const Text('删除'),
+            child: Text(t('删除')),
           ),
         ],
       ),
@@ -864,10 +865,10 @@ const SizedBox(height: 16),
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('确认删除'),
-        content: Text('确定要删除《${_book!.title}》吗？此操作不可恢复。'),
+        title: Text(t('确认删除')),
+        content: Text(t('确定要删除《{p1}》吗？此操作不可恢复。', {'p1': _book!.title})),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(t('取消'))),
           FilledButton(
             onPressed: () async {
               Navigator.pop(ctx);
@@ -877,7 +878,7 @@ const SizedBox(height: 16),
               if (mounted && context.mounted) context.go('/');
             },
             style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
-            child: const Text('删除'),
+            child: Text(t('删除')),
           ),
         ],
       ),
@@ -913,11 +914,11 @@ class _CreateTagTileState extends ConsumerState<_CreateTagTile> {
         Expanded(
           child: TextField(
             controller: _controller,
-            decoration: const InputDecoration(
-              hintText: '输入新标签名...',
+            decoration: InputDecoration(
+              hintText: t('输入新标签名...'),
               isDense: true,
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              border: const OutlineInputBorder(),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             ),
             onSubmitted: (_) => _create(),
           ),
@@ -940,7 +941,7 @@ class _CreateTagTileState extends ConsumerState<_CreateTagTile> {
         const SizedBox(width: 8),
         FilledButton.tonal(
           onPressed: _isCreating ? null : _create,
-          child: const Text('创建'),
+          child: Text(t('创建')),
         ),
       ],
     );
@@ -950,7 +951,7 @@ class _CreateTagTileState extends ConsumerState<_CreateTagTile> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('选择标签颜色'),
+        title: Text(t('选择标签颜色')),
         content: Wrap(
           spacing: 12,
           runSpacing: 12,
@@ -979,7 +980,7 @@ class _CreateTagTileState extends ConsumerState<_CreateTagTile> {
           }).toList(),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('关闭')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(t('关闭'))),
         ],
       ),
     );
@@ -997,7 +998,7 @@ class _CreateTagTileState extends ConsumerState<_CreateTagTile> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('创建失败: $e')),
+          SnackBar(content: Text(t('创建失败: {e}', {'e': e}))),
         );
       }
     } finally {

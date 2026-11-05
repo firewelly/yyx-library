@@ -5,6 +5,7 @@ import '../models/import_result.dart';
 import '../providers/database_provider.dart';
 import '../theme/app_colors.dart';
 import '../utils/formatters.dart';
+import '../l10n/s.dart';
 
 /// 作者管理页面
 /// 作者来自 books.author 字段聚合（非独立表），支持：
@@ -44,14 +45,14 @@ class _AuthorsScreenState extends ConsumerState<AuthorsScreen> {
 
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: const Text('作者管理')),
+        appBar: AppBar(title: Text(t('作者管理'))),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('👤 作者管理（${_authors.length}）'),
+        title: Text(t('👤 作者管理（{p1}）', {'p1': _authors.length})),
       ),
       body: _authors.isEmpty
           ? Center(
@@ -60,9 +61,9 @@ class _AuthorsScreenState extends ConsumerState<AuthorsScreen> {
                 children: [
                   const Icon(Icons.person_off_outlined, size: 64, color: AppColors.emptyState),
                   const SizedBox(height: 16),
-                  Text('暂无作者', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+                  Text(t('暂无作者'), style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
                   const SizedBox(height: 8),
-                  Text('导入带作者信息的小说后会在此显示', style: theme.textTheme.bodySmall?.copyWith(color: AppColors.hintText)),
+                  Text(t('导入带作者信息的小说后会在此显示'), style: theme.textTheme.bodySmall?.copyWith(color: AppColors.hintText)),
                 ],
               ),
             )
@@ -81,18 +82,18 @@ class _AuthorsScreenState extends ConsumerState<AuthorsScreen> {
                       ),
                     ),
                     title: Text(item.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text('${item.count} 本小说'),
+                    subtitle: Text(t('{p1} 本小说', {'p1': item.count})),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
                           icon: const Icon(Icons.edit, size: 20),
-                          tooltip: '重命名',
+                          tooltip: t('重命名'),
                           onPressed: () => _showRenameDialog(item),
                         ),
                         IconButton(
                           icon: Icon(Icons.link_off, size: 20, color: theme.colorScheme.error),
-                          tooltip: '清空作者归属',
+                          tooltip: t('清空作者归属'),
                           onPressed: () => _confirmClear(item),
                         ),
                       ],
@@ -131,7 +132,7 @@ class _AuthorsScreenState extends ConsumerState<AuthorsScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      '${item.name}（${item.count}本）',
+                      t('{p1}（{p2}本）', {'p1': item.name, 'p2': item.count}),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -148,7 +149,7 @@ class _AuthorsScreenState extends ConsumerState<AuthorsScreen> {
                   }
                   final books = snapshot.data!;
                   if (books.isEmpty) {
-                    return const Center(child: Text('无作品'));
+                    return Center(child: Text(t('无作品')));
                   }
                   return ListView.builder(
                     controller: scrollController,
@@ -159,8 +160,9 @@ class _AuthorsScreenState extends ConsumerState<AuthorsScreen> {
                         leading: const Icon(Icons.menu_book, size: 20, color: AppColors.hintText),
                         title: Text(book.title, maxLines: 1, overflow: TextOverflow.ellipsis),
                         subtitle: Text(
-                          '${Formatters.formatWordCount(book.wordCount)}字'
-                          '${book.status.isNotEmpty ? " · ${book.status}" : ""}',
+                          book.status.isNotEmpty
+                              ? t('{n} · {status}', {'n': Formatters.formatWordCount(book.wordCount), 'status': t(book.status)})
+                              : t('{n}字', {'n': Formatters.formatWordCount(book.wordCount)}),
                           style: const TextStyle(fontSize: 12),
                         ),
                         trailing: const Icon(Icons.chevron_right),
@@ -187,29 +189,29 @@ class _AuthorsScreenState extends ConsumerState<AuthorsScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('重命名作者'),
+        title: Text(t('重命名作者')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
               controller: nameCtrl,
-              decoration: const InputDecoration(
-                labelText: '作者名',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: t('作者名'),
+                border: const OutlineInputBorder(),
               ),
               autofocus: true,
             ),
             const SizedBox(height: 12),
             Text(
-              '将更新 ${item.count} 本书的作者字段。'
-              '\n若输入的名字已存在，会合并到该作者名下。',
+              t('将更新 {p1} 本书的作者字段。'
+              '\n若输入的名字已存在，会合并到该作者名下。', {'p1': item.count}),
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(t('取消'))),
           FilledButton(
             onPressed: () async {
               final newName = nameCtrl.text.trim();
@@ -222,11 +224,11 @@ class _AuthorsScreenState extends ConsumerState<AuthorsScreen> {
               final affected = await ref.read(databaseServiceProvider).renameAuthor(item.name, newName);
               if (!mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('已更新 $affected 本书的作者为「$newName」')),
+                SnackBar(content: Text(t('已更新 {affected} 本书的作者为「{newName}」', {'affected': affected, 'newName': newName}))),
               );
               await _loadAuthors();
             },
-            child: const Text('保存'),
+            child: Text(t('保存')),
           ),
         ],
       ),
@@ -238,14 +240,14 @@ class _AuthorsScreenState extends ConsumerState<AuthorsScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('清空作者归属'),
+        title: Text(t('清空作者归属')),
         content: Text(
-          '确定要清空「${item.name}」的作者归属吗？\n\n'
-          '这将把 ${item.count} 本书的 author 字段置空（书籍本身保留）。\n'
-          '此操作不可撤销。',
+          t('确定要清空「{p1}」的作者归属吗？\n\n'
+          '这将把 {p2} 本书的 author 字段置空（书籍本身保留）。\n'
+          '此操作不可撤销。', {'p1': item.name, 'p2': item.count}),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(t('取消'))),
           FilledButton(
             onPressed: () async {
               // 先关对话框再做数据库操作
@@ -253,12 +255,12 @@ class _AuthorsScreenState extends ConsumerState<AuthorsScreen> {
               final affected = await ref.read(databaseServiceProvider).clearAuthor(item.name);
               if (!mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('已清空 $affected 本书的作者归属')),
+                SnackBar(content: Text(t('已清空 {affected} 本书的作者归属', {'affected': affected}))),
               );
               await _loadAuthors();
             },
             style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
-            child: const Text('清空'),
+            child: Text(t('清空')),
           ),
         ],
       ),

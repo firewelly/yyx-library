@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/s.dart';
 
 /// 格式化工具
 class Formatters {
@@ -7,11 +8,19 @@ class Formatters {
   /// 格式化字数：12345 → "1.2万", 1234 → "1.2k", 999 → "999"
   static String formatWordCount(int count) {
     if (count >= 10000) {
-      return '${(count / 10000).toStringAsFixed(1)}万';
+      return t('{p1}万', {'p1': (count / 10000).toStringAsFixed(1)});
     } else if (count >= 1000) {
       return '${(count / 1000).toStringAsFixed(1)}k';
     }
     return count.toString();
+  }
+
+  /// 章节显示标题：直接显示标题原文（爬取/导入的标题本身已含「第X章」等编号，
+  /// 不再额外拼序号）；仅当标题为空时用「第N章」兜底。
+  static String chapterTitle(int? number, String? title) {
+    final name = (title ?? '').trim();
+    if (name.isNotEmpty) return name;
+    return number == null ? '' : t('第{num}章', {'num': number});
   }
 
   /// 格式化日期 → "2026-04-08"
@@ -31,11 +40,11 @@ class Formatters {
 
   /// 格式化持续时间（分钟 → "X小时Y分钟"）
   static String formatDuration(int minutes) {
-    if (minutes < 60) return '$minutes分钟';
+    if (minutes < 60) return t('{minutes}分钟', {'minutes': minutes});
     final hours = minutes ~/ 60;
     final mins = minutes % 60;
-    if (mins == 0) return '$hours小时';
-    return '$hours小时$mins分钟';
+    if (mins == 0) return t('{hours}小时', {'hours': hours});
+    return t('{hours}小时{mins}分钟', {'hours': hours, 'mins': mins});
   }
 
   /// 截断文本

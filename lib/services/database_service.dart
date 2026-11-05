@@ -7,6 +7,7 @@ import '../utils/book_path.dart';
 import '../utils/content_codec.dart';
 import '../utils/zh_converter.dart';
 import 'platform_fs.dart';
+import '../l10n/s.dart';
 
 /// 数据库版本
 const int _dbVersion = 5;
@@ -343,7 +344,7 @@ class DatabaseService {
     String whereClause = '';
     final whereArgs = <dynamic>[];
 
-    if (status != null && status != '全部状态') {
+    if (status != null && status != t('全部状态')) {
       whereClause += 'status = ?';
       whereArgs.add(status);
     }
@@ -396,7 +397,7 @@ class DatabaseService {
     String? where;
     final whereArgs = <dynamic>[];
 
-    if (status != null && status != '全部状态') {
+    if (status != null && status != t('全部状态')) {
       where = 'status = ?';
       whereArgs.add(status);
     }
@@ -736,7 +737,7 @@ await db.delete('reading_progress', where: 'bookId = ?', whereArgs: [id]);
   Future<Tag> createTag(String name, {String color = '#1976D2'}) async {
     final existing = await db.query('tags', where: 'name = ?', whereArgs: [name]);
     if (existing.isNotEmpty) {
-      throw ArgumentError('标签"$name"已存在');
+      throw ArgumentError(t('标签"{name}"已存在', {'name': name}));
     }
     final id = await db.insert('tags', {'name': name, 'color': color});
     return Tag(id: id, name: name, color: color);

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/backup_service.dart';
 import 'database_provider.dart';
+import '../l10n/s.dart';
 
 /// 备份状态
 class BackupState {
@@ -51,7 +52,7 @@ class BackupNotifier extends StateNotifier<BackupState> {
       await loadBackups(backupDir: targetDir);
       return path;
     } catch (e) {
-      state = state.copyWith(isBackingUp: false, error: '备份失败: $e');
+      state = state.copyWith(isBackingUp: false, error: t('备份失败: {e}', {'e': e}));
       rethrow;
     }
   }
@@ -63,7 +64,7 @@ class BackupNotifier extends StateNotifier<BackupState> {
       await _backupService.restore(backupFilePath);
       state = state.copyWith(isRestoring: false);
     } catch (e) {
-      state = state.copyWith(isRestoring: false, error: '恢复失败: $e');
+      state = state.copyWith(isRestoring: false, error: t('恢复失败: {e}', {'e': e}));
     }
   }
 
@@ -73,7 +74,7 @@ class BackupNotifier extends StateNotifier<BackupState> {
       final backups = await _backupService.listBackups(backupDir: backupDir);
       state = state.copyWith(backups: backups);
     } catch (e) {
-      state = state.copyWith(error: '加载备份列表失败: $e');
+      state = state.copyWith(error: t('加载备份列表失败: {e}', {'e': e}));
     }
   }
 
@@ -83,7 +84,7 @@ class BackupNotifier extends StateNotifier<BackupState> {
       await _backupService.deleteBackup(backupFilePath);
       await loadBackups(backupDir: backupDir);
     } catch (e) {
-      state = state.copyWith(error: '删除备份失败: $e');
+      state = state.copyWith(error: t('删除备份失败: {e}', {'e': e}));
     }
   }
 
@@ -99,7 +100,7 @@ class BackupNotifier extends StateNotifier<BackupState> {
       state = state.copyWith(isBackingUp: false);
       return sql;
     } catch (e) {
-      state = state.copyWith(isBackingUp: false, error: '备份失败: $e');
+      state = state.copyWith(isBackingUp: false, error: t('备份失败: {e}', {'e': e}));
       rethrow;
     }
   }
@@ -111,7 +112,7 @@ class BackupNotifier extends StateNotifier<BackupState> {
       await _backupService.restoreSqlDump(sql);
       state = state.copyWith(isRestoring: false);
     } catch (e) {
-      state = state.copyWith(isRestoring: false, error: '恢复失败: $e');
+      state = state.copyWith(isRestoring: false, error: t('恢复失败: {e}', {'e': e}));
       rethrow;
     }
   }

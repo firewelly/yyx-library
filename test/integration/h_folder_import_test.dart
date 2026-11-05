@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart' as p;
+import 'package:novelmgt_flutter/l10n/s.dart';
 import 'package:novelmgt_flutter/services/database_service.dart';
 import 'package:novelmgt_flutter/services/import_service.dart';
 import 'package:novelmgt_flutter/services/export_service.dart';
@@ -82,6 +83,9 @@ Future<DatabaseService> _createTestDb() async {
 }
 
 void main() {
+  setUpAll(() {
+    S.configure('zh'); // 服务端消息断言依赖中文文案
+  });
   late DatabaseService db;
   late ImportService importService;
   late ExportService exportService;

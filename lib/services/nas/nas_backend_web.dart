@@ -6,6 +6,7 @@ import '../../utils/zh_converter.dart';
 import '../database_service.dart';
 import 'nas_state_api.dart';
 import 'nas_sql_worker.dart';
+import '../../l10n/s.dart';
 
 /// NAS 只读直连模式的本地小库。
 ///
@@ -113,7 +114,7 @@ class NasReadonlyDatabase extends DatabaseService {
     String whereClause = '';
     final whereArgs = <dynamic>[];
 
-    if (status != null && status != '全部状态') {
+    if (status != null && status != t('全部状态')) {
       whereClause += 'status = ?';
       whereArgs.add(status);
     }
@@ -162,7 +163,7 @@ class NasReadonlyDatabase extends DatabaseService {
     String? where;
     final whereArgs = <dynamic>[];
 
-    if (status != null && status != '全部状态') {
+    if (status != null && status != t('全部状态')) {
       where = 'status = ?';
       whereArgs.add(status);
     }
@@ -448,7 +449,7 @@ class NasReadonlyDatabase extends DatabaseService {
 
     final statusDistribution = <String, int>{};
     for (final r in await _rq('SELECT status, COUNT(*) as c FROM books GROUP BY status')) {
-      statusDistribution[r['status'] as String? ?? '未知'] = r['c'] as int;
+      statusDistribution[r['status'] as String? ?? t('未知')] = r['c'] as int;
     }
 
     final ratingDistribution = <int, int>{};

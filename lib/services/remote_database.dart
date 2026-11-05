@@ -6,6 +6,7 @@ import 'package:sqflite/sqflite.dart' show DatabaseExecutor;
 import '../models/models.dart';
 import '../utils/zh_converter.dart';
 import 'database_service.dart';
+import '../l10n/s.dart';
 
 /// 远程书库模式（路线 B）：所有数据经同源 /api 访问 NAS 上的共享数据库。
 ///
@@ -25,7 +26,7 @@ class RemoteDatabaseService extends DatabaseService {
   Future<Object?> _getJson(String path, [Map<String, String>? q]) async {
     final res = await _http.get(_u(path, q)).timeout(const Duration(seconds: 30));
     if (res.statusCode != 200) {
-      throw Exception('API $path 失败: HTTP ${res.statusCode}');
+      throw Exception(t('API {path} 失败: HTTP {p2}', {'path': path, 'p2': res.statusCode}));
     }
     return jsonDecode(utf8.decode(res.bodyBytes)) as Object?;
   }
@@ -38,7 +39,7 @@ class RemoteDatabaseService extends DatabaseService {
     final res = await _http.send(req).timeout(const Duration(seconds: 120));
     final text = await res.stream.bytesToString();
     if (res.statusCode != 200) {
-      throw Exception('API $method $path 失败: HTTP ${res.statusCode}');
+      throw Exception(t('API {method} {path} 失败: HTTP {p3}', {'method': method, 'path': path, 'p3': res.statusCode}));
     }
     return text.isEmpty ? null : jsonDecode(text) as Object?;
   }

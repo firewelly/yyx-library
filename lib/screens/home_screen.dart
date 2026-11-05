@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:file_picker/file_picker.dart';
+import '../l10n/s.dart';
 import '../providers/library_provider.dart';
 import '../providers/database_provider.dart';
 import '../providers/scan_provider.dart';
@@ -36,6 +37,50 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     Future.microtask(() {
       unawaited(ref.read(libraryProvider.notifier).refresh());
     });
+  }
+
+  /// 右上角中英文切换按钮
+  Widget _buildLanguageButton(WidgetRef ref) {
+    final current = ref.watch(settingsProvider).settings.language;
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.translate),
+      tooltip: t(t('语言 / Language')),
+      onSelected: (value) {
+        ref.read(settingsProvider.notifier).setLanguage(value);
+      },
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: 'system',
+          child: Row(
+            children: [
+              if (current == 'system') const Icon(Icons.check, size: 18),
+              if (current == 'system') const SizedBox(width: 8),
+              Text(t(t('跟随系统'))),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'zh',
+          child: Row(
+            children: [
+              if (current == 'zh') const Icon(Icons.check, size: 18),
+              if (current == 'zh') const SizedBox(width: 8),
+              Text(t(t('简体中文'))),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'en',
+          child: Row(
+            children: [
+              if (current == 'en') const Icon(Icons.check, size: 18),
+              if (current == 'en') const SizedBox(width: 8),
+              const Text('English'),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -78,20 +123,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: Scaffold(
       appBar: AppBar(
         title: library.isSelectionMode
-            ? Text('已选择 ${library.selectedBookIds.length} 本')
-            : const Text('📚 书库'),
+            ? Text(t('已选择 {p1} 本', {'p1': library.selectedBookIds.length}))
+            : Text(t('📚 书库')),
         actions: library.isSelectionMode
             ? [
                 // 全选
                 IconButton(
                   icon: const Icon(Icons.select_all),
-                  tooltip: '全选',
+                  tooltip: t('全选'),
                   onPressed: () => ref.read(libraryProvider.notifier).selectAll(),
                 ),
                 // 批量导出
                 IconButton(
                   icon: const Icon(Icons.download),
-                  tooltip: '批量导出',
+                  tooltip: t('批量导出'),
                   onPressed: library.selectedBookIds.isEmpty
                       ? null
                       : () => _showBatchExportDialog(context, ref),
@@ -99,9 +144,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 // 取消选择
                 IconButton(
                   icon: const Icon(Icons.close),
-                  tooltip: '取消',
+                  tooltip: t('取消'),
                   onPressed: () => ref.read(libraryProvider.notifier).toggleSelectionMode(),
                 ),
+                // 语言切换（右上角）
+                _buildLanguageButton(ref),
               ]
             : [
                 // 搜索（窄屏收窄，避免顶栏图标溢出）
@@ -111,7 +158,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     controller: _searchController,
                     focusNode: _searchFocusNode,
                     decoration: InputDecoration(
-                      hintText: '搜索小说...',
+                      hintText: t('搜索小说...'),
                       prefixIcon: const Icon(Icons.search, size: 20),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(28)),
                       contentPadding: const EdgeInsets.symmetric(vertical: 0),
@@ -126,13 +173,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 // 视图切换
                 IconButton(
                   icon: Icon(_isGridView ? Icons.view_list : Icons.grid_view),
-                  tooltip: _isGridView ? '列表视图' : '网格视图',
+                  tooltip: _isGridView ? t('列表视图') : t('网格视图'),
                   onPressed: () => setState(() => _isGridView = !_isGridView),
                 ),
                 // 选择模式
                 IconButton(
                   icon: const Icon(Icons.checklist),
-                  tooltip: '批量选择',
+                  tooltip: t('批量选择'),
                   onPressed: () => ref.read(libraryProvider.notifier).toggleSelectionMode(),
                 ),
                 // 扫描书库
@@ -144,7 +191,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.radar),
-                  tooltip: scan.isScanning ? '扫描中，点击取消' : '扫描书库（导入新书与更新）',
+                  tooltip: scan.isScanning ? t('扫描中，点击取消') : t('扫描书库（导入新书与更新）'),
                   onPressed: () => _handleScan(context, ref),
                 ),
               ],
@@ -198,7 +245,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.go('/import'),
-        tooltip: '导入小说',
+        tooltip: t('导入小说'),
         child: const Icon(Icons.add),
       ),
     ),
@@ -219,19 +266,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         runSpacing: 8,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          Text('共 ${library.totalCount} 部小说', style: theme.textTheme.bodySmall),
+          Text(t('共 {p1} 部小说', {'p1': library.totalCount}), style: theme.textTheme.bodySmall),
           // 状态筛选(Chip 化)
-          ...['全部状态', ...AppConstants.bookStatuses].map((s) {
-            final selected = (s == '全部状态' && library.selectedStatus == null) ||
+          ...[t('全部状态'), ...AppConstants.bookStatuses].map((s) {
+            final selected = (s == t('全部状态') && library.selectedStatus == null) ||
                 library.selectedStatus == s;
             return FilterChip(
-              label: Text(s, style: const TextStyle(fontSize: 12)),
+              label: Text(s == t('全部状态') ? s : t(s), style: const TextStyle(fontSize: 12)),
               selected: selected,
               visualDensity: VisualDensity.compact,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               onSelected: (_) {
                 ref.read(libraryProvider.notifier).filterByStatus(
-                  s == '全部状态' ? null : s,
+                  s == t('全部状态') ? null : s,
                 );
               },
             );
@@ -250,12 +297,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 const Icon(Icons.arrow_drop_down, size: 18),
               ],
             ),
-            tooltip: '标签筛选',
+            tooltip: t('标签筛选'),
             onSelected: (value) {
               ref.read(libraryProvider.notifier).filterByTag(value);
             },
             itemBuilder: (_) => [
-              const PopupMenuItem(value: null, child: Text('全部标签', style: TextStyle(fontSize: 13))),
+              PopupMenuItem(value: null, child: Text(t('全部标签'), style: const TextStyle(fontSize: 13))),
               ...library.tags.map((t) => PopupMenuItem(
                 value: t.id,
                 child: Text(t.name, style: const TextStyle(fontSize: 13)),
@@ -265,16 +312,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           // 排序
           PopupMenuButton<String>(
             icon: const Icon(Icons.sort, size: 20),
-            tooltip: '排序',
+            tooltip: t('排序'),
             onSelected: (value) {
               final isAsc = library.sortOrder == 'asc';
               ref.read(libraryProvider.notifier).sort(value, isAsc ? 'desc' : 'asc');
             },
             itemBuilder: (_) => [
-              const PopupMenuItem(value: 'title', child: Text('标题')),
-              const PopupMenuItem(value: 'wordCount', child: Text('字数')),
-              const PopupMenuItem(value: 'rating', child: Text('评分')),
-              const PopupMenuItem(value: 'createdAt', child: Text('导入时间')),
+              PopupMenuItem(value: 'title', child: Text(t('标题'))),
+              PopupMenuItem(value: 'wordCount', child: Text(t('字数'))),
+              PopupMenuItem(value: 'rating', child: Text(t('评分'))),
+              PopupMenuItem(value: 'createdAt', child: Text(t('导入时间'))),
             ],
           ),
         ],
@@ -284,11 +331,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   /// 当前选中标签的显示名
   String _selectedTagName(LibraryState library) {
-    if (library.selectedTagId == null) return '全部标签';
+    if (library.selectedTagId == null) return t('全部标签');
     for (final t in library.tags) {
       if (t.id == library.selectedTagId) return t.name;
     }
-    return '全部标签';
+    return t('全部标签');
   }
 
   /// 翻页控制条：上一页 / 页码 / 下一页（搜索模式一次拉全量，隐藏）
@@ -309,16 +356,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           IconButton(
-            tooltip: '上一页',
+            tooltip: t('上一页'),
             icon: const Icon(Icons.chevron_left),
             onPressed: page > 1
                 ? () => ref.read(libraryProvider.notifier).goToPage(page - 1)
                 : null,
           ),
-          Text('第 $page / $totalPages 页 · 共 ${library.totalCount} 本',
+          Text(t('第 {page} / {totalPages} 页 · 共 {p3} 本', {'page': page, 'totalPages': totalPages, 'p3': library.totalCount}),
               style: theme.textTheme.bodySmall),
           IconButton(
-            tooltip: '下一页',
+            tooltip: t('下一页'),
             icon: const Icon(Icons.chevron_right),
             onPressed: page < totalPages
                 ? () => ref.read(libraryProvider.notifier).goToPage(page + 1)
@@ -336,7 +383,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               decoration: InputDecoration(
-                hintText: '页码',
+                hintText: t('页码'),
                 isDense: true,
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
@@ -376,8 +423,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ],
           Text(
             scan.isScanning
-                ? '扫描中 ${(scan.progress * 100).round()}% | ${scan.statusMessage}'
-                : '小说: ${library.totalCount} 部 | 标签: ${library.tags.length} 个',
+                ? t('扫描中 {p1}% | {p2}', {'p1': (scan.progress * 100).round(), 'p2': scan.statusMessage})
+                : t('小说: {p1} 部 | 标签: {p2} 个', {'p1': library.totalCount, 'p2': library.tags.length}),
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -400,9 +447,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (folders.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('尚未配置书库文件夹（支持相对路径，如 novels、H）'),
+          content: Text(t('尚未配置书库文件夹（支持相对路径，如 novels、H）')),
           action: SnackBarAction(
-            label: '去设置',
+            label: t('去设置'),
             onPressed: () => context.go('/settings'),
           ),
         ),
@@ -416,7 +463,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final state = ref.read(scanProvider);
     if (state.error != null && state.error!.isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('扫描出错: ${state.error}')),
+        SnackBar(content: Text(t('扫描出错: {p1}', {'p1': state.error}))),
       );
       return;
     }
@@ -429,8 +476,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '扫描完成: 新增 ${result.imported}，更新 ${result.updated}，'
-            '无变化 ${result.noChange}，失败 ${result.failed}，跳过占位 ${result.placeholderSkipped}',
+            t('扫描完成: 新增 {p1}，更新 {p2}，'
+            '无变化 {p3}，失败 {p4}，跳过占位 {p5}', {'p1': result.imported, 'p2': result.updated, 'p3': result.noChange, 'p4': result.failed, 'p5': result.placeholderSkipped}),
           ),
           duration: const Duration(seconds: 6),
         ),
@@ -447,14 +494,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('批量导出'),
+          title: Text(t('批量导出')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('将导出 ${selectedBooks.length} 本小说'),
+              Text(t('将导出 {p1} 本小说', {'p1': selectedBooks.length})),
               const SizedBox(height: 16),
-              const Text('选择格式:', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+              Text(t('选择格式:'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
@@ -470,20 +517,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
-                    'Kindle 导出为 EPUB 格式(Kindle 设备可直接读取)',
+                    t('Kindle 导出为 EPUB 格式(Kindle 设备可直接读取)'),
                     style: TextStyle(fontSize: 11, color: Theme.of(ctx).colorScheme.onSurfaceVariant),
                   ),
                 ),
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
+            TextButton(onPressed: () => Navigator.pop(ctx), child: Text(t('取消'))),
             FilledButton(
               onPressed: () async {
                 Navigator.pop(ctx);
                 await _doBatchExport(context, ref, selectedBooks, format);
               },
-              child: const Text('导出'),
+              child: Text(t('导出')),
             ),
           ],
         ),
@@ -538,7 +585,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         }
       } else {
         final outputDir = await FilePicker.platform.getDirectoryPath(
-          dialogTitle: '选择导出目录',
+          dialogTitle: t('选择导出目录'),
         );
         if (outputDir == null) return;
 
@@ -557,10 +604,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('导出完成: $successCount/${books.length} 本成功'),
+            content: Text(t('导出完成: {successCount}/{p2} 本成功', {'successCount': successCount, 'p2': books.length})),
             action: errors.isNotEmpty
                 ? SnackBarAction(
-                    label: '查看错误',
+                    label: t('查看错误'),
                     onPressed: () => _showExportErrors(context, errors),
                   )
                 : null,
@@ -570,7 +617,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('导出失败: $e')),
+          SnackBar(content: Text(t('导出失败: {e}', {'e': e}))),
         );
       }
     }
@@ -581,7 +628,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('导出错误'),
+        title: Text(t('导出错误')),
         content: SizedBox(
           width: 400,
           height: 300,
@@ -595,7 +642,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('关闭')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(t('关闭'))),
         ],
       ),
     );

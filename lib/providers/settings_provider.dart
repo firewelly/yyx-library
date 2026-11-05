@@ -56,6 +56,12 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     state = state.copyWith(settings: _service.settings);
   }
 
+  /// 界面语言: 'system' / 'zh' / 'en'
+  Future<void> setLanguage(String lang) async {
+    await _service.setLanguage(lang);
+    state = state.copyWith(settings: _service.settings);
+  }
+
   // 阅读设置
   Future<void> setFontSize(double size) async {
     await _service.setFontSize(size.clamp(AppConstants.minFontSize, AppConstants.maxFontSize));

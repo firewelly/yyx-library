@@ -130,8 +130,14 @@ async def flow_detail(app: App, rep: Report):
 
 
 async def flow_reader(app: App, rep: Report):
-    books = app.api("/books?perPage=1")["books"]
+    # 选一本「确实有章节」的书：最近更新的可能是不带章节的测试残留/空书
+    books = app.api("/books?perPage=10")["books"]
     bid = books[0]["id"] if books else 1
+    for b in books:
+        d = app.api(f"/books/{b['id']}")
+        if (d or {}).get("chapterCount"):
+            bid = b["id"]
+            break
     await app.open(f"/reader/{bid}", wait_ms=9000)
 
     c = rep.case("R-1", "第一章内容渲染")
@@ -141,7 +147,13 @@ async def flow_reader(app: App, rep: Report):
     c = rep.case("R-2", "下一章翻章（序号递进）")
     await app.tap("reader.next")
     await app.shot(c, "reader_ch2")
-    prog = app.api(f"/user/progress?bookId={bid}")
+    # 进度保存有去抖：轮询等待落库（最多 ~6s），避免慢环境下误报
+    prog = None
+    for _ in range(12):
+        prog = app.api(f"/user/progress?bookId={bid}")
+        if prog is not None and prog.get("chapterId") is not None:
+            break
+        await app.page.wait_for_timeout(500)
     check(c, prog is not None, f"进度已落库：chapterId={prog and prog.get('chapterId')}")
 
     c = rep.case("R-3", "翻章后回到顶部（回归）")
@@ -157,11 +169,24 @@ async def flow_reader(app: App, rep: Report):
     check(c, True, f"{before} → 键盘翻章后截图")
 
     c = rep.case("R-4", "重开书恢复上次阅读章节（回归）")
-    prog = app.api(f"/user/progress?bookId={bid}")
+
+    async def _stable_progress(bid, tries=12):
+        # 进度保存有去抖：读到连续两次一致才算稳定
+        last = None
+        for _ in range(tries):
+            cur = app.api(f"/user/progress?bookId={bid}")
+            key = (cur or {}).get("chapterId")
+            if cur is not None and key is not None and key == last:
+                return cur
+            last = key
+            await app.page.wait_for_timeout(500)
+        return last and app.api(f"/user/progress?bookId={bid}")
+
+    prog = await _stable_progress(bid)
     await app.open("/")
     await app.open(f"/reader/{bid}", wait_ms=9000)
     await app.shot(c, "reader_reopen")
-    prog2 = app.api(f"/user/progress?bookId={bid}")
+    prog2 = await _stable_progress(bid)
     check(c, prog2 is not None and prog2.get("chapterId") == (prog or {}).get("chapterId"),
           f"重进后进度章节一致（{prog2 and prog2.get('chapterId')}）")
 
@@ -434,7 +459,7 @@ async def run(args):
         evidence = EVIDENCE_ROOT / stamp
         rep = Report(evidence)
         size = (1440, 900) if view == "desktop" else (390, 844)
-        ctx = await browser.new_context(viewport={"width": size[0], "height": size[1]})
+        ctx = await browser.new_context(viewport={"width": size[0], "height": size[1]}, locale="zh-CN")
         page = await ctx.new_page()
         app = App(page, args.base, view, evidence)
 
@@ -477,7 +502,7 @@ async def main():
         from playwright.async_api import async_playwright
         p = await async_playwright().start()
         browser = await p.chromium.launch(headless=True)
-        page = await (await browser.new_context(viewport={"width": 1440, "height": 900})).new_page()
+        page = await (await browser.new_context(viewport={"width": 1440, "height": 900}, locale="zh-CN")).new_page()
         EVIDENCE_ROOT.mkdir(parents=True, exist_ok=True)
         await calibrate(page, args.base)
         await browser.close(); await p.stop()

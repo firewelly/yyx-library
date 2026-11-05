@@ -11,7 +11,9 @@ import '../providers/database_provider.dart';
 import '../theme/app_colors.dart';
 import '../theme/reader_themes.dart';
 import '../utils/constants.dart';
+import '../utils/formatters.dart';
 import '../utils/zh_converter.dart';
+import '../l10n/s.dart';
 
 /// 阅读器页面
 class ReaderScreen extends ConsumerStatefulWidget {
@@ -79,15 +81,15 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
 
     if (state.error != null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('错误')),
+        appBar: AppBar(title: Text(t('错误'))),
         body: Center(child: Text(state.error!)),
       );
     }
 
     if (state.currentChapter == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('无章节')),
-        body: const Center(child: Text('该小说暂无章节内容')),
+        appBar: AppBar(title: Text(t('无章节'))),
+        body: Center(child: Text(t('该小说暂无章节内容'))),
       );
     }
 
@@ -136,7 +138,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
           foregroundColor: rTheme.text,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
-            tooltip: '返回目录',
+            tooltip: t('返回目录'),
             onPressed: () => context.go('/book/${widget.bookId}'),
           ),
           title: Text(displayTitle,
@@ -147,43 +149,43 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
             // 目录
             IconButton(
               icon: Icon(Icons.format_list_numbered, color: rTheme.accent),
-              tooltip: '目录',
+              tooltip: t('目录'),
               onPressed: () => _showToc(context),
             ),
             // 繁简显示切换
             PopupMenuButton<String>(
               icon: Icon(Icons.translate, color: rTheme.accent),
-              tooltip: '繁简切换',
+              tooltip: t('繁简切换'),
               onSelected: (v) =>
                   ref.read(settingsProvider.notifier).setReaderZhVariant(v),
               itemBuilder: (ctx) => [
-                const PopupMenuItem(value: 'original', child: Text('显示原文')),
-                const PopupMenuItem(value: 'simplified', child: Text('转换为简体')),
-                const PopupMenuItem(value: 'traditional', child: Text('转换为繁体')),
+                PopupMenuItem(value: 'original', child: Text(t('显示原文'))),
+                PopupMenuItem(value: 'simplified', child: Text(t('转换为简体'))),
+                PopupMenuItem(value: 'traditional', child: Text(t('转换为繁体'))),
               ],
             ),
             // 章节搜索
             IconButton(
               icon: Icon(Icons.search, color: rTheme.accent),
-              tooltip: '章节搜索',
+              tooltip: t('章节搜索'),
               onPressed: () => _showChapterSearch(context),
             ),
             // 添加书签
             IconButton(
               icon: Icon(Icons.bookmark_border, color: rTheme.accent),
-              tooltip: '添加书签',
+              tooltip: t('添加书签'),
               onPressed: () => _addBookmark(context),
             ),
             // 添加笔记
             IconButton(
               icon: Icon(Icons.note_add_outlined, color: rTheme.accent),
-              tooltip: '添加笔记',
+              tooltip: t('添加笔记'),
               onPressed: () => _addNote(context),
             ),
             // 阅读主题切换
             PopupMenuButton<String>(
               icon: Icon(Icons.palette_outlined, color: rTheme.accent),
-              tooltip: '阅读主题',
+              tooltip: t('阅读主题'),
               onSelected: (id) =>
                   ref.read(settingsProvider.notifier).setReaderTheme(id),
               itemBuilder: (ctx) => [
@@ -216,7 +218,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
             // 更多(字号/书签列表/笔记列表/返回书库)
             PopupMenuButton<String>(
               icon: Icon(Icons.more_vert, color: rTheme.text),
-              tooltip: '更多',
+              tooltip: t('更多'),
               onSelected: (value) {
                 switch (value) {
                   case 'home':
@@ -243,11 +245,11 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                 }
               },
               itemBuilder: (ctx) => [
-                const PopupMenuItem(value: 'font_up', child: Text('放大字体')),
-                const PopupMenuItem(value: 'font_down', child: Text('缩小字体')),
-                const PopupMenuItem(value: 'bookmarks', child: Text('查看书签')),
-                const PopupMenuItem(value: 'notes', child: Text('查看笔记')),
-                const PopupMenuItem(value: 'home', child: Text('返回书库')),
+                PopupMenuItem(value: 'font_up', child: Text(t('放大字体'))),
+                PopupMenuItem(value: 'font_down', child: Text(t('缩小字体'))),
+                PopupMenuItem(value: 'bookmarks', child: Text(t('查看书签'))),
+                PopupMenuItem(value: 'notes', child: Text(t('查看笔记'))),
+                PopupMenuItem(value: 'home', child: Text(t('返回书库'))),
               ],
             ),
           ],
@@ -278,7 +280,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                             ? () => ref.read(readerProvider.notifier).previousChapter()
                             : null,
                         icon: const Icon(Icons.chevron_left, size: 18),
-                        label: const Text('上一章'),
+                        label: Text(t('上一章')),
                         style: TextButton.styleFrom(
                           foregroundColor: rTheme.accent,
                           visualDensity: VisualDensity.compact,
@@ -290,7 +292,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                             ? () => ref.read(readerProvider.notifier).nextChapter()
                             : null,
                         icon: const Icon(Icons.chevron_right, size: 18),
-                        label: const Text('下一章'),
+                        label: Text(t('下一章')),
                         iconAlignment: IconAlignment.end,
                         style: TextButton.styleFrom(
                           foregroundColor: rTheme.accent,
@@ -366,7 +368,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                                 OutlinedButton.icon(
                                   onPressed: () => ref.read(readerProvider.notifier).previousChapter(),
                                   icon: const Icon(Icons.chevron_left, size: 18),
-                                  label: const Text('上一章'),
+                                  label: Text(t('上一章')),
                                   style: OutlinedButton.styleFrom(
                                     foregroundColor: rTheme.accent,
                                     side: BorderSide(color: rTheme.accent.withValues(alpha: 0.5)),
@@ -377,7 +379,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                                 FilledButton.icon(
                                   onPressed: () => ref.read(readerProvider.notifier).nextChapter(),
                                   icon: const Icon(Icons.chevron_right, size: 18),
-                                  label: const Text('下一章'),
+                                  label: Text(t('下一章')),
                                   iconAlignment: IconAlignment.end,
                                   style: FilledButton.styleFrom(
                                     backgroundColor: rTheme.accent,
@@ -405,22 +407,22 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     if (state.currentChapter == null) return;
 
     final titleController = TextEditingController(
-      text: '第${state.currentChapter!.chapterNumber}章 ${state.currentChapter!.title}',
+      text: Formatters.chapterTitle(state.currentChapter!.chapterNumber, state.currentChapter!.title),
     );
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('添加书签'),
+        title: Text(t('添加书签')),
         content: TextField(
           controller: titleController,
-          decoration: const InputDecoration(
-            labelText: '书签标题',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: t('书签标题'),
+            border: const OutlineInputBorder(),
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(t('取消'))),
           FilledButton(
             onPressed: () async {
               Navigator.pop(ctx);
@@ -438,11 +440,11 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
               unawaited(ref.read(readerProvider.notifier).openBook(widget.bookId));
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('书签已添加')),
+                  SnackBar(content: Text(t('书签已添加'))),
                 );
               }
             },
-            child: const Text('添加'),
+            child: Text(t('添加')),
           ),
         ],
       ),
@@ -459,14 +461,14 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('添加笔记'),
+        title: Text(t('添加笔记')),
         content: SizedBox(
           width: 400,
           child: TextField(
             controller: contentController,
-            decoration: const InputDecoration(
-              labelText: '笔记内容',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: t('笔记内容'),
+              border: const OutlineInputBorder(),
               alignLabelWithHint: true,
             ),
             maxLines: 8,
@@ -474,7 +476,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(t('取消'))),
           FilledButton(
             onPressed: () async {
               final content = contentController.text.trim();
@@ -492,11 +494,11 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
               unawaited(ref.read(readerProvider.notifier).openBook(widget.bookId));
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('笔记已添加')),
+                  SnackBar(content: Text(t('笔记已添加'))),
                 );
               }
             },
-            child: const Text('添加'),
+            child: Text(t('添加')),
           ),
         ],
       ),
@@ -531,7 +533,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Text('目录（共 ${state.chapters.length} 章）', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  Text(t('目录（共 {p1} 章）', {'p1': state.chapters.length}), style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                   const Spacer(),
                   IconButton(
                     icon: const Icon(Icons.close),
@@ -617,7 +619,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setState) => AlertDialog(
-            title: const Text('章节搜索'),
+            title: Text(t('章节搜索')),
             content: SizedBox(
               width: 480,
               child: Column(
@@ -627,7 +629,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                     controller: queryController,
                     autofocus: true,
                     decoration: InputDecoration(
-                      hintText: '搜索本书章节标题与正文...',
+                      hintText: t('搜索本书章节标题与正文...'),
                       prefixIcon: const Icon(Icons.search, size: 20),
                       suffixIcon: queryController.text.isNotEmpty
                           ? IconButton(
@@ -653,7 +655,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                   else if (results.isEmpty && queryController.text.trim().isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.all(12),
-                      child: Text('未找到匹配的章节', style: Theme.of(context).textTheme.bodySmall),
+                      child: Text(t('未找到匹配的章节'), style: Theme.of(context).textTheme.bodySmall),
                     )
                   else if (results.isNotEmpty)
                     Flexible(
@@ -703,11 +705,11 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('关闭'),
+                child: Text(t('关闭')),
               ),
               FilledButton(
                 onPressed: () => doSearch(setState, queryController.text),
-                child: const Text('搜索'),
+                child: Text(t('搜索')),
               ),
             ],
           ),
@@ -734,7 +736,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Text('书签列表', style: Theme.of(context).textTheme.titleMedium),
+                  Text(t('书签列表'), style: Theme.of(context).textTheme.titleMedium),
                   const Spacer(),
                   IconButton(
                     icon: const Icon(Icons.close),
@@ -746,7 +748,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
             const Divider(height: 1),
             Expanded(
               child: state.bookmarks.isEmpty
-                  ? const Center(child: Text('暂无书签'))
+                  ? Center(child: Text(t('暂无书签')))
                   : ListView.builder(
                       controller: scrollController,
                       itemCount: state.bookmarks.length,
@@ -754,10 +756,10 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                         final bm = state.bookmarks[index];
                         return ListTile(
                           leading: const Icon(Icons.bookmark, color: AppColors.ratingStar),
-                          title: Text(bm.title ?? '未命名书签'),
+                          title: Text(bm.title ?? t('未命名书签')),
                           subtitle: Text(
                             bm.chapterTitle != null
-                                ? '第${bm.chapterNumber ?? "?"}章 ${bm.chapterTitle}'
+                                ? Formatters.chapterTitle(bm.chapterNumber, bm.chapterTitle)
                                 : '',
                             style: const TextStyle(fontSize: 12),
                           ),
@@ -801,7 +803,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Text('笔记列表', style: Theme.of(context).textTheme.titleMedium),
+                  Text(t('笔记列表'), style: Theme.of(context).textTheme.titleMedium),
                   const Spacer(),
                   IconButton(
                     icon: const Icon(Icons.close),
@@ -813,7 +815,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
             const Divider(height: 1),
             Expanded(
               child: state.notes.isEmpty
-                  ? const Center(child: Text('暂无笔记'))
+                  ? Center(child: Text(t('暂无笔记')))
                   : ListView.builder(
                       controller: scrollController,
                       itemCount: state.notes.length,
@@ -830,7 +832,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                           ),
                           subtitle: Text(
                             note.chapterTitle != null
-                                ? '第${note.chapterNumber ?? "?"}章 ${note.chapterTitle}'
+                                ? Formatters.chapterTitle(note.chapterNumber, note.chapterTitle)
                                 : '',
                             style: const TextStyle(fontSize: 12),
                           ),
@@ -860,7 +862,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('编辑笔记'),
+        title: Text(t('编辑笔记')),
         content: SizedBox(
           width: 400,
           child: TextField(
@@ -872,7 +874,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(t('取消'))),
           FilledButton(
             onPressed: () async {
               Navigator.pop(ctx);
@@ -880,7 +882,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
               await db.updateNote(note.copyWith(content: controller.text.trim()));
               unawaited(ref.read(readerProvider.notifier).openBook(widget.bookId));
             },
-            child: const Text('保存'),
+            child: Text(t('保存')),
           ),
         ],
       ),

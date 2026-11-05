@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:pdfrx/pdfrx.dart';
 import 'chapter_parser.dart';
 import 'platform_fs.dart';
+import '../l10n/s.dart';
 
 /// PDF 导入器 —— 从文字版 PDF 抽取文本并切分章节
 ///
@@ -19,7 +20,7 @@ class PdfImporter {
       parse(String filePath, {String? bookTitle}) async {
     final bytes = await PlatformFs.readBytes(filePath);
     if (bytes == null) {
-      throw PdfImportException('文件不存在: $filePath');
+      throw PdfImportException(t('文件不存在: {filePath}', {'filePath': filePath}));
     }
     return parseBytes(
       bytes,
@@ -58,8 +59,8 @@ class PdfImporter {
       // 扫描版 PDF 判定:全部页面都抽不出文字
       if (fullText.isEmpty) {
         throw PdfImportException(
-          '该 PDF 为扫描图片版,无法提取文字内容。\n'
-          '请使用文字版 PDF,或先用 OCR 工具转换为文本。',
+          t('该 PDF 为扫描图片版,无法提取文字内容。\n'
+          '请使用文字版 PDF,或先用 OCR 工具转换为文本。'),
         );
       }
 

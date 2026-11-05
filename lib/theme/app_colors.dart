@@ -20,26 +20,26 @@ class AppPalette {
   });
 
   /// 全部可选配色方案
-  static const List<AppPalette> all = [paletteA, paletteB, paletteC, paletteD];
+  static final List<AppPalette> all = [paletteA, paletteB, paletteC, paletteD];
 
   /// A 墨韵书阁（墨绿+暖金，东方书卷气）
-  static const paletteA = AppPalette(
-    id: 'a', name: '墨韵书阁', seed: Color(0xFF2F5D50), accent: Color(0xFFC9A227),
+  static final paletteA = AppPalette(
+    id: 'a', name: '墨韵书阁', seed: const Color(0xFF2F5D50), accent: const Color(0xFFC9A227),
   );
 
   /// B 靛蓝墨海（深靛蓝+珊瑚橙，现代专业，默认）
-  static const paletteB = AppPalette(
-    id: 'b', name: '靛蓝墨海', seed: Color(0xFF3949AB), accent: Color(0xFFFF6E40),
+  static final paletteB = AppPalette(
+    id: 'b', name: '靛蓝墨海', seed: const Color(0xFF3949AB), accent: const Color(0xFFFF6E40),
   );
 
   /// C 暮色书房（暖棕+赤陶，温暖复古）
-  static const paletteC = AppPalette(
-    id: 'c', name: '暮色书房', seed: Color(0xFF5D4037), accent: Color(0xFFD2691E),
+  static final paletteC = AppPalette(
+    id: 'c', name: '暮色书房', seed: const Color(0xFF5D4037), accent: const Color(0xFFD2691E),
   );
 
   /// D 墨夜星河（深色优先，青柠+天蓝，科技护眼）
-  static const paletteD = AppPalette(
-    id: 'd', name: '墨夜星河', seed: Color(0xFFA3E635), accent: Color(0xFF38BDF8),
+  static final paletteD = AppPalette(
+    id: 'd', name: '墨夜星河', seed: const Color(0xFFA3E635), accent: const Color(0xFF38BDF8),
   );
 
   static AppPalette byId(String id) => all.firstWhere(
@@ -99,7 +99,8 @@ class AppColors {
   ];
 
   /// 浅色色彩方案（可指定配色方案）
-  static ColorScheme lightColorScheme([AppPalette palette = AppPalette.paletteB]) {
+  static ColorScheme lightColorScheme([AppPalette? palette]) {
+    palette ??= AppPalette.paletteB;
     return ColorScheme.fromSeed(
       seedColor: palette.seed,
       brightness: Brightness.light,
@@ -107,7 +108,8 @@ class AppColors {
   }
 
   /// 深色色彩方案（可指定配色方案）
-  static ColorScheme darkColorScheme([AppPalette palette = AppPalette.paletteB]) {
+  static ColorScheme darkColorScheme([AppPalette? palette]) {
+    palette ??= AppPalette.paletteB;
     return ColorScheme.fromSeed(
       seedColor: palette.seed,
       brightness: Brightness.dark,
