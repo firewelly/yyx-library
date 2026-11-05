@@ -1,0 +1,14 @@
+services:
+  yyx-library:
+    image: yyx-library:10.0.3
+    # image: ghcr.io/firewelly/yyx-library:10.0.3   # 预构建镜像（发布后可用）
+    container_name: yyx-library
+    restart: unless-stopped
+    ports:
+      - "12702:12702"
+    environment:
+      PORT: "12702"
+      DB: /data/novelmgt.db
+      STATE_DB: /data/novelmgt_state.db
+    volumes:
+      - ./data:/data
