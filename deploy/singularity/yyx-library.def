@@ -24,11 +24,7 @@ From: python:3.11-slim
 %post
     mkdir -p /data
 
-%environment
-    export PORT=12702
-    export DB=/data/novelmgt.db
-    export STATE_DB=/data/novelmgt_state.db
-
+# 说明：不在 %environment 里 export，宿主传入的 PORT/DB/STATE_DB 可直接覆盖默认值
 %runscript
     mkdir -p /data
     exec python3 /app/bin/novel_server.py \
