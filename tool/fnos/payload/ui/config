@@ -1,8 +1,8 @@
 {
     ".url": {
         "novelmgt.Application": {
-            "title": "小说管理",
-            "desc": "NAS 书库直读，无需下载整库",
+            "title": "YYX书库",
+            "desc": "YYX书库：NAS 本地书库管理与阅读，进度/书签/笔记多设备共享",
             "icon": "images/icon_{0}.png",
             "type": "iframe",
             "port": "12702",
