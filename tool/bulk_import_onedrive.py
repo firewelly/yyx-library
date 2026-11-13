@@ -313,12 +313,12 @@ class Importer:
             key = f"{f}|{int(f.stat().st_mtime)}"
             if key in self.state["done"] or key in self.state["skip"] or key in self.state["failed"]:
                 continue
+            title = derive_title(f.name)
             if cached_only:
                 st = f.stat()
                 if st.st_blocks * 512 < st.st_size * 0.9:
                     self.state["skip"][key] = {"title": title, "reason": "未缓存(云端，未导入)"}
                     continue
-            title = derive_title(f.name)
             if title in self.existing_titles or title in self.existing_any:
                 self.state["skip"][key] = {"title": title, "reason": "已存在"}
                 self.existing_any.add(title)
