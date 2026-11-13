@@ -74,13 +74,15 @@ def main():
         shutil.copytree(web_dir, ui_dir)
         # 桌面入口配置覆盖
         shutil.copy(os.path.join(PAYLOAD, "ui", "config"), os.path.join(ui_dir, "config"))
-        # icons: ui/images/icon-{0}.png 由 web/icons 提供
+        # icons: 桌面图标由 payload/ui/images/icon_{0}.png 提供（fnOS 官方 8 档尺寸，
+        # 原用 web/icons 的 Icon-192/512 生成连字符命名，fnOS 请求 icon_48/96 时 404 → 不显示）
         images = os.path.join(ui_dir, "images")
         os.makedirs(images, exist_ok=True)
-        for src_name, dst_name in (("Icon-192.png", "icon-192.png"), ("Icon-512.png", "icon-512.png")):
-            src = os.path.join(ROOT, "web", "icons", src_name)
-            if os.path.isfile(src):
-                shutil.copy(src, os.path.join(images, dst_name))
+        pimg = os.path.join(PAYLOAD, "ui", "images")
+        if os.path.isdir(pimg):
+            for _n in sorted(os.listdir(pimg)):
+                if _n.startswith("icon_"):
+                    shutil.copy(os.path.join(pimg, _n), os.path.join(images, _n))
         shutil.copy(os.path.join(PAYLOAD, "bin", "novel_webserver.py"),
                     os.path.join(app_dir, "bin", "novel_webserver.py"))
 
