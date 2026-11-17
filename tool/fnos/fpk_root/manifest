@@ -1,6 +1,6 @@
 appname         = novelmgt
-version         = 1.0.0
-desc            = 小说管理系统：浏览器经 HTTP Range 直读 NAS 上的单文件书库，无需下载整库、无需后端 API。
+version         = 10.0.1
+desc            = YYX书库：浏览器经 HTTP Range 直读 NAS 上的单文件书库，无需下载整库、无需后端 API。
 platform        = x86
 maintainer      = firewelly
 maintainer_url  = https://github.com/firewelly
@@ -10,7 +10,7 @@ os_min_version  = 0.8.1
 helpurl         = https://github.com/firewelly/yyx-library
 ctl_stop        = true
 desktop_uidir   = ui
-display_name    = 小说管理
+display_name    = YYX书库
 desktop_applaunchname = novelmgt.Application
 install_type    = root
 service_port    = 12702

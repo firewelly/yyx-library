@@ -4,16 +4,33 @@
         "items": [
             {
                 "type": "tips",
+                "helpText": "访问口令（必填）：打开书库需输入；口令以挑战-应答方式校验（明文不出浏览器），仅存本 NAS（0600）。家庭局域网使用也建议设置，远程访问时必须设置。"
+            },
+            {
+                "type": "text",
+                "field": "novelmgt_pin",
+                "label": "访问口令（必填）",
+                "rules": [
+                    {
+                        "required": true,
+                        "message": "请输入至少 4 位访问口令"
+                    }
+                ]
+            },
+            {
+                "type": "tips",
                 "helpText": "书库（只读）：NAS 上 novelmgt.db 的绝对路径。misc 上默认使用 NFS 挂载的 dx4600 共享库；dx4600 本机为 /volume3/hermes3/novelmgt/novelmgt.db。留空使用默认值。"
             },
             {
                 "type": "text",
                 "field": "novel_db_path",
                 "label": "书库文件绝对路径",
-                "rules": [{
-                    "required": false,
-                    "message": "路径错误"
-                }]
+                "rules": [
+                    {
+                        "required": false,
+                        "message": "路径错误"
+                    }
+                ]
             },
             {
                 "type": "tips",
@@ -23,10 +40,12 @@
                 "type": "text",
                 "field": "novel_state_path",
                 "label": "状态库文件绝对路径（可选）",
-                "rules": [{
-                    "required": false,
-                    "message": "路径错误"
-                }]
+                "rules": [
+                    {
+                        "required": false,
+                        "message": "路径错误"
+                    }
+                ]
             }
         ]
     }

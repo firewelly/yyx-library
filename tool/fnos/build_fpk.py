@@ -85,12 +85,19 @@ def main():
                     shutil.copy(os.path.join(pimg, _n), os.path.join(images, _n))
         shutil.copy(os.path.join(PAYLOAD, "bin", "novel_webserver.py"),
                     os.path.join(app_dir, "bin", "novel_webserver.py"))
+        # 隐私政策（/privacy 与首启同意页内容来源，2026-11-17 安全修复）
+        priv = os.path.join(PAYLOAD, "bin", "PRIVACY.md")
+        if os.path.isfile(priv):
+            shutil.copy(priv, os.path.join(app_dir, "bin", "PRIVACY.md"))
 
         # ---- 2. app.tgz ----
         app_tgz = os.path.join(stage, "app.tgz")
         with tarfile.open(app_tgz, "w:gz") as tar:
             add_file(tar, os.path.join(app_dir, "bin", "novel_webserver.py"),
                      "./bin/novel_webserver.py", 0o755)
+            if os.path.isfile(os.path.join(app_dir, "bin", "PRIVACY.md")):
+                add_file(tar, os.path.join(app_dir, "bin", "PRIVACY.md"),
+                         "./bin/PRIVACY.md", 0o644)
             # ui 根目录文件（config 用 payload 版覆盖，其余来自 build/web）
             for name in sorted(os.listdir(ui_dir)):
                 full = os.path.join(ui_dir, name)
