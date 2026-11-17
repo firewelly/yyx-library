@@ -1,6 +1,6 @@
 services:
   app:
-    image: novelmgt-app:10.0.3
+    image: novelmgt-app:10.0.4
     container_name: novelmgt
     restart: always
     ports:
@@ -10,6 +10,7 @@ services:
       - ./state:/app/state
     environment:
       - TZ={{.TZ}}
+      - WEB_PIN=${WEB_PIN}
     healthcheck:
       test: ["CMD", "python3", "-c", "import urllib.request as u; u.urlopen(\"http://127.0.0.1:12702/api/health\", timeout=5)"]
       interval: 60s

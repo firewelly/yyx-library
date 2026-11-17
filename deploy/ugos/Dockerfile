@@ -16,6 +16,7 @@ WORKDIR /app
 COPY ui /app/ui
 COPY bin /app/bin
 COPY demo /app/demo
+COPY PRIVACY.md /app/PRIVACY.md
 
 EXPOSE 12702
 
@@ -24,4 +25,6 @@ CMD ["python3", "/app/bin/novel_server.py", \
      "--db=/app/db/novelmgt.db", \
      "--state-db=/app/state/novelmgt_state.db", \
      "--demo-db=/app/demo/novelmgt-demo.db", \
-     "--port=12702"]
+     "--port=12702", \
+     "--pin-file=/app/pin.conf", \
+     "--privacy-file=/app/PRIVACY.md"]

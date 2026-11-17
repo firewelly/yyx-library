@@ -1,6 +1,6 @@
 spec_version: "2.1"
 app_id: com.firewell.novelmgt
-version: 10.0.3
+version: 10.0.4
 support_arch:
   - amd64
 product_series:
@@ -20,6 +20,22 @@ support_migration: true
 allow_add_access_path: true
 permissions:
   - NETWORK.ACCESS_INTERNET
+parameters:
+  - key: WEB_PIN
+    type: password
+    required: true
+    i18n:
+      en-US:
+        name: Access PIN (required)
+        description: >-
+          Access PIN for the library web UI (required). Verified via
+          challenge-response; the plaintext never leaves the browser and is
+          stored only on this NAS (0600). Session cookie lasts 30 days.
+      zh-CN:
+        name: 访问口令（必填）
+        description: >-
+          打开书库网页需输入的访问口令（必填）。挑战-应答方式校验，明文不出浏览器；
+          口令仅存本 NAS（0600）。登录会话 Cookie 有效期 30 天。
 privacy_policy_link:
   - https://github.com/firewelly/yyx-library/blob/main/PRIVACY.md
 license_agreement_link:
