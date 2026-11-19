@@ -1193,8 +1193,10 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", MIME.get(ext, "application/octet-stream"))
         self.send_header("Content-Length", str(len(data)))
         self.send_header("Last-Modified", self.date_time_string(mtime))
-        # 仅带内容哈希的 assets/ 长缓存；入口与主代码 no-cache（更新即时生效）
-        if rel.startswith("assets/"):
+        # 带内容哈希的 assets/ 与字体分片（gstatic 镜像，版本化路径内容永不变）
+        # 长缓存；入口与主代码 no-cache（更新即时生效）。字体分片此前 no-cache
+        # 导致首帧 120 个分片全部重新请求，偶发失败即豆腐块（2026-11-19）
+        if rel.startswith("assets/") or rel.startswith("fonts.gstatic.com/"):
             self.send_header("Cache-Control", "public, max-age=2592000, immutable")
         else:
             self.send_header("Cache-Control", "no-cache")

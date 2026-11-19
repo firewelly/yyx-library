@@ -73,6 +73,8 @@ if [ "$SKIP_IMAGE" -eq 0 ]; then
   find "$STAGE" -name ".DS_Store" -delete 2>/dev/null || true
   # 字体回退离线化（gstatic → 本地镜像，见 tool/patch_web_offline_fonts.py）
   python3 "$ROOT/tool/patch_web_offline_fonts.py" "$STAGE/ui/main.dart.js"
+  # 字体分片预热（首帧豆腐块修复，见 tool/patch_web_font_preload.py）
+  python3 "$ROOT/tool/patch_web_font_preload.py" "$STAGE/ui" || echo "⚠️ 字体预热补丁失败（继续构建）"
   docker build --platform linux/amd64 -t "$IMAGE" "$STAGE"
 else
   echo "==> 跳过镜像构建（--skip-image）"

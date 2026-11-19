@@ -231,11 +231,6 @@ class StateStore(object):
 # ============================================================
 
 SHA256_JS = """
-async function sha256hex(input){
-  const bytes = new TextEncoder().encode(input);
-  const buf = await crypto.subtle.digest('SHA-256', bytes);
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-}
 """
 
 def _render_privacy_md(md_text):
@@ -293,27 +288,30 @@ def _login_page():
   <div class=\"err\" id=\"err\"></div>
   <button class=\"btn\" type=\"submit\">进入书库</button>
 </form>
-<p class=\"meta\">首次使用即表示同意
-  <a href=\"/privacy\" target=\"_blank\">《隐私政策》</a>。</p>
+<p class=\"meta\">《隐私政策》已生效，可随时
+  <a href=\"/privacy\" target=\"_blank\">查看</a>。</p>
 <script>
 %s
-async function doLogin(){
+function doLogin(){
   const err = document.getElementById('err');
   err.textContent = '';
   const pin = document.getElementById('pin').value;
   if (!pin) { err.textContent = '请输入口令'; return false; }
   try {
-    const r1 = await fetch('/api/pin-challenge');
-    const c = await r1.json();
+    const xhr1 = new XMLHttpRequest();
+    xhr1.open('GET', '/api/pin-challenge', false);
+    xhr1.send();
+    const c = JSON.parse(xhr1.responseText);
     if (!c.nonce) { err.textContent = c.error || '获取挑战失败'; return false; }
-    const ph = await sha256hex(pin);
-    const resp = await sha256hex(c.nonce + ph);
-    const r2 = await fetch('/api/pin-login', {method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({nonce: c.nonce, response: resp})});
-    if (r2.ok) { location.href = '/'; return false; }
-    err.textContent = (await r2.json()).error || '口令不对，再试试';
-  } catch (e) { err.textContent = '网络错误：' + e; }
+    const ph = sha256utf8(pin);
+    const resp = sha256utf8(c.nonce + ph);
+    const xhr2 = new XMLHttpRequest();
+    xhr2.open('POST', '/api/pin-login', false);
+    xhr2.setRequestHeader('Content-Type', 'application/json');
+    xhr2.send(JSON.stringify({nonce: c.nonce, response: resp}));
+    if (xhr2.status === 200) { location.href = '/'; return false; }
+    err.textContent = JSON.parse(xhr2.responseText).error || '口令不对，再试试';
+  } catch (e) { err.textContent = '登录失败：' + e; }
   return false;
 }
 document.getElementById('f').addEventListener('submit', doLogin);
@@ -350,6 +348,69 @@ def _fallback_privacy():
             "你的浏览器中，不向开发者或任何第三方上传。</p>")
 
 
+
+_SHA256_JS = """
+function sha256utf8(s) { return sha256(unescape(encodeURIComponent(s))); }
+function sha256(ascii) {
+  function rightRotate(value, amount) { return (value >>> amount) | (value << (32 - amount)); }
+  var mathPow = Math.pow, maxWord = mathPow(2, 32), lengthProperty = 'length', i, j, result = '';
+  var words = [], asciiBitLength = ascii[lengthProperty] * 8;
+  var hash = sha256.h = sha256.h || [], k = sha256.k = sha256.k || [];
+  var primeCounter = k[lengthProperty];
+  var isComposite = {};
+  for (var candidate = 2; primeCounter < 64; candidate++) {
+    if (!isComposite[candidate]) {
+      for (i = 0; i < 313; i += candidate) { isComposite[i] = candidate; }
+      hash[primeCounter] = (mathPow(candidate, .5) * maxWord) | 0;
+      k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;
+    }
+  }
+  ascii += '\\x80';
+  while (ascii[lengthProperty] % 64 - 56) ascii += '\\x00';
+  for (i = 0; i < ascii[lengthProperty]; i++) {
+    j = ascii.charCodeAt(i);
+    if (j >> 8) return;
+    words[i >> 2] |= j << ((3 - i) % 4) * 8;
+  }
+  words[words[lengthProperty]] = ((asciiBitLength / maxWord) | 0);
+  words[words[lengthProperty]] = (asciiBitLength);
+  for (j = 0; j < words[lengthProperty];) {
+    i = j;
+    var w = words.slice(j, j += 16);
+    var oldHash = hash;
+    hash = hash.slice(0, 8);
+    for (i = 0; i < 64; i++) {
+      var w15 = w[i - 15], w2 = w[i - 2];
+      var a = hash[0], e = hash[4];
+      var temp1 = hash[7]
+        + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25))
+        + ((e & hash[5]) ^ ((~e & hash[6])))
+        + k[i]
+        + (w[i] = (i < 16) ? w[i] : (
+          w[i - 16]
+          + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3))
+          + w[i - 7]
+          + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))
+        ) | 0
+        );
+      var temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22))
+        + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+      hash = [(temp1 + temp2) | 0].concat(hash);
+      hash[4] = (hash[4] + temp1) | 0;
+    }
+    for (i = 0; i < 8; i++) { hash[i] = (hash[i] + oldHash[i]) | 0; }
+  }
+  for (i = 0; i < 8; i++) {
+    for (j = 3; j + 1; j--) {
+      var b = (hash[i] >> (j * 8)) & 255;
+      result += ((b < 16) ? 0 : '') + b.toString(16);
+    }
+  }
+  return result;
+}
+function sha256utf8(s) { return sha256(unescape(encodeURIComponent(s))); }
+
+"""
 
 class NovelHandler(SimpleHTTPRequestHandler):
     db_path = None      # 只读书库（由 main() 注入）
@@ -550,6 +611,17 @@ class NovelHandler(SimpleHTTPRequestHandler):
             return self._send_html(_privacy_page(self._load_privacy()))
         if path == "/consent":
             return self._send_html(_consent_page(self._load_privacy()))
+        path_only = self.path.split("?")[0]
+        # 首次使用：先弹隐私政策同意页（自愿、明确、主动同意——不依赖口令）
+        if path_only in ("/", "/index.html") and not self._consented():
+            self.send_response(302)
+            self.send_header("Location", "/consent")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return
+        # 同意后再输访问口令（口令开启且未登录 → 登录页）
+        if path_only in ("/", "/index.html") and self._pin_on() and not self._authed():
+            return self._send_html(_login_page())
         if self._is_state_api() or self._is_db_request():
             if not self._require_auth():
                 return
@@ -568,6 +640,17 @@ class NovelHandler(SimpleHTTPRequestHandler):
         super().do_GET()
 
     def do_HEAD(self):
+        path_only = self.path.split("?")[0]
+        # 首次使用：先弹隐私政策同意页（自愿、明确、主动同意——不依赖口令）
+        if path_only in ("/", "/index.html") and not self._consented():
+            self.send_response(302)
+            self.send_header("Location", "/consent")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return
+        # 同意后再输访问口令（口令开启且未登录 → 登录页）
+        if path_only in ("/", "/index.html") and self._pin_on() and not self._authed():
+            return self._send_html(_login_page())
         if self._is_state_api() or self._is_db_request():
             if not self._require_auth():
                 return
@@ -648,7 +731,17 @@ class NovelHandler(SimpleHTTPRequestHandler):
                 remaining -= len(chunk)
 
     def end_headers(self):
-        self.send_header("Cache-Control", "no-cache")
+        # 已显式声明 Cache-Control 的响应不重复追加；静态字体分片与带内容哈希的
+        # Flutter 资源走 immutable 长缓存（首帧 unicode-range 分片并发请求偶发
+        # 失败会造成豆腐块——长缓存 + index.html 预热解决，2026-11-19）。
+        buf = getattr(self, "_headers_buffer", None) or []
+        has_cc = any(line.lower().startswith(b"cache-control:") for line in buf)
+        if not has_cc:
+            path = self.path.split("?")[0]
+            if path.startswith("/fonts.gstatic.com/") or path.startswith("/assets/"):
+                self.send_header("Cache-Control", "public, max-age=31536000, immutable")
+            else:
+                self.send_header("Cache-Control", "no-cache")
         super().end_headers()
 
     def log_message(self, fmt, *args):

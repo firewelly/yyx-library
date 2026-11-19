@@ -52,6 +52,43 @@
       fontFallbackBaseUrl: 'fonts.gstatic.com/s/'
     };
   </script>
-  <script src="flutter_bootstrap.js" async></script>
+  
+<script>
+/* font-preload-guard：字体分片预热后再启动 Flutter（tool/patch_web_font_preload.py 注入）。
+   首帧 unicode-range 分片并发请求偶发失败 → 豆腐块；全部预热（重试 ×5）
+   + 服务端 immutable 缓存根治。清单缺失/预热失败均降级为直接启动，不阻塞。 */
+(function () {
+  function start() {
+    if (window.__flutterBooted) return;
+    window.__flutterBooted = true;
+    var s = document.createElement('script');
+    s.src = 'flutter_bootstrap.js';
+    s.async = true;
+    document.body.appendChild(s);
+  }
+  function fetchRetry(url, n) {
+    return fetch(url).then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.arrayBuffer();
+    }).catch(function (e) {
+      if (n <= 0) throw e;
+      return new Promise(function (res) { setTimeout(res, 250 * (6 - n)); })
+        .then(function () { return fetchRetry(url, n - 1); });
+    });
+  }
+  fetch('fonts.gstatic.com/manifest.json')
+    .then(function (r) { if (!r.ok) throw new Error('manifest ' + r.status); return r.json(); })
+    .then(function (list) {
+      if (!list || !list.length) { start(); return; }
+      Promise.all(list.map(function (p) {
+        return fetchRetry(p, 5).catch(function () { return null; });
+      })).then(start);
+    })
+    .catch(function () { start(); });
+  // 兜底：预热异常卡死 15s 后强制启动
+  setTimeout(start, 15000);
+})();
+</script>
+
 </body>
 </html>

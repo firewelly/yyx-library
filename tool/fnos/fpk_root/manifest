@@ -1,5 +1,5 @@
 appname         = novelmgt
-version         = 10.0.1
+version         = 10.0.2
 desc            = YYX书库：浏览器经 HTTP Range 直读 NAS 上的单文件书库，无需下载整库、无需后端 API。
 platform        = x86
 maintainer      = firewelly
@@ -16,5 +16,6 @@ install_type    = root
 service_port    = 12702
 checkport       = true
 source          = thirdparty
-changelog       = 10.0.0 首发：浏览器 HTTP Range 直读 NAS 书库；阅读状态全设备共享；数据全程本地。
+changelog       = 10.0.2：登录页 SHA-256 改纯 JS 实现（HTTP 明文环境可登录）；隐私同意页前置（显式同意/不同意）；字体分片长缓存+预热（修复首帧偶发豆腐块）。
+10.0.0 首发：浏览器 HTTP Range 直读 NAS 书库；阅读状态全设备共享；数据全程本地。
 checksum        = TO_BE_FILLED_BY_BUILD

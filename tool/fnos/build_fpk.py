@@ -85,6 +85,13 @@ def main():
                     shutil.copy(os.path.join(pimg, _n), os.path.join(images, _n))
         shutil.copy(os.path.join(PAYLOAD, "bin", "novel_webserver.py"),
                     os.path.join(app_dir, "bin", "novel_webserver.py"))
+        # 字体分片预热（首帧豆腐块修复，2026-11-19；幂等，失败不阻塞构建）
+        _patch = os.path.normpath(os.path.join(HERE, "..", "patch_web_font_preload.py"))
+        if os.path.isfile(_patch):
+            import subprocess as _sp
+            _r = _sp.run([sys.executable, _patch, ui_dir])
+            if _r.returncode != 0:
+                print("⚠️ 字体预热补丁失败（继续构建）")
         # 隐私政策（/privacy 与首启同意页内容来源，2026-11-17 安全修复）
         priv = os.path.join(PAYLOAD, "bin", "PRIVACY.md")
         if os.path.isfile(priv):
