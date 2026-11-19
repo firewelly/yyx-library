@@ -17,8 +17,12 @@ COPY ui /app/ui
 COPY bin /app/bin
 COPY demo /app/demo
 COPY PRIVACY.md /app/PRIVACY.md
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod 0755 /entrypoint.sh
 
 EXPOSE 12702
+
+ENTRYPOINT ["/entrypoint.sh"]
 
 CMD ["python3", "/app/bin/novel_server.py", \
      "--web-dir=/app/ui", \
