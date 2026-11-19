@@ -68,6 +68,7 @@ if [ "$SKIP_IMAGE" -eq 0 ]; then
   cp "$SERVER" "$STAGE/bin/novel_server.py"
   cp "$UGOS/novelmgt-demo.db" "$STAGE/demo/novelmgt-demo.db"
   cp "$UGOS/Dockerfile" "$STAGE/Dockerfile"
+  cp "$UGOS/entrypoint.sh" "$STAGE/entrypoint.sh"
   cp "$ROOT/PRIVACY.md" "$STAGE/PRIVACY.md"
   find "$STAGE" -name "._*" -delete 2>/dev/null || true
   find "$STAGE" -name ".DS_Store" -delete 2>/dev/null || true

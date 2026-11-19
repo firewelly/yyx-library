@@ -1,6 +1,6 @@
 services:
   app:
-    image: novelmgt-app:10.0.4
+    image: novelmgt-app:10.0.6
     container_name: novelmgt
     restart: always
     ports:
