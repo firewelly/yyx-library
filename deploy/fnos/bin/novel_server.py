@@ -985,8 +985,8 @@ def _login_page():
         "<div class=\"err\" id=\"err\"></div>"
         "<button class=\"btn\" type=\"submit\">进入书库</button>"
         "</form>"
-        "<p class=\"meta\">首次使用即表示同意 "
-        "<a href=\"/privacy\" target=\"_blank\">《隐私政策》</a>。</p>"
+        "<p class=\"meta\">《隐私政策》已生效，可随时 "
+        "<a href=\"/privacy\" target=\"_blank\">查看</a>。</p>"
         "<script>" + _SHA256_JS + """
 function doLogin(){
   const err = document.getElementById('err');
