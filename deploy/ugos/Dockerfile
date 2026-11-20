@@ -19,6 +19,10 @@ COPY demo /app/demo
 COPY PRIVACY.md /app/PRIVACY.md
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod 0755 /entrypoint.sh
+# 防预置凭据（10.0.6.0001 事故）：增量构建（FROM 旧镜像）会继承运行时残留的
+# pin.conf 与 config Env WEB_PIN——构建期强制清空/删除
+ENV WEB_PIN=
+RUN rm -f /app/pin.conf
 
 EXPOSE 12702
 
